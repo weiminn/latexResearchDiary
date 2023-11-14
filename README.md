@@ -18,3 +18,8 @@ Please start by reading [the documentation](master.pdf) which has a nice introdu
 ## Scope and limitations
 I made this LaTeX-based research diary back in 2014 and has used it ever since. Unfortunately, I am now quite busy with many other things which means that I do not have time to refine it anymore. I have therefore decided to move everything to Github so that people with more time and skills than me can keep developing it.
 
+## Installation
+
+```bash
+sudo apt install texlive-full
+```
