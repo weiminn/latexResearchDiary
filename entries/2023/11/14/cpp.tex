@@ -1,0 +1,102 @@
+% mainfile: ../../../../master.tex
+\subsection{C++ Primer}
+\label{task:20231114_cpp}
+
+\subsubsection{Primitive Built-in Types}
+
+Includes \textbf{arithmetic types} and a special type named \textbf{void} which has no associated values and can be used in only a few circumstances, most commonly as the return type for functions that do not return a value.
+
+The arithmetic types are divided into two categories: \textbf{integral types} (which include character and boolean types) and floating-point types.
+
+\begin{longtable}{p{.2\linewidth}  p{.40\linewidth} p{.3\linewidth}} 
+\toprule
+\textbf{Type} & \textbf{Meaning} & \textbf{Minimum Size}\\
+\midrule
+
+\texttt{bool} & boolean (\texttt{true} or \texttt{false}) & NA \\
+\texttt{char} & character & 8 bits \\
+\texttt{w\_char\_t} & wide character & 16 bits\\
+\texttt{char16\_t} & Unicode character & 16 bits \\
+\texttt{char32\_t} & Unicode character & 32 bits \\
+\texttt{short} & short integer & 16 bits \\
+\texttt{int} & integer & 16 bits \\
+\texttt{long} & long integer & 32 bits \\
+\texttt{long long} & long integer & 64 bits \\
+\texttt{float} & single-precision floating-point & 6 significant digits \\
+\texttt{double} & double-precision floating-point & 10 significant digits\\
+\texttt{long double} & extended-precision floating-point & 10 significant digits \\
+
+\midrule
+\caption{Zygote Initialization Sequence} 
+\label{tab:zygoteinitializationsequence}
+\end{longtable}
+
+Except for \texttt{bool} and extended character types, the integral types may be \textbf{signed} (can represent negative or positive numbers) or \textbf{unsigned}. By default, \texttt{int}, \texttt{short}, \texttt{long}, \texttt{long long} are all signed. To declare unsigned type, prepend \texttt{unsigned} to the type. \texttt{char} is signed on some machine and \texttt{unsigned} on others, and \texttt{unsigned int} is abbreviated as \texttt{unsigned}.
+
+Conversions happen automatically when we use an object of one type where an object of another type is expected. 
+\begin{lstlisting}[language=c++]
+unsigned u = 10; 
+int i = -42; 
+std::cout << i + i << std::endl; // prints -84 
+std::cout << u + i << std::endl; // if 32-bit ints, prints 4294967264
+\end{lstlisting}
+In the above snippet, converting a negative number to \texttt{unsigned} will cause the value to "wrap around" because \texttt{unsigned} values can never be less than $0$. Thus, extra care should be taken if we want to write loops with \texttt{unsigned} values and stopping conditions at negative values like the snippet below:
+\begin{lstlisting}[language=c++]
+// WRONG: u can never be less than 0; the condition will always succeed 
+for (unsigned u = 10; u >= 0; --u) 
+    std::cout << u << std::endl;
+\end{lstlisting}
+
+As such it is always advisable to not mix \texttt{signed} and \texttt{unsigned} types. By default, integer literals (\texttt{42}) are signed, while octal (\texttt{024}) and hexadecimal (\texttt{0x14}) may be signed or unsigned.
+
+% Escape sequences are nonprintable characters with special meanings and begin with backlash:
+% \begin{longtable}{p{.2\linewidth}  p{.40\linewidth} p{.3\linewidth}} 
+% \toprule
+% \textbf{Description} & \textbf{Escape Sequence} \\
+% \midrule
+
+% new line & \texttt{\\n} \\
+% vertical tab & \texttt{\\v} \\
+% horizontal tab & \texttt{\\t} \\
+% backspace & \texttt{\\b} \\
+% carriage return & \texttt{\\r} \\
+% alert (bell) & \texttt{\a} \\
+% single quote & \texttt{\\'} \\
+% double quote & \texttt{\\"} \\
+% formfeed & \texttt{\\f} \\
+% backslash & \texttt{\\\\} \\
+
+% \midrule
+% \caption{Escape sequences} 
+% \label{tab:escapesequences}
+% \end{longtable}
+
+Escape sequences are used as if they were single characters:
+\begin{lstlisting}[language=c++]
+std::cout << `\n`; // prints a newline 
+std::cout << "\tHi!\n"; // prints a tab followd by "Hi!" and a newline
+\end{lstlisting}
+
+\subsubsection*{Variables}
+
+Initialization is not assignment. Initialization happens when a variable is given a value when it is created. Assignment obliterates an object's current value and replaces that value with a new one. 
+
+Four different ways to initialize:
+\begin{lstlisting}[language=c++]
+int units_sold = 0; 
+int units_sold = {0}; // list initialization; does not work for built-in types if data loss is likely
+int units_sold{0}; 
+int units_sold(0);
+\end{lstlisting}
+
+Variables defined outside any function body are initialized to zero by default.  Variables of built-in type defined inside a function are \textbf{uninitialized} and therefore undefined. Objects of class type that we do not explicitly initialize have a value that is defined by the class.
+
+A \textbf{declaration} makes a name known to the program. A file that wants to use a name defined elsewhere includes a declaration for that name. A \textbf{definition} creates the associated entity. A definition involves declaration, allocates storage and may provide the variable with an initial value. 
+\begin{lstlisting}[language=c++]
+extern int i;   // declares but not define j
+int j;          // declares and defines j
+int k = 12;     // declares, defines and initializes j
+extern double pi = 3.14;     // definition
+\end{lstlisting}
+
+Variables must be defined only once but can be declared several times. To use a variable in more than one file requires declarations that are separate from the variable's definition. To use the same variable in multiple files, we must define that in one - and only one - file. Other files that use that variable must declara - but not define - that variable.
