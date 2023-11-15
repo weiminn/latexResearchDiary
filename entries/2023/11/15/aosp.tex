@@ -2,4 +2,84 @@
 \subsection{AOSP}
 \label{task:20231115_aosp}
 
-\subsubsection*{Zygote}
+\subsubsection*{Starting Android System Server and Other Apps using Zygote}
+
+During its initialization, Zygote will check for \texttt{start-system-server} flag, and if set, will bring up \texttt{SystemServer} in the following sequence:
+
+\begin{longtable}{p{.25\linewidth}  p{.4\linewidth} p{.3\linewidth}} 
+\toprule
+Method 	& Description & Source\\
+\midrule
+\endhead
+
+\url{ZygoteInit.forkSystemServer} 
+& Runs after the Zygote process has been initialized. It is hardcoded with System Server classpath\footnote{\url{com.android.server.SystemServer}, the source for which is stored in \url{AOSP/frameworks/base/services/java/com/android/server/SystemServer. java}.} as one of the arguments to call \texttt{Zygote.forkSystemServer} to spawn \texttt{SystemServer} process.
+&\path{AOSP/framework/base/core/java/com/android/internal/os/ZygoteInit.java}\\
+
+\url{Zygote.forkSystemServer} 
+& \texttt{Zygote} class wraps native methods that communicate with Android Runtime, one of whom is \texttt{com\_android\_internal\_os\_nativeForkSystemServer}.
+&\path{AOSP/framework/base/core/java/com/android/internal/os/Zygote.java}\\
+
+\texttt{com\_android\_internal\_os\_nativeForkSystemServer}
+& Calls \texttt{zygote::ForkCommon} and \texttt{SpecializeCommon} which does the actual forking.
+&\path{AOSP/frameworks/base/core/jni/com_android_internal_os_Zygote.cpp}\\
+
+\texttt{SpecializeCommon}
+& Looks at the flags and Process ID for setting up sandboxing, configuring the correct SE Linux context, and process capabilities. Afterwards, it will call \texttt{Zygote} methods for post-fork procedures.
+&\path{AOSP/frameworks/base/core/jni/com_android_internal_os_Zygote.cpp}\\
+
+\url{Zygote.callPostForkSystemServerHooks}
+& Calls \texttt{ZygoteHooks.java} at the end of specialization procedures. Only applicable for \texttt{SystemSever}.
+&\path{AOSP/framework/base/core/java/com/android/internal/os/Zygote.java}\\
+
+\url{Zygote.callPostForkChildHooks}
+& Calls \texttt{ZygoteHooks.java} at the end of specialization procedures. Applicable to all applications and services including \texttt{SystemServer}
+&\path{AOSP/framework/base/core/java/com/android/internal/os/Zygote.java}\\
+
+\url{ZygoteHooks.postForkSystemServer} and \url{ZygoteHooks.postForkSystemServer}
+& Wrappers for \texttt{ZygoteHooks} inside the Android Runtime. They call their respective native code inside the ART via Java Native Interface.
+&\path{AOSP/libcore/dalvik/src/main/java/dalvik/system/ZygoteHooks.java}\\
+
+\url{ZygoteHooks_nativePostForkSystemServer}
+& Loads the specialized class libraries to start the the System Server. 
+&\path{AOSP/art/runtime/native/dalvik_system_ZygoteHooks.cc}\\
+
+\url{ZygoteHooks_nativePostForkChild}
+& Loads the specialized class libraries to start the service/application. 
+&\path{AOSP/art/runtime/native/dalvik_system_ZygoteHooks.cc}\\
+
+\url{handleSystemServerProcess}
+& The control returns to \texttt{ZygoteInit}, and finish remaining work for the newly forked system server process, and calls \texttt{ZygoteInit.zygoteInit}.
+&\path{AOSP/framework/base/core/java/com/android/internal/os/ZygoteInit.java}\\
+
+\url{ZygoteInit.zygoteInit}
+& The main function called when started through the zygote process, which calls \texttt{RuntimeInit.applicationInit} 
+&\path{AOSP/framework/base/core/java/com/android/internal/os/ZygoteInit.java}\\
+
+\url{RuntimeInit.applicationInit}
+& Calls the \texttt{public static void main} method of the application
+% \footnote{Here all the Android services are started: \texttt{PackageManagerService}, \texttt{ActivityManagerService}, and so on.}. 
+&\path{AOSP/framework/base/core/java/com/android/internal/os/RuntimeInit.java}\\
+
+\url{ZygoteServer.runSelectLoop}
+& After forking has finished, the control enters \texttt{ZygoteServer} which starts an endless loop that handles incoming connections with \texttt{ZygoteConnection.processCommand}.
+&\path{AOSP/framework/base/core/java/com/android/internal/os/ZygoteServer.java}\\
+
+\url{ZygoteConnection.processCommand}
+& Calls \texttt{Zygote.forkAndSpecialize}
+% \footnote{Old code to be replaced soon.} 
+which is a version of \texttt{ZygoteInit.forkSystemServer} for the masses.
+&\path{AOSP/framework/base/core/java/com/android/internal/os/ZygoteConnection.java}\\
+
+\url{Zygote.forkAndSpecialize}
+& A version of \url{Zygote.forkSystemServer} for the masses. 
+&\path{AOSP/frameworks/base/core/jni/com_android_internal_os_Zygote.cpp}\\
+
+\texttt{com\_android\_internal\_os\_nativeForkAndSpecialize}
+& Calls \texttt{zygote::ForkCommon} and \texttt{SpecializeCommon} which does the actual forking, and returns to \texttt{ZygoteInit} and immediately enters \texttt{ZygoteServer}.
+&\path{AOSP/frameworks/base/core/jni/com_android_internal_os_Zygote.cpp}\\
+
+\midrule
+\caption{System Server and Applications Initialization Sequence} 
+\label{tab:sysserandappinitializationsequence}
+\end{longtable}

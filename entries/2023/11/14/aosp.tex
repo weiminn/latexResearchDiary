@@ -96,6 +96,6 @@ Zygote has 3 major tasks, on startup:
 \begin{enumerate}
     \item Register the socket to which the system will connect to start new application. Handled by \texttt{registerServerSocket} method which creates socket using the named passed as parameter for \texttt{init} script.
     \item Preload Android resources (classes, libraries, resources and even WebViews) with a call to \texttt{preload} method. After \texttt{preload} is finished, Zygote is fully initialized and ready to clone to new applications very quickly.
-    \item Start Android System Server with \texttt{startSystemServer}. Thus, \texttt{SystemServer} is the first application to be cloned by Zygote.
+    \item Start Android System Server. Thus, \texttt{SystemServer} is the first application to be cloned by Zygote.
 \end{enumerate}
 After it has completed these three tasks, it enters a loop, waiting for connections to the socket.
