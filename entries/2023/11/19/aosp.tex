@@ -1,0 +1,39 @@
+% mainfile: ../../../../master.tex
+\subsection{Building AOSP HAL}
+\label{task:20231119_aosp_hal}
+
+\subsubsection*{Implementing the HAL}
+
+Device driver and its API are usually provided by a third-party hardware provider. Shim code include \path{.h} files for one or more device drivers.
+
+New devices can communicate with the processor via USB which is popular. Even without driver, the device can be accessed with generic USB commands. 
+\textit{libusb}\footnote{\url{https://libusb.info}} is a portable, user-mode, and USB-version agnostic library for using USB devices, and supports Android. If the device has a driver, it is likely to be a specialization of the USB command.
+
+\begin{lstlisting}[language=C++]
+#ifndef PROXIMITY_HAL_H 
+#define PROXIMITY_HAL_H 
+
+#include <hardware/hardware.h> 
+
+#define ACME_PROXIMITY_SENSOR_MODULE "libproximityhal" 
+
+typedef struct proximity_sensor_device proximity_sensor_device_t; 
+
+struct value_range { 
+    int min; int range; 
+}; 
+
+typedef struct proximity_params { 
+    struct value_range precision; 
+    struct value_range proximity; 
+} 
+
+proximity_params_t; 
+
+struct proximity_sensor_device { hw_device_t common; 
+    int fd; 
+    proximity_params_t params; 
+    int (*poll_sensor)(proximity_sensor_device_t *dev, int precision); 
+}; #endif // PROXIMITY_HAL_H
+
+\end{lstlisting}

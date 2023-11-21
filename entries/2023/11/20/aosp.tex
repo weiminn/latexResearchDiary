@@ -1,0 +1,101 @@
+% mainfile: ../../../../master.tex
+\subsection{Rudimentary AOSP HAL Application}
+\label{task:20231120_aosp}
+
+Create Rudimentary Service source file, \path{rudi.cpp}, in \path{AOSP/device/generic/goldfish/app/wei_daemon}
+\begin{lstlisting}[language=C++]
+#include <unistd.h> 
+#include <stdio.h> 
+#include <android/log.h> 
+
+#define DELAY_SECS 2 
+#define ALOG(msg) __android_log_write(ANDROID_LOG_DEBUG, "WEIMINN PROJ", msg)
+
+int main(int argc, char *argv[]) {
+    ALOG("STARTING WEIMINN PROJECT");
+
+    int n = 0; 
+    while (true) {
+        sleep(DELAY_SECS);
+        n++; 
+
+        ALOG("TESTING");
+    }
+}
+\end{lstlisting}
+
+And create Soong build file, \path{Android.bp} in the same folder:
+\begin{lstlisting}[language=C++]
+cc_binary { 
+    name: "weiminn_daemon", 
+    relative_install_path: "hw", 
+    init_rc: ["init.weiminn.rc"], 
+    header_libs: [
+        "liblog_headers", 
+    ], 
+    srcs: [ 
+        "weiminn.cpp" 
+    ], 
+    shared_libs: [ 
+        "liblog", 
+        "libcutils", 
+    ], 
+    static_libs: [ 
+    ], 
+    vendor: true, 
+    proprietary: true, 
+}
+\end{lstlisting}
+
+Add \path{wei_rudi_daemon} to the \path{PRODUCT_PACKAGES += \} attribute of \path{AOSP/device/generic/goldfish/vendor.mk}
+
+Add the startup script below to the end of the \path{init.rc} file:
+\begin{lstlisting}
+service wei_rudi_daemon /vendor/bin/hw/wei_rudi_daemon
+    class main
+    user system
+    group system
+    oneshot
+\end{lstlisting}
+
+But the service cannot start due to SE Policy not being implemented for the service yet:
+\begin{lstlisting}
+11-21 02:13:54.242  1862  1862 W cp : type=1400 audit(0.0:231): avc: denied { getattr } for path="/vendor/bin/hw/wei_rudi_daemon" dev="dm-3" ino=110 scontext=u:r:shell:s0 tcontext=u:object_r:vendor_file:s0 tclass=file permissive=0
+\end{lstlisting}
+
+
+% \subsubsection*{Implementing the HAL}
+
+% Device driver and its API are usually provided by a third-party hardware provider. Shim code include \path{.h} files for one or more device drivers.
+
+% New devices can communicate with the processor via USB which is popular. Even without driver, the device can be accessed with generic USB commands. 
+% \textit{libusb}\footnote{\url{https://libusb.info}} is a portable, user-mode, and USB-version agnostic library for using USB devices, and supports Android. If the device has a driver, it is likely to be a specialization of the USB command.
+
+% \begin{lstlisting}[language=C++]
+% #ifndef PROXIMITY_HAL_H 
+% #define PROXIMITY_HAL_H 
+
+% #include <hardware/hardware.h> 
+
+% #define ACME_PROXIMITY_SENSOR_MODULE "libproximityhal" 
+
+% typedef struct proximity_sensor_device proximity_sensor_device_t; 
+
+% struct value_range { 
+%     int min; int range; 
+% }; 
+
+% typedef struct proximity_params { 
+%     struct value_range precision; 
+%     struct value_range proximity; 
+% } 
+
+% proximity_params_t; 
+
+% struct proximity_sensor_device { hw_device_t common; 
+%     int fd; 
+%     proximity_params_t params; 
+%     int (*poll_sensor)(proximity_sensor_device_t *dev, int precision); 
+% }; #endif // PROXIMITY_HAL_H
+
+% \end{lstlisting}

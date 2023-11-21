@@ -1,5 +1,5 @@
 % mainfile: ../../../../master.tex
-\subsection{Configuring AOSP for Acme Device}
+\subsection{Configuring AOSP for Acme Device on Ubuntu 23}
 \label{task:20231118_aosp_hal}
 
 % The interface to the hardware is a device drivers which are usually device specific and sometimes proprietary. A single set of C header files describes the functionality that a HAL provides to the Android system. HAL Code for a particular device is the implementation of the API defined by those header files, so that no code above the HAL needs to be changed to port Android to use the new device.
@@ -23,6 +23,29 @@ where the remote, \path{aosp}, is defined likewise in the top of of the \path{de
 Instead of including a URL as its attribute, it includes the \path{fetch} attribute which indicatese the URL for this remote should be derived from the URL used to initialize the workspace (the argument to the \path{-u} option).
 
 
+\begin{lstlisting}
+git ls-remote -h https://android.googlesource.com/platform/manifest.git
+repo init -u https://android.googlesource.com/platform/manifest -b android-10.0.0_r33
+git config --global user.email "mg.weiminn@gmail.com"
+git config --global user.name "weiminn"
+repo init -u https://android.googlesource.com/platform/manifest -b android-10.0.0_r33
+repo sync -j31
+source build/envsetup.sh 
+lunch sdk_phone_x86_64-userdebug 
+make -j31
+\end{lstlisting}
+% sudo apt-get install libncurses-dev
+
+Ubuntu $23$ does not have the repository for \path{libncurses5} because they already have \path{libncurses6}, so you have to add old \path{focal} repository to your \path{/etc/apt/sources.list}:
+\begin{lstlisting}[language=bash]
+deb http://security.ubuntu.com/ubuntu focal-security main universe
+\end{lstlisting}
+
+After including the old repo, update the repository index and install \path{libncurses5}: 
+\begin{lstlisting}[language=bash]
+sudo apt update
+sudo apt install libncurses5
+\end{lstlisting}
 
 % \begin{figure}[H]
 %     \centering

@@ -1,0 +1,31 @@
+% mainfile: ../../../../master.tex
+\subsection{Fixing SELinux Policy to Start System Service}
+\label{task:20231121_aosp}
+
+
+Add \path{seclabel} to the startup script:
+\begin{lstlisting}[language=sh]
+service weiminn_daemon /vendor/bin/hw/weiminn_daemon
+    class main
+    user system
+    group system
+    seclabel u:r:ueventd:s0
+\end{lstlisting}
+Add \texttt{start weiminn\_daemon} under \texttt{on early-init} right after \texttt{start ueventd}.
+
+Got a new permission denied error this time:
+\begin{lstlisting}
+11-21 09:45:47.732 0 0 E init : cannot execv('/vendor/bin/hw/weiminn_daemon'). See the 'Debugging init' section of init's README.md for tips: Permission denied
+11-21 09:45:47.733 0 0 I init : Service 'weiminn_daemon' (pid 1402) exited with status 127
+11-21 09:45:47.733 0 0 I init : Sending signal 9 to service 'weiminn_daemon' (pid 1402) process group...    
+\end{lstlisting}
+
+Adding \path{device/generic/goldfish/sepolicy/x86/weiminn.te} with following contents:
+\begin{lstlisting}
+type weiminn, domain; 
+permissive weiminn;
+type weiminn_exec, vendor_file_type, exec_type, file_type; 
+
+init_daemon_domain(weiminn)     
+\end{lstlisting}
+and changed \path{seclabel} of the startup script to \texttt{seclabel u:r:weiminn\_exec:s0}. Still got the same error.
