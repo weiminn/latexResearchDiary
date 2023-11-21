@@ -28,4 +28,12 @@ type weiminn_exec, vendor_file_type, exec_type, file_type;
 
 init_daemon_domain(weiminn)     
 \end{lstlisting}
-and changed \path{seclabel} of the startup script to \texttt{seclabel u:r:weiminn\_exec:s0}. Still got the same error.
+and changed \path{seclabel} of the startup script to \texttt{seclabel u:r:weiminn\_exec:s0}. And it reverts to the previous error:
+\begin{lstlisting}
+11-21 10:19:43.865 0 0 I init : starting service 'weiminn_daemon'...
+11-21 10:19:43.866 0 0 F init : cannot setexeccon('u:r:weiminn_exec:s0') for weiminn_daemon: Invalid argument
+11-21 10:19:43.867 0 0 I init : Service 'weiminn_daemon' (pid 1827) exited with status 6
+11-21 10:19:43.868 0 0 I init : Sending signal 9 to service 'weiminn_daemon' (pid 1827) process group...
+11-21 10:19:43.868 0 0 I libprocessgroup : Successfully killed process cgroup uid 1000 pid 1827 in 0ms
+    
+\end{lstlisting}
