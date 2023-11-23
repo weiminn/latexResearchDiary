@@ -1,0 +1,64 @@
+% mainfile: ../../../../master.tex
+% \subsection{Memory Dump}
+% \label{task:20231121_memdump}
+
+% \subsubsection{Try on Android Emulator}
+
+% Set up emulator environment by appending the following inside \path{~/.bashrc}:
+% \begin{lstlisting}[language=bash]
+% export ANDROID_SDK_ROOT=~/Android/Sdk
+% export ANDROID_HOME=~/Android/Sdk
+% export ANDROID_AVD_HOME=~/.android/avd
+
+% PATH=$PATH:$ANDROID_SDK_ROOT/emulator
+% \end{lstlisting}
+
+% Register the path: 
+% \begin{lstlisting}[language=bash]
+% source ~/.bashrc
+% \end{lstlisting}
+
+% Create new AVD, Pixel 7 Pro with Tramisu (Android 13 with Google APIs, not Google Play), via Android Studio.
+
+% Run emulator using command: 
+% \begin{lstlisting}[language=bash]
+% emulator -avd Pixel_7_Pro_API_33
+% \end{lstlisting}
+
+% Load APK into emulator: 
+% \begin{lstlisting}[language=bash]
+% adb devices # to get id of running instance
+% adb root
+% adb install -r de.drmaxnix.birthdaycountdown.apk
+% \end{lstlisting}
+
+% Clone Fridump\footnote{\url{https://pentestcorner.com/introduction-to-fridump}}:
+% \begin{lstlisting}[language=bash]
+% git clone https://github.com/Nightbringer21/fridump
+% code fridump
+% pip install frida frida-tools
+
+% \end{lstlisting}
+
+% Download and Run Fridump dependencies:
+% \begin{lstlisting}[language=bash]
+% git clone https://github.com/Nightbringer21/fridump
+% code fridump
+% adb push frida-server /data/local/tmp
+% sudo sysctl kernel.yama.ptrace_scope=0 && frida-ps -D emulator-5554
+% frida-ps -D emulator-5554 | grep Birth # to get process ID of the Birthday app
+
+% # inside emulator shell
+% ./data/local/tmp/frida-server
+% \end{lstlisting}
+
+% Found out that Fridump doesn't support the latest Android 13 and API 34, so download Android 10 with API 29 with Pixel 3a.
+
+% Run Fridump:
+% \begin{lstlisting}[language=bash]
+% python fridump.py -U -s Birthday\ Countdown
+% \end{lstlisting}
+% and it works now!
+
+
+
