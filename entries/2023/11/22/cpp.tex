@@ -1,175 +1,66 @@
 % % % mainfile: ../../../../master.tex
-\subsection{C++ Types}
-\label{task:20231122_cpp}
+\subsection{C++ Data Structure}
+\label{task:20231123_cpp}
 
-\subsubsection{Aliases}
+\subsubsection{\texttt{Sales_item} Struct}
 
-Traditionally, we use \textbf{\texttt{typedef}} for synonym for another type:
+The data structure does not support any operations\footnote{Basically, class with only attributes, and no methods.} any requires the user to implement the operations themselves:
 \begin{lstlisting}[language=C++]
-typedef double wages; // wages is a synonym for double 
-typedef wages base, *p; // base is a synonym for double, p for double*
+struct Sales_data { 
+    std::string bookNo; 
+    unsigned units_sold = 0; 
+    double revenue = 0.0; 
+};
+\end{lstlisting}
+The names defined inside the class must be unique within the class but can reuse names defined outside the class. We define data members the same way that we define normal variables: We specify a base type followed by a list of one or more declarators.
+
+The close curly that ends the class body must be followed by a semicolon. The semicolon is needed because we can define variables after the class body:
+\begin{lstlisting}[language=C++]
+struct Sales_data { /* ... */ } accum, trans, *salesptr; 
+// equivalent, but better way to define these objects 
+struct Sales_data { /* ... */}; Sales_data accum, trans, *salesptr;
+\end{lstlisting}
+The semicolon marks the end of the (usually empty) list of declarators. Ordinarily, it is a bad idea to define an object as part of a class definition. Doing so obscures the code by combining the definitions of two different entities—the class and a variable—in a single statement.
+
+We use the dot operator (\texttt{.}) to read into the member attributes of the object:
+\begin{lstlisting}[language=C++]
+Sales_data data1, data2;
+double price = 0; // price per book, used to calculate total revenue 
+
+// read the first transactions: ISBN, number of books sold, price per book 
+std::cin >> data1.bookNo >> data1.units_sold >> price; 
+
+// calculate total revenue from price and units_sold 
+data1.revenue = data1.units_sold * price;
+
+// read the second transaction 
+std::cin >> data2.bookNo >> data2.units_sold >> price; 
+data2.revenue = data2.units_sold * price;
 \end{lstlisting}
 
+\subsubsection{Preprocessor}
 
-The new standard introduced a second way to define \textbf{alias declaration} type alias:
+In order to ensure that the class definition is the same in each file, classes are usually defined in header files. Typically, classes are stored in headers whose name derives from the name of the class. Thus, we will define our \texttt{Sales_data} class in a header file named \texttt{Sales_data.h}.
+
+Headers often need to use facilities from other headers. For example, because our \texttt{Sales\_data} class has a string member, \texttt{Sales\_data.h} must \texttt{#include} the \texttt{string} header. As we’ve seen, programs that use \texttt{Sales\_data} also need to include the \texttt{string} header in order to use the \texttt{bookNo} member. As a result, programs that use \texttt{Sales\_data} will include the \texttt{string} header twice: once directly and once as a side effect of including \texttt{Sales\_data.h}. Because a header might be included more than once, we need to write our headers in a way that is safe even if the header is included multiple times.
+
+The \textbf{preprocessor} is a program that runs before the compiler and changes the source text of our programs. Our programs already rely on one preprocessor facility, \texttt{#include}. When the preprocessor sees a \texttt{#include}, it replaces the \texttt{#include} with the contents of the specified header.
+
+Header guards can be defined using the preprocessor. Preprocessor variables have one of two states: defined and not defined. \texttt{define} directive takes a name as a preprocessor variable. \texttt{#ifdef} is true if the variable has been defined, and \texttt{#ifndef} is true if the variable has not been defined. If the test is true, then everything following the \texttt{#ifdef} or \texttt{#ifndef} is processed up to the matching \texttt{#endif}:
 \begin{lstlisting}[language=C++]
-using SI = Sales_item; // SI is a synonym for Sales_item
+#ifndef SALES_DATA_H 
+
+#define SALES_DATA_H 
+#include <string> 
+
+struct Sales_data { 
+    std::string bookNo; 
+    unsigned units_sold = 0; 
+    double revenue = 0.0; 
+};
+
+#endif
 \end{lstlisting}
+The first time \texttt{Sales\_data.h} is included, the \texttt{#ifndef} test will succeed. The preprocessor will process the lines following \texttt{#ifndef} up to the \texttt{#endif}. As a result, the preprocessor variable \texttt{SALES\_DATA\_H} will be defined and the contents of \texttt{Sales\_data.h} will be copied into our program. If we include \texttt{Sales\_data.h} later on in the same file, the \texttt{#ifndef} directive will be false. The lines between it and the \texttt{#endif} directive will be ignored.
 
-It is also possible to declare "pointer to" alias:
-\begin{lstlisting}[language=C++]
-typedef char *pstring; 
-const pstring cstr = 0; // equivalent to char *const cstr = 0; 
-const pstring *ps; // equivalent to const char *ps;
-\end{lstlisting}
-
-\subsubsection{\texttt{auto} Type Specifier}
-
-We can let the compiler deduce the type from the initializer for us by using the \texttt{auto} type specifier:
-\begin{lstlisting}[language=C++]
-// the type of item is deduced from the type of the result of adding val1 and val2 
-auto item = val1 + val2; // item initialized to the result of val1+val2
-\end{lstlisting}
-
-The initializaer for all the variables muxt have types that are consistent with each other:
-\begin{lstlisting}[language=C++]
-auto i = 0, *p = &i; // ok: i is int and p is a pointer to int 
-auto sz = 0, pi = 3.14; // error: inconsistent types for sz and pi
-\end{lstlisting}
-
-\texttt{auto} ignores top-level \texttt{const}s, and only low-level initializer are usually kept:
-\begin{lstlisting}[language=C++]
-const int ci = i, &cr = ci; 
-auto b = ci; // b is an int (const in ci is dropped) 
-auto c = cr; // c is an int (cr is an alias for ci whose const is dropped) 
-auto d = &i; // d is an int* (& of an int object is int*) 
-auto e = &ci; // e is const int* (& of a const object is low-level const)
-const auto f = ci; // deduced type of ci is int; f has type const int
-\end{lstlisting}
-
-Normal initialization rules still apply for reference to the \texttt{auto}-deduced type:
-\begin{lstlisting}[language=C++]
-const int ci = i, &cr = ci; 
-auto &g = ci; // g is a const int& that is bound to ci 
-auto &h = 42; // error: we can’t bind a plain reference to a literal 
-const auto &j = 42; // ok: we can bind a const reference to a literal
-\end{lstlisting}
-When we ask for reference to an \texttt{auto}-deduced type, top-level \texttt{const}s in the initializer are not ignored. \texttt{const}s are not top-level when we bind a reference to an initializer.
-
-\subsubsection{\texttt{decltype} Type Specifier}
-
-We want to define a variable with a type that the compiler deduces from an expression but do not want to use the expression to initialize the variable:
-\begin{lstlisting}[language=C++]
-decltype(f()) sum = x; // sum has whatever type f returns
-\end{lstlisting}
-The compiler does not call \texttt{f}, but it uses the type that such a call would return as the type for \texttt{sum}.
-
-\texttt{decltype} handles top-level \texttt{const} and references differs subtly from \texttt{auto}
-\begin{lstlisting}[language=C++]
-const int ci = 0, &cj = ci; 
-decltype(ci) x = 0; // x has type const int 
-decltype(cj) y = x; // y has type const int& and is bound to x 
-decltype(cj) z; // error: z is a reference and must be initialized
-\end{lstlisting}
-
-% When we have variables whose value we know cannot be changed, and We want to prevent code from inadvertently giving a new value to the variable, we define the variable's type as \texttt{const}: 
-% \begin{lstlisting}[language=C++]
-% const int bufSize = 512; // input buffer size
-% bufSize = 512; // error: attempt to write to const object
-% \end{lstlisting}
-
-% Because we can't change the value of a const object after we create it, it must be initialized:
-% \begin{lstlisting}[language=C++]
-% const int i = get_size(); // ok: initialized at run time 
-% const int j = 42; // ok: initialized at compile time 
-% const int k; // error: k is uninitialized const
-% \end{lstlisting}
-
-% \subsubsection*{\texttt{const} is Local to the File}
-
-% When a \texttt{const} object is initialized from a compile-time constant as in:
-% \begin{lstlisting}[language=C++]
-% const int bufSize = 512;
-% \end{lstlisting}
-% the compiler will usually replace uses of the variable with its corresponding value during compilation. Thus, when we split a program to multiple files, every file that uses that \texttt{const} must have a access to its initializer. In order to see the initializer, the variable must be defined in every file that wants to use the variable's value. To support this, we define the \texttt{const} in one file, and declare it in other files that use that object.
-% \begin{lstlisting}[language=C++]
-% // file_1.cc defines and initializes a const that is accessible to other files 
-% extern const int bufSize = fcn(); 
-
-% // file_1.h 
-% extern const int bufSize; // same bufSize as defined in file_1.cc
-% \end{lstlisting}
-% Because \texttt{bufSize} is \texttt{const}, we must specify \texttt{extern} in order for \texttt{bufSize} to be used in other files. \texttt{extern} signifies that \texttt{bufSize} is not local to this file and that its definition will occur elsewhere.
-
-% \subsubsection*{References to \texttt{const}}
-
-% Unlike an ordinary reference, a reference to \texttt{const} cannot be used to change the object to which the reference is bound:
-% \begin{lstlisting}[language=C++]
-% const int ci = 1024; 
-% const int &r1 = ci; // ok: both reference and underlying object are const 
-% r1 = 42; // error: r1is a reference to const int &r2 = 
-% ci; // error: nonconstreference to a constobject
-% \end{lstlisting}
-
-% We can bind a reference to a \texttt{const} to a non\texttt{const} object, literals, or a more general expression:
-% \begin{lstlisting}[language=C++]
-% int i = 42;
-% const int &r1 = i; // we can bind a const int& to a plain int object 
-% const int &r2 = 42; // ok: r1 is a reference to const 
-% const int &r3 = r1 * 2; // ok: r3 is a reference to 
-% const int &r4 = r * 2; // error: r4is a plain, nonconst reference
-% \end{lstlisting}
-% It is important to realize that a reference to \texttt{const} restricts only what we can do through that reference. Binding a reference to \texttt{const} to an object says nothing about whether the underlying object itself is \texttt{const}.
-
-% \subsubsection{Pointers and \texttt{const}}
-
-% Like a reference to \texttt{const}, a pointer to \texttt{const} may not be used to change the object to which the pointer points. We may store the address of a \texttt{const} object only in a pointer to \texttt{const}, where we can modify the pointer itself (change the reference stored inside) but not the object (value) pointed to:
-% \begin{lstlisting}[language=C++]
-% const double pi = 3.14; // pi is const; its value may not be changed 
-% double *ptr = &pi; // error: ptr is a plain pointer 
-% const double *cptr = &pi; // ok: cptr may point to a double that is const 
-% *cptr = 42; // error: cannot assign to *cptr
-% \end{lstlisting}
-% Like a reference to \texttt{const}, a pointer to \texttt{const} says nothing about whether the object to which the pointer points is \texttt{const}, that there is no guarantee that an object pointed to by a pointer to \texttt{const} won't change.
-
-% We can have a pointer that is itself \texttt{const}, and the address it holds cannot by changed. We indicate that the pointer is \texttt{const} by putting the \texttt{const} by the \texttt{const}:
-% \begin{lstlisting}[language=C++]
-% int errNumb = 0; 
-% int *const curErr = &errNumb; // curErr will always point to errNumb 
-% const double pi = 3.14159; 
-% const double *const pip = &pi; // pip is a constpointer to a const object
-
-% *pip = 2.72; // error: pip is a pointer to const  and cannot be changed as the pointer is const
-% // if the object to which curErrpoints (i.e., errNumb) is nonzero 
-% if (*curErr) { 
-%     errorHandler(); 
-%     *curErr = 0; // ok: reset the value of the object to which curErr is bound because errNumb is not const 
-% }
-% \end{lstlisting}
-
-% \subsubsection*{Constant Expressions}
-
-% A constant expression is an expression whose value cannot change and that can be evaluated at compile time. A literal is a constant expression. A \texttt{const} object that is initialized from a constant expression is also a constant expression:
-% \begin{lstlisting}[language=C++]
-% const int max_files = 20; // max_files is a constant expression 
-% const int limit = max_files + 1; // limit is a constant expression 
-% int staff_size = 27; // staff_size is not a constant expression 
-% const int sz = get_size(); // sz is not a constant expression
-% \end{lstlisting}
-% Although \path{staff_size} is initialized from a literal, it is not a constant expression because it is a plain \path{int}, not a \path{const int}. Even though \path{sz} is a \path{const}, the value of its initializer is not known until run time, and thus, \path{sz} is not a constant expression.
-
-% We can ask the compiler to verify that a variable is a constant expression by declaring the variable in a \texttt{constexpr} declaration. Variables declared as \path{constexpr} are implicitly \path{const} and must be initiated by constant expressions:
-% \begin{lstlisting}[language=C++]
-% constexpr int mf = 20; // 20 is a constant expression 
-% constexpr int limit = mf + 1; // mf+1 is a constant expression 
-% constexpr int sz = size(); // ok only if size is a constexpr function
-% \end{lstlisting}
-
-% Because a constant expression is one that can be evaluated at compile time, only literal types (arithmetic, reference, and pointer) types can be defined as constant expressions. Custom classes, library IO and \path{string} types are not literal types. We can point (or bind) to an object that remains at a fixed address.
-
-% \path{constexpr} declaration applies to the pointer, not the type to which the pointer points:
-% \begin{lstlisting}[language=C++]
-% const int *p = nullptr; // pis a pointer to a constint
-% constexpr int *q = nullptr; // qis a constpointer to int
-% \end{lstlisting}
-% \path{p} is a pointer to \path{const} (low-level), whereas \path{q} is a constant pointer (top-level).
+Preprocessor variables, including names of header guards, must be unique throughout the program. Typically we ensure uniqueness by basing the guard’s name on the name of a class in the header. To avoid name clashes with other entities in our programs, preprocessor variables usually are written in all uppercase.
