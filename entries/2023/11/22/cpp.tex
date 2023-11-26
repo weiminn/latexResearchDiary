@@ -1,8 +1,8 @@
 % % % mainfile: ../../../../master.tex
 \subsection{C++ Data Structure}
-\label{task:20231123_cpp}
+\label{task:20231122_cpp}
 
-\subsubsection{\texttt{Sales_item} Struct}
+\subsubsection{\texttt{Sales\_item} Struct}
 
 The data structure does not support any operations\footnote{Basically, class with only attributes, and no methods.} any requires the user to implement the operations themselves:
 \begin{lstlisting}[language=C++]
@@ -40,13 +40,13 @@ data2.revenue = data2.units_sold * price;
 
 \subsubsection{Preprocessor}
 
-In order to ensure that the class definition is the same in each file, classes are usually defined in header files. Typically, classes are stored in headers whose name derives from the name of the class. Thus, we will define our \texttt{Sales_data} class in a header file named \texttt{Sales_data.h}.
+In order to ensure that the class definition is the same in each file, classes are usually defined in header files. Typically, classes are stored in headers whose name derives from the name of the class. Thus, we will define our \texttt{Sales\_data} class in a header file named \texttt{Sales\_data.h}.
 
-Headers often need to use facilities from other headers. For example, because our \texttt{Sales\_data} class has a string member, \texttt{Sales\_data.h} must \texttt{#include} the \texttt{string} header. As we’ve seen, programs that use \texttt{Sales\_data} also need to include the \texttt{string} header in order to use the \texttt{bookNo} member. As a result, programs that use \texttt{Sales\_data} will include the \texttt{string} header twice: once directly and once as a side effect of including \texttt{Sales\_data.h}. Because a header might be included more than once, we need to write our headers in a way that is safe even if the header is included multiple times.
+Headers often need to use facilities from other headers. For example, because our \texttt{Sales\_data} class has a string member, \texttt{Sales\_data.h} must \texttt{\#include} the \texttt{string} header. As we’ve seen, programs that use \texttt{Sales\_data} also need to include the \texttt{string} header in order to use the \texttt{bookNo} member. As a result, programs that use \texttt{Sales\_data} will include the \texttt{string} header twice: once directly and once as a side effect of including \texttt{Sales\_data.h}. Because a header might be included more than once, we need to write our headers in a way that is safe even if the header is included multiple times.
 
-The \textbf{preprocessor} is a program that runs before the compiler and changes the source text of our programs. Our programs already rely on one preprocessor facility, \texttt{#include}. When the preprocessor sees a \texttt{#include}, it replaces the \texttt{#include} with the contents of the specified header.
+The \textbf{preprocessor} is a program that runs before the compiler and changes the source text of our programs. Our programs already rely on one preprocessor facility, \texttt{\#include}. When the preprocessor sees a \texttt{\#include}, it replaces the \texttt{\#include} with the contents of the specified header.
 
-Header guards can be defined using the preprocessor. Preprocessor variables have one of two states: defined and not defined. \texttt{define} directive takes a name as a preprocessor variable. \texttt{#ifdef} is true if the variable has been defined, and \texttt{#ifndef} is true if the variable has not been defined. If the test is true, then everything following the \texttt{#ifdef} or \texttt{#ifndef} is processed up to the matching \texttt{#endif}:
+Header guards can be defined using the preprocessor. Preprocessor variables have one of two states: defined and not defined. \texttt{\#define} directive takes a name as a preprocessor variable. \texttt{\#ifdef} is true if the variable has been defined, and \texttt{\#ifndef} is true if the variable has not been defined. If the test is true, then everything following the \texttt{\#ifdef} or \texttt{\#ifndef} is processed up to the matching \texttt{\#endif}:
 \begin{lstlisting}[language=C++]
 #ifndef SALES_DATA_H 
 
@@ -61,6 +61,6 @@ struct Sales_data {
 
 #endif
 \end{lstlisting}
-The first time \texttt{Sales\_data.h} is included, the \texttt{#ifndef} test will succeed. The preprocessor will process the lines following \texttt{#ifndef} up to the \texttt{#endif}. As a result, the preprocessor variable \texttt{SALES\_DATA\_H} will be defined and the contents of \texttt{Sales\_data.h} will be copied into our program. If we include \texttt{Sales\_data.h} later on in the same file, the \texttt{#ifndef} directive will be false. The lines between it and the \texttt{#endif} directive will be ignored.
+The first time \texttt{Sales\_data.h} is included, the \texttt{\#ifndef} test will succeed. The preprocessor will process the lines following \texttt{\#ifndef} up to the \texttt{\#endif}. As a result, the preprocessor variable \texttt{SALES\_DATA\_H} will be defined and the contents of \texttt{Sales\_data.h} will be copied into our program. If we include \texttt{Sales\_data.h} later on in the same file, the \texttt{\#ifndef} directive will be false. The lines between it and the \texttt{\#endif} directive will be ignored.
 
 Preprocessor variables, including names of header guards, must be unique throughout the program. Typically we ensure uniqueness by basing the guard’s name on the name of a class in the header. To avoid name clashes with other entities in our programs, preprocessor variables usually are written in all uppercase.
