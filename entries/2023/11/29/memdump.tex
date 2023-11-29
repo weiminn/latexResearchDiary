@@ -1,0 +1,177 @@
+% mainfile: ../../../../master.tex
+\subsection{Android OAT Dump Parser}
+\label{task:20231129_memdump}
+
+The format for OAT files is described in \path{AOSP/art/dex2oat/linker/oat_writer.h}.
+
+\path{.bss}\footnote{\url{https://en.wikipedia.org/wiki/.bss}} is the portion of an ojbect file, executable, or assembly language code that contains statically allocated variables that are declared but not have been assigned a value yet.
+
+\begin{lstlisting}[language=python]
+import argparse
+
+# helper function
+def findLineWith(arr, s):
+    for i in range(len(arr)):
+        if s in arr[i]:
+            return i
+        
+def parse_method(method_arr):
+    method_sig_raw = method_arr.pop(0)
+    method_sig_raw_ = method_sig_raw[0: method_sig_raw.index(')')+1]
+    method_sig_raw__ = method_sig_raw_.split(':')[1:]
+    method_sig = method_sig_raw__[0].strip()
+
+    method_arr.pop(0) # discard "DEX CODE:"
+    endOfDex = findLineWith(method_arr, "OatMethodOffsets")
+    dexCode = method_arr[0: endOfDex]
+
+    startOfOat = findLineWith(method_arr, "CODE:")
+    nativeCode = method_arr[startOfOat+1:] # Exclude "CODE: "
+
+    parsed_method = {'method_sig': method_sig, 'dex': dexCode, 'native': nativeCode}
+
+    # print("Parsed", method_sig)
+
+    return parsed_method
+
+def parse_type(type_arr):
+    method_indexes = [i for i in range(len(type_arr)) if 'method_idx' in type_arr[i]]
+    if len(method_indexes) > 0: 
+        method_indexes.append(len(type_arr))
+    methods_raw = [type_arr[method_indexes[i]:method_indexes[i+1]] for i in range(0, len(method_indexes)-1)]
+    
+    methods = []
+    for mraw in methods_raw:
+        methods.append(parse_method(mraw))
+
+    return {'type_name': type_arr[0].split()[1], 'methods': methods}
+
+def load_oat_dump(p):
+    f = open(p)
+    lines = f.readlines()
+
+    # determine the start and end of DEX code
+    startOfOatDex = lines.index('OatDexFile:\n')
+    endOfOatDex = lines.index('OAT FILE STATS:\n')
+    OatDex = lines[startOfOatDex:endOfOatDex]
+
+    # extract the classes and types
+    type_indexes = [i for i in range(len(OatDex)) if 'type_idx' in OatDex[i]]
+    type_indexes.append(len(OatDex))
+    all_types = [OatDex[type_indexes[i]:type_indexes[i+1]] for i in range(0, len(type_indexes)-1)]
+
+    all_methods = []
+    all_methods_dict = {}
+
+    for t in all_types:
+        parsed = parse_type(t) 
+        all_methods += parsed['methods']
+
+        for m in parsed['methods']:
+            all_methods_dict[m['method_sig']] = {}
+            all_methods_dict[m['method_sig']]['dex'] = m['dex']
+            all_methods_dict[m['method_sig']]['native'] = m['native']
+
+    # return all_methods
+    return all_methods_dict
+
+def load_schema(p):
+    f = open(p)
+    lines = f.readlines()
+
+    schema = []
+    for l in lines:
+        split = l.split('|||')
+        schema.append(split[1][:-1]) # -1 to remove \n character
+        # print("Added schema", schema[-1])
+    return schema
+
+parser = argparse.ArgumentParser(description='OAT Debloation Checker')
+parser.add_argument('--oat', type=str, help='OAT Dump TXT file')
+parser.add_argument('--schema', type=str, help='Debloating schema file')
+
+try:
+    args = parser.parse_args()
+    # print("Options:", args.OAT, args.schema)
+
+    # Load Debloated OAT Dump
+    print("Debloated OAT Dump:", args.oat)
+    normal_methods = load_oat_dump(args.oat)
+    # normal_methods = load_oat_dump('prelim_results/com.storiestime/10min_normal_com.storiestime_oat_dump.txt')
+
+    # Load Schema
+    print("Schema File:", args.schema)
+    schema = load_schema(args.schema)
+    # schema = load_schema('Money_script/success_schema/169_com.storiestime_removed_methods.txt')
+
+    # Check if debloated
+    for m in schema:
+        retrieve = normal_methods[m]
+        if 'NO CODE!' in retrieve['native'][0]:
+            print(m, ' is debloated!')
+        else:
+            print(m, ' is not debloated!')
+
+    # print('test')    
+except Exception as e:
+    print("Exception!", str(e))
+\end{lstlisting}
+
+% Set up emulator environment by appending the following inside \path{~/.bashrc}:
+% \begin{lstlisting}[language=bash]
+% export ANDROID_SDK_ROOT=~/Android/Sdk
+% export ANDROID_HOME=~/Android/Sdk
+% export ANDROID_AVD_HOME=~/.android/avd
+
+% PATH=$PATH:$ANDROID_SDK_ROOT/emulator
+% \end{lstlisting}
+
+% Register the path: 
+% \begin{lstlisting}[language=bash]
+% source ~/.bashrc
+% \end{lstlisting}
+
+% Create new AVD, Pixel 7 Pro with Tramisu (Android 13 with Google APIs, not Google Play), via Android Studio.
+
+% Run emulator using command: 
+% \begin{lstlisting}[language=bash]
+% emulator -avd Pixel_7_Pro_API_33
+% \end{lstlisting}
+
+% Load APK into emulator: 
+% \begin{lstlisting}[language=bash]
+% adb devices # to get id of running instance
+% adb root
+% adb install -r de.drmaxnix.birthdaycountdown.apk
+% \end{lstlisting}
+
+% Clone Fridump\footnote{\url{https://pentestcorner.com/introduction-to-fridump}}:
+% \begin{lstlisting}[language=bash]
+% git clone https://github.com/Nightbringer21/fridump
+% code fridump
+% pip install frida frida-tools
+
+% \end{lstlisting}
+
+% Download and Run Fridump dependencies:
+% \begin{lstlisting}[language=bash]
+% git clone https://github.com/Nightbringer21/fridump
+% code fridump
+% adb push frida-server /data/local/tmp
+% sudo sysctl kernel.yama.ptrace_scope=0 && frida-ps -D emulator-5554
+% frida-ps -D emulator-5554 | grep Birth # to get process ID of the Birthday app
+
+% # inside emulator shell
+% ./data/local/tmp/frida-server
+% \end{lstlisting}
+
+% Found out that Fridump doesn't support the latest Android 13 and API 34, so download Android 10 with API 29 with Pixel 3a.
+
+% Run Fridump:
+% \begin{lstlisting}[language=bash]
+% python fridump.py -U -s Birthday\ Countdown
+% \end{lstlisting}
+% and it works now!
+
+
+

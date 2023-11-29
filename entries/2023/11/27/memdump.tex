@@ -1,30 +1,54 @@
 % mainfile: ../../../../master.tex
-\subsection{Android Memory Dump}
-\label{task:20231125_memdump}
+\subsection{Android Profile Guided Compilation}
+\label{task:20231127_memdump}
 
-\subsubsection{Heap Dump}
+\footnote{\url{https://developer.android.com/games/agde/pgo-overview}}
+\footnote{\url{https://newandroidbook.com/files/ArtOfDalvik.pdf}}
 
+\subsubsection{Baseline Profiles}
 \begin{lstlisting}[language=bash]
-adb shell am dumpheap <PID> <HEAP-DUMP-FILE-PATH>  
-adb shell cat <HEAP-DUMP-FILE-PATH> > <LOCAL-FILE-PATH>
-strings <LOCAL-FILE-PATH> <LOCAL-FILE-PATH-FOR-STRINGS>
-
-pip install objection
-frida-ps -Uai
-# objection -g de.drmaxnix.birthdaycountdown explore
-objection -g bloodpressure.bpdiary explore
-
-android hooking list classes #List all loaded classes, As the target application gets usedmore, this command will return more classes.
-
-android hooking search classes bloodpressure.bpdiary
-android hooking search methods bloodpressure.bpdiary recordDbActivity
-
-android hooking watch class bloodpressure.bpdiary.recordDbActivity --dump-args --dump-return
-
-android hooking watch class_method bloodpressure.bpdiary.recordDbActivity.showWeight --dump-args --dump-backtrace --dump-return
+adb shell cmd package dump-profiles bloodpressure.bpdiary
+adb shell cat /data/misc/profman/bloodpressure.bpdiary-primary.prof.txt > bpdiary_profile.txt
 \end{lstlisting}
 
+\subsubsection{Perfetto}
 
+% adb pull /data/local/traces .
+
+\subsubsection{Simpleperf}\footnote{\url{https://android.googlesource.com/platform/system/extras/+/main/simpleperf/demo/README.md}}
+% \begin{lstlisting}[language=bash]
+
+
+\begin{lstlisting}[language=bash]
+git clone https://android.googlesource.com/platform/system/extras
+cd extras/simpleperf/demo/scripts/
+python3 app_profiler.py -p simpleperf.example.java
+python3 report_html.py --add_source_code --source_dirs ../demo --add_disassembly
+sudo apt-get install python3-tk
+./report.py
+\end{lstlisting}
+
+\begin{lstlisting}[language=bash]
+python3 app_profiler.py -p bloodpressure.bpdiary
+adb shell /data/local/tmp/simpleperf record -o /data/local/tmp/perf.data -e task-clock:u -f 1000 -g --duration 10 --log info --app bloodpressure.bpdiary
+\end{lstlisting}
+
+\subsubsection{Profcollect}
+\footnote{\url{https://android.googlesource.com/platform/system/extras/+/master/profcollectd/}}
+
+This is only supported by Coresight ETM-enabled ARM devices, so emulator doesn't work.
+
+Inside ADB shell:
+\begin{lstlisting}[language=bash]
+device_config put profcollect_native_boot enabled true
+setprop persist.device_config.profcollect_native_boot.collection_interval 60
+setprop persist.device_config.profcollect_native_boot.sampling_period 1000
+setprop persist.device_config.profcollect_native_boot.max_trace_limit 53687091200
+setprop persist.device_config.profcollect_native_boot.enabled true
+setprop ctl.stop profcollectd
+setprop ctl.start profcollectd
+ps -e | grep profcollectd
+\end{lstlisting}
 
 % \begin{lstlisting}
 % wget https://www.python.org/ftp/python/2.7.9/Python-2.7.9.tgz
