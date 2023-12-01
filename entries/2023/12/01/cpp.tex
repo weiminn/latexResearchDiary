@@ -1,0 +1,357 @@
+% % % mainfile: ../../../../master.tex
+\subsection{C++ Strings, Vectors and Arrays}
+\label{task:20231201_cpp}
+
+\subsubsection{Namespace \texttt{using} Declarations}
+
+The scope operator (\texttt{::}) says that the compiler should look in the scope of the left-hand operand for the name of the right-hand operand. \texttt{using} declaration lets us use a name from a namespace without qualifying the name with \path{namespace::} prefix as below:
+\begin{lstlisting}[language=C++]
+#include <iostream>
+
+// when we use the name cin, we get the one from the namespace std
+using namespace::name;
+
+int main(){
+    int i;
+    cin >> i;
+    cout << i;
+    std::cout << i;
+    return 0;
+}
+\end{lstlisting}
+
+Headers should NOT include \texttt{using} declarations, as the contents of a header are copied into the including program's text. As a result, a program that didn't intend to use the specified library name might encounter unexpected name conflicts.
+
+\subsubsection{\texttt{string} Type}
+
+If you include a header that includes \texttt{<string>} you may not have to do so explicitly. However, it is bad practice to count on this, and well-written headers include guards against multiple inclusion, so assuming you're using well-written header files, there is no harm in including a header that was included via a previous include.\footnote{\url{https://stackoverflow.com/a/73640984}}:
+
+\begin{lstlisting}[language=C++]
+#include <string> // You need to include the <string> header to use std::string.
+using std:string; 
+\end{lstlisting}
+
+Most common ways to initialize \path{string}s:
+
+\begin{lstlisting}[language=C++]
+// direct initialization
+string s1; // default initialization; s1 is the empty string 
+string s4(10, ’c’); // s4 is cccccccccc
+string s6("hiya");
+
+// copy initialization
+string s2 = s1; // s2 is a copy of s1 
+string s3 = "hiya"; // equivalent to string s3("hiya");
+string s8 = string(10, 'c') // copying initialization; s8 is cccccccccc
+\end{lstlisting}
+When we initialize a variable using \path{=}, we are asking the compiler to copy initialize the object by copying the initializer on the right-hand size into the object being created. When we omit the \texttt{=}, we use direct initialization.
+
+\path{string} Operations:
+\begin{longtable}{p{.3\linewidth} p{.5\linewidth}} 
+\toprule
+Statement 	& Description \\
+\midrule
+\endhead
+
+\path{os << s}
+&Writes \path{s} onto output stream \path{os}. Return \path{os}.
+\\
+
+\path{is >> s}
+&Reads whitespaced-separated string from \path{is} to \path{s}. Return \path{is}.
+\\
+
+\path{getline(is,s)}
+&Reads a line of input from \path{is} into s. Returns \path{is}.
+\\
+
+\path{s.empty()}
+&Returns \path{true} if s is empty; otherwise return \path{false}.
+\\
+
+\path{s.size()}
+&Returns the number of characters in \path{s}.
+\\
+
+\path{s[n]}
+&Returns a reference to the \path{char} at position \path{n} in \path{s}.
+\\
+
+\texttt{s1 + s2}
+&Returns a \path{string} that is the concatenation of \path{s1} and \path{s2}.
+\\
+
+\texttt{s1 += s2}
+&Equivalent to \texttt{s1 = s1 + s2}.
+\\
+
+\texttt{s1 = s2}
+&Replaces characters in \path{s1} with a copy of \path{s2}.
+\\
+
+\texttt{s1 == s2} and texttt{s1 != s2}
+&The \path{string}s in \path{s1} and \path{s2} are equal if they contain the same characters. The equality is case-sensitive.
+\\
+
+\texttt{<, <=, >, >=}
+&Comparisons are case-sensitive and use dictionary ordering.
+\\
+
+\midrule
+\caption{\texttt{string} Operations} 
+\label{tab:stringoperations}
+\end{longtable}
+
+To check individual character:
+
+\begin{longtable}{p{.3\linewidth} p{.5\linewidth}} 
+\toprule
+Function & Description \\
+\midrule
+\endhead
+
+\texttt{isalnum(c)}
+& \texttt{true} if \texttt{c} is a letter or a digit.
+\\
+
+\texttt{isalpha(c)}
+& \texttt{true} if \texttt{c} is a letter.
+\\
+
+\texttt{iscntrl(c)}
+& \texttt{true} if \texttt{c} is a control character.
+\\
+
+\texttt{digit(c)}
+& \texttt{true} if \texttt{c} is a digit.
+\\
+
+\texttt{isgraph(c)}
+& \texttt{true} if \texttt{c} is not a space but is printable.
+\\
+
+\texttt{islower(c)}
+& \texttt{true} if \texttt{c} is a lowercase letter.
+\\
+
+\texttt{isprint(c)}
+& \texttt{true} if \texttt{c} is a printable character (i.e., a space or a character that has a visible representation).
+\\
+
+\texttt{ispunct(c)}
+& \texttt{true} if \texttt{c} is a punctuation character.
+\\
+
+\texttt{isspace(c)}
+& \texttt{true} if \texttt{c} is whitespace (i.e., a space, tab, vertical tab, return, newline, or formfeed).
+\\
+
+\texttt{isupper(c)}
+& \texttt{true} if \texttt{c} is an uppercase letter.
+\\
+
+\texttt{isxdigit(c)}
+& \texttt{true} if \texttt{c} is a hexadecimal digit.
+\\
+
+\texttt{tolower(c)}
+& If \texttt{c} is an uppercase letter, returns its lowercase equivalent; otherwise returns \texttt{c} unchanged.
+\\
+
+\texttt{toupper(c)}
+& If \texttt{c} is an lower letter, returns its uppercase equivalent; otherwise returns \texttt{c} unchanged.
+\\
+
+\midrule
+\caption{\texttt{cctype} Functions} 
+\label{tab:cctypefunctions}
+\end{longtable}
+
+\subsubsection{Reading an Unknown Number of \texttt{string}s}
+
+If the stream is valid - it hasn't hit end-of-file or encountered an invalid input - then the body of \texttt{while} is executed:
+\begin{lstlisting}[language=C++]
+int main() { 
+    string word; 
+    while (cin >> word) // read until end-of-file 
+        cout << word << endl; // write each word followed by a new line 
+
+    // Reads the given stream up to and including the first newline
+    string line; // read input a line at a time until end-of-file 
+    while (getline(cin, line)) 
+        // The newline that causes getline to return is discarded; the newline is not stored in the string.
+        cout << line << endl; 
+    
+    while (getline(cin, line)) 
+        // Only print lines that are not empty
+        if (!line.empty()) 
+            cout << line << endl;
+    
+    return 0; 
+}
+\end{lstlisting}
+
+\subsubsection{Library \texttt{string}s and String Literals}
+
+When we mix \texttt{string}s and string or character literals, at least one operand to each \texttt{+} operator must be of \texttt{string} type:
+\begin{lstlisting}[language=C++]
+string s4 = s1 + ", "; // ok: adding a string and a literal 
+string s5 = "hello" + ", "; // error: no string operand 
+string s6 = s1 + ", " + "world"; // ok: each + has a string operand 
+string s7 = "hello" + ", " + s2; // error: can’t add string literals
+\end{lstlisting}
+For compatibility reasons with C, string literals are NOT standard library \texttt{string}s. It is important to remember that these types differ when you use string literals and library \texttt{string}s.
+
+\subsubsection{Characters in \texttt{string}s}
+
+\texttt{string} expression represent a sequence of characters, and to traverse every character, we can use a range \texttt{for} that follows the syntax:
+\begin{lstlisting}[language=C++]
+for (declaration: expression)
+    statement
+\end{lstlisting}
+
+A simple example:
+\begin{lstlisting}[language=C++]
+string str("some string"); 
+// print the characters in str one character to a line 
+for (auto c : str) // for every char in str 
+    cout << c << endl; // print the current character followed by a newline
+\end{lstlisting}
+We use auto to let compiler deduce the type of \texttt{c}, which in this case will be \texttt{char}.
+
+If we want to change the value of the character in a \texttt{string}, we must define the loop variable as a reference type:
+\begin{lstlisting}[language=C++]
+string str("some string"); 
+// convert s to uppercase 
+for (auto &c : str) // for every char ref in str 
+    c = toupper(s); // c is a reference, so the assignment changes the char in s
+\end{lstlisting}
+
+The subscript operator (the \texttt{[]} operator) takes a \path{string::size_type} value that denotes the position of the character we want to access. The operator returns a reference to the character at the given position:
+\begin{lstlisting}[language=C++]
+string str("some string"); 
+if (!s. empty())            // make sure there's a character to print
+    cout << s[0] << endl;   // print the first character in s
+\end{lstlisting}
+
+To iterate using subscript:
+\begin{lstlisting}[language=C++]
+// process characters in s until we run out of characters or we hit a whitespace 
+for (
+    decltype(s.size()) index = 0; 
+    index != s.size() && !isspace(s[index]); // the operator yields true if both operands are true
+    ++index) 
+        s[index] = toupper(s[index]); // capitalize the current character
+\end{lstlisting}
+
+\subsubsection{\texttt{vector} Type}
+
+A \texttt{vector} is a collection\footnote{Often referred to as container because it "contains" other objects.} of objects, all of which have the same type, and each of which has an associated index that gives access to that object. Below is the headers to use a \texttt{vector}:
+\begin{lstlisting}[language=C++]
+#include <vector>
+user std::vector;
+\end{lstlisting}
+
+\texttt{vector} is not a class/type but a class template, which is a set of instructions for the compiler for generating classes/types, a process called instantiation. To specify what kind of class (what type of object we want the \texttt{vector} to hold) we want to instantiate, we supply additional information inside a pair of angle brackets following the template's name:
+\begin{lstlisting}[language=C++]
+vector<int> ivec; // ivec holds objects of type 
+int vector<Sales_item> Sales_vec; // holds Sales_items 
+vector<vector<string>> file; // vector whose elements are vectors
+\end{lstlisting}
+Here, \path{vector<int>}, \path{vector<Sales_item>}, and \path{vector<vector<string>>} are the types generated types by the compiler.
+
+Because references are not objects, we cannot have a vector of references. 
+
+\subsubsection{Defining and Initializing \texttt{vector}s}
+
+The most common way of Initializing a vector is to initialize an empty \texttt{vector}. We can also perform direct and copy initialization, but the objects must be the same type:
+\begin{lstlisting}[language=C++]
+vector<string> svec; // default initialization; svechas no elements
+
+// direct and copy initialization
+vector<int> ivec2(ivec); // copy elements of ivec into ivec2 
+vector<int> ivec3 = ivec; // copy elements of ivec into ivec3 
+vector<string> svec(ivec2); // error: svec holds strings, not ints
+
+// list initialization
+vector<string> articles = {"a", "an", "the"};
+vector<string> articles2{"a", "an", "the"};
+vector<string> articles3("a", "an", "the"); // error
+
+vector<int> ivec(10, -1); // ten int elements, each initialized to -1 
+vector<string> svec(10, "hi!"); // ten strings; each element is "hi!"
+
+vector<int> ivec(10); // ten elements, each initialized to 0 
+vector<string> svec(10); // ten elements, each an empty string
+\end{lstlisting}
+Some classes require that we always supply an explicit initializer, and cannot be default initialized, in which case, we must supply the initial value/
+
+\subsubsection{\texttt{vector} Operations}
+
+Two \texttt{vector}s are equal if they have the same numnber of elements, and if the corresponding elements all have the same value. If the vectors have differing sizes, but the elements that are in common are equal, then the vector with fewer elements is less than the one with more elements. If the elements have differing values, then the relationship between the \texttt{vector}s is determined by the relationship between the first elements that differ. We can compare two \texttt{vectors} only if we can compare the element in those \texttt{vector}s.
+
+\begin{longtable}{p{.3\linewidth} p{.6\linewidth}} 
+\toprule
+Methods & Description \\
+\midrule
+\endhead
+
+\path{v.empty()}
+& Returns \texttt{true} if \texttt{v} is empty; otherwise returns \texttt{false}.
+\\
+
+\path{v.size()}
+& Returns the number of elements in \texttt{v}.
+\\
+
+\path{v.push_back(t)}
+& Adds an element with value \texttt{t} to the end of \texttt{v}.
+\\
+
+\path{v[n]}
+& Returns a reference to the element at position \texttt{n} in \texttt{v}.
+\\
+
+\texttt{v1 = v2}
+& Replaces the elements in \texttt{v1} with a copy of the elements in \texttt{v2}.
+\\
+
+\texttt{v1 = {a, b, c, ...}}
+& Replaces the elements in \texttt{v1} with a copy of the elements in the comma-separated list.
+\\
+
+\texttt{v1 == v2} and \texttt{v1 != v2}
+& \texttt{v1} and \texttt{v2} are equal if they have the same number of elements and each element in \texttt{v1} is equal to corresponding element in \texttt{v2}.
+\\
+
+\texttt{<, <=, >, >=}
+& Have their normal meanings using dictionary ordering.
+\\
+
+\midrule
+\caption{\texttt{vector} Methods} 
+\label{tab:vectormethods}
+\end{longtable}
+
+As with \texttt{string}s, subscript for \texttt{vector} start at 0; the type of a subscript is the corresponding \path{size_type}; and we can write to the element returned by the subscript operator.
+
+Subscripting a \texttt{vector} does NOT add elements:
+\begin{lstlisting}[language=C++]
+vector<int> ivec; // empty vector 
+for (decltype(ivec.size()) ix = 0; ix != 10; ++ix) 
+    ivec[ix] = ix; // disaster: ivec has no elements
+\end{lstlisting}
+It is an error to subscript an element that doesn’t exist, but it is an error that the compiler is unlikely to detect. Instead, the value we get at run time is undefined\footnote{\textit{Buffer overflow} errors are the result of subscripting elements that don’t exist. Such bugs are the most common cause of security problems in PC and other applications.}. A good way to ensure that subscripts are in range is to avoid subscripting altogether by using a range \texttt{for} whenever possible.
+
+\subsubsection{Iterators}
+
+Iterators are more general mechanism than subscript operators. All of the library containers have iterators, but only a few of them support the subscript operator. Like pointers, iterators give us indirect acess to an object. 
+\begin{lstlisting}[language=C++]
+// the compiler determines the type of b and e; see § 2.5.2 (p. 68) 
+// b denotes the first element and e denotes one past the last element in v 
+auto b = v.begin(), e = v.end(); // b and e have the same type
+\end{lstlisting}
+The \texttt{begin} member returns an iterator that denotes the first element (if there is one). The \texttt{end} member returns an iterator positioned "one past the end" of the associated container (or \texttt{string}), also referred to as the off-the-end iterator. If the container is empty, \texttt{begin} returns the same iterator as the one returned by \texttt{end}.
+
+
+
