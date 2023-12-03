@@ -1,0 +1,293 @@
+% % % mainfile: ../../../../master.tex
+\subsection{C++ Iterator, and Arrays}
+\label{task:20231203_cpp}
+
+\subsubsection{Iterators}
+
+Iterators are more general mechanism than subscript operators. All of the library containers have iterators, but only a few of them support the subscript operator. Like pointers, iterators give us indirect acess to an object. 
+\begin{lstlisting}[language=C++]
+// the compiler determines the type of b and e;
+// b denotes the first element and e denotes one past the last element in v 
+auto b = v.begin(), e = v.end(); // b and e have the same type
+\end{lstlisting}
+The \texttt{begin} member returns an iterator that denotes the first element (if there is one). The \texttt{end} member returns an iterator positioned "one past the end" of the associated container (or \texttt{string}), also referred to as the off-the-end iterator. If the container is empty, \texttt{begin} returns the same iterator as the one returned by \texttt{end}. 
+
+We do not know (or need to care about) the precise type that an iterator has, so we use \texttt{auto} to define \texttt{b} and \texttt{e}.
+
+We compare two valid iterators using \texttt{==} or \texttt{!=}. Iterators are equal if they denote the same element of if they are both off-the-end iterators for the same container. Otherwise, they are unequal. 
+
+Like pointers, we can dereference a valid iterator to obtain the elemnt denoted by an iterator. Dereferencing an invalid iterator or an off-the-end iterator has undefined behavior:
+\begin{lstlisting}[language=C++]
+string s("some string"); 
+if (s.begin() != s.end()) { // make sure s is not empty 
+    auto it = s.begin(); // it denotes the first character in s 
+    *it = toupper(*it); // make that character uppercase 
+}
+\end{lstlisting}
+
+Iterators also support a few other operations:
+
+\begin{longtable}{p{.25\linewidth} p{.7\linewidth}} 
+\toprule
+Methods & Description \\
+\midrule
+% \endhead
+
+\texttt{*iter}
+& Returns a reference to the element denoted by the iterator \texttt{iter}.
+\\
+
+\texttt{iter->mem}
+&Dereferences \texttt{iter} and fetches the member named \texttt{mem} from the underlying element. Equivalent to \texttt{(*iter).mem}.
+\\
+
+\texttt{++iter}
+&Increments \texttt{iter} to refer to the next element in the container.
+\\
+
+\texttt{--iter}
+&Decrements \texttt{iter} to refer to the previous element in the container.
+\\
+
+\texttt{iter1 == iter2} and \texttt{iter1 != iter2}
+&Compares two iterators for equality. Two iterators are equal if they denote the same element or if they are off-the-end iterator for the same container.
+\\
+
+\midrule
+\caption{Iterator operations} 
+\label{tab:iteratoroperations}
+\end{longtable}
+
+The increment (\texttt{++}) operator to move from one element to the next:
+\begin{lstlisting}[language=C++]
+string s("some string"); 
+for (auto it = s.begin(); it != s.end() && !isspace(*it); ++it) {
+    *it = toupper(*it); // make that character uppercase 
+}
+\end{lstlisting}
+Because the iterator returned by \texttt{end} does not denote an element, it may not be incremented or dereferenced. 
+
+When we need to read but not write to an object, we ask specifically for \path{const_iterator} type:
+\begin{lstlisting}[language=C++]
+vector<int> v;
+auto b = v.cbegin(); // b has type vector<int>::const_iterator
+auto e = v.cend(); // e has type vector<int>::const_iterator
+\end{lstlisting}
+Regardless of whether the container is \texttt{const}, they return a \path{const_iterator}.
+
+Iterators for \texttt{string} and \texttt{vector} support additional operations that can move an iterator multiple elements at a time, often referred to as iterator arithmetic:
+\begin{longtable}{p{.2\linewidth} p{.75\linewidth}} 
+\toprule
+Iter. Arithmetic & Description \\
+\midrule
+\endhead
+
+\texttt{iter + n} and \texttt{iter - n}
+&Adding (subtracting) an integral value \texttt{n} to (from) an iterator yields an iterator that many elements forward (or backward) within the container. The resulting iterator must denote elements in, or one past the end of, the same container.
+\\
+
+\texttt{iter += n} and \texttt{iter -= n}
+&Compound-assignment for iterator addition and subtraction. Assigns to \texttt{iter1} the value of adding \texttt{n} to, or subtracting \texttt{n} from, \texttt{iter1}.
+\\
+
+\texttt{iter1 - iter2}
+&Subtracting two iterators yields the number that when added to the right-hand iterator yields the left-hand iterator. The iterators must denote elements in, or one past the end of, the same container.
+\\
+
+\texttt{>},\texttt{>=},\texttt{<},\texttt{<=}
+&Relational operators on iterators. One iterator is less than another if it refers to an element that appears in the container before the one referred to by the other iterator. The iterators must denote elements in, or one past the end of, the same container.
+\\
+
+\midrule
+\caption{Iterator Arithmetics} 
+\label{tab:iteratorarithmetics}
+\end{longtable}
+
+A classic algorithm that uses iterator arithmetic is binary search:
+\begin{lstlisting}[language=C++]
+vector<int> v;
+// text must be sorted 
+// begand end will denote the range we're searching 
+auto beg = text.begin(), end = text.end(); 
+auto mid = text.begin() + (end - beg)/2; // original midpoint 
+
+// while there are still elements to look at and we haven't yet found sought 
+while (mid != end && *mid != sought) { 
+    if (sought < *mid) // is the element we want in the first half? 
+        end = mid; // if so, adjust the range to ignore the second half 
+    else // the element we want is in the second half 
+        beg = mid + 1; // start looking with the element just after mid 
+    mid = beg + (end - beg)/2; // new midpoint 
+}
+\end{lstlisting}
+
+\subsubsection{Arrays}
+
+Similar to library \texttt{vector} type, an \texttt{array} is a container of unnamed objectis of a single type that we access by position. Unlike a \texttt{vector}, arrays have fixed size; we cannot add elements to an array, in order to attain better runtime performance for specialize applications at the cost of flexibility.
+
+An array declarator has the form \texttt{a[d]}, where \texttt{a} is the name being defined and \texttt{d} is the dimension of the array which specifies the number of elements and must be greater than zero. The dimension must be known at compile time, which means that the dimension must be a \texttt{constexpr}:
+\begin{lstlisting}[language=C++]
+unsigned cnt = 42; // not a constant expression 
+constexpr unsigned sz = 42; // constant expression 
+int arr[10]; // array of ten ints 
+int *parr[sz]; // array of 42 pointers to int 
+string bad[cnt]; // error: cnt is not a constant expression 
+string strs[get_size()]; // ok if get_size is constexpr, error otherwise
+\end{lstlisting}
+By default, the elements in an array are default initialized. As with \texttt{vector}, arrays hold objects. Thus, there are no arrays of references.
+
+We can list initialize an array which allow us to omit the dimension as the compiler infers it from the number of initializers. If we specify, the number of initializers must not exceed the specified size:
+\begin{lstlisting}[language=C++]
+const unsigned sz = 3; 
+int ia1[sz] = {0,1,2}; // array of three ints with values 0, 1, 2 
+int a2[] = {0, 1, 2}; // an array of dimension 3 
+int a3[5] = {0, 1, 2}; // equivalent to a3[] = {0, 1, 2, 0, 0} 
+string a4[3] = {"hi", "bye"}; // same as a4[] = {"hi", "bye", ""} 
+int a5[2] = {0,1,2}; // error: too many initializers
+\end{lstlisting}
+
+Character arrays can also be initialized from a string literals. It's important to remember that string literals end with a null character:
+\begin{lstlisting}[language=C++]
+char a1[] = {'C', '+', '+'}; // list initialization, no null 
+char a2[] = {'C', '+', '+', '\0'}; // list initialization, explicit null 
+char a3[] = "C++"; // null terminator added automatically 
+const char a4[6] = "Daniel"; // error: no space for the null!
+\end{lstlisting}
+
+We cannot initialization an array as a copy of another array, nor is it legal to assign one array to another\footnote{Some compilers allow array assignment as a compiler extension.Itis usually a good idea to avoid using nonstandard features. Programs that use such features, will not work with a different compiler.}:
+\begin{lstlisting}[language=C++]
+int a[] = {0, 1, 2}; // array of three ints 
+int a2[] = a; // error: cannot initialize one array with another 
+a2 = a; // error: cannot assign one array to another
+\end{lstlisting}
+
+Defining arrays that hold pointers is fairly straightforward, defining a pointer or reference to an array is a bit more complicated:
+\begin{lstlisting}[language=C++]
+int *ptrs[10]; // ptrs is an array of ten pointers to int 
+int &refs[10] = /* ? */; // error: no arrays of references 
+int (*Parray)[10] = &arr; // Parray points to an array of ten ints 
+int (&arrRef)[10] = arr; // arrRef refers to an array of ten ints
+\end{lstlisting}
+The parentheses around \texttt{*Parray} means that \texttt{Parray} is a pointer. Looking right, we see that \texttt{Parray} points to an array of size 10. Looking left, we see taht the elements in the array are \texttt{int}s.. Thus, \texttt{Parray} is a pointer to an array of ten \texttt{int}s. Similarly, \texttt{\&arrRef} says that \texttt{arrRef} is a reference.
+
+We can use range \texttt{for} or the subscript operator to access elements of an array:
+\begin{lstlisting}[language=C++]
+// count the number of grades by clusters of ten: 0--9, 10--19, . . . 90--99, 100 
+unsigned scores[11] = {}; // 11 buckets, all value initialized to 0 
+unsigned grade; 
+while (cin >> grade) { 
+    if (grade <= 100) 
+        ++scores[grade/10]; // increment the counter for the current cluster 
+}
+
+for (auto i : scores) // for each counter in scores 
+    cout << i << " "; // print the value of that counter 
+cout << endl;
+\end{lstlisting}
+We have to use a variable to have type \path{size_t} (defined in \path{cstddef} header) which is a machine-specific unsigned type that is guaranteed to be large enough to hold the size of any object in memory.
+
+The most common source of security problems are buffer overflow bugs. Such bugs occur when a program fails to check a subscript and mistakenly uses memory outside the range of an array or similar data structure. Nothing stops a program from stepping across an array boundary except careful attention to detail and thorough testing of the code.
+
+We obtain a pointer to an array element by taking the address of that element:
+\begin{lstlisting}[language=C++]
+string nums[] = {"one", "two", "three"}; // array of strings 
+string *p = &nums[0]; // p points to the first element in nums
+string *p2 = nums; // equivalent to p2=&nums[0]
+\end{lstlisting}
+When we use an object of array type, we are really using a pointer to the first element in that array, as the compiler automatically substitutes a pointer to the first element.
+
+When we use an array as an initializer for a variable defined using \texttt{auto}, the deduced type is a pointer, not an array:
+\begin{lstlisting}[language=C++]
+int ia[] = {0,1,2,3,4,5,6,7,8,9}; // ia is an array of ten ints 
+auto ia2(ia); // ia2 is an int* that points to the first element in ia 
+ia2 = 42; // error: ia2 is a pointer, and we can't assign an int to a pointer
+\end{lstlisting}
+Although \texttt{ia} is an array of ten \path{int}s, when we use \texttt{ia} as an initializer, the compiler treats that initialization as if we had written:
+\begin{lstlisting}[language=C++]
+auto ia2(&ia[0]); // now it's clear that ia2 has type int*
+\end{lstlisting}
+This converstion does not happen when we use \texttt{decltype}:
+\begin{lstlisting}[language=C++]
+// ia3 is an array of ten ints 
+decltype(ia) ia3 = {0,1,2,3,4,5,6,7,8,9}; 
+ia3 = p; // error: can't assign an int* to an array 
+ia3[4] = i; // ok: assigns the value of ito an element in ia3
+\end{lstlisting}
+
+Pointers to array elements support the same operations as iterators on \path{vector}s or \path{string}s:
+\begin{lstlisting}[language=C++]
+// ia3 is an array of ten ints 
+int arr[] = {0,1,2,3,4,5,6,7,8,9}; 
+int *p = arr; // p points to the first element in arr 
+++p; // ppoints to arr[1]
+int *e = &arr[10]; // pointer just past the last element in arr
+\end{lstlisting}
+\path{arr} has 10 elements, so the last element in \path{arr} is at index $9$. Like the off-the-end iterator, off-the-end pointer does not point to an element. As a result, we may not dereference or increment an off-the-end pointer.
+
+To be safer and less error-prone, we can use \path{begin} and \texttt{end} functions that act like similarly named container members. However, as arrays are not class types, these are not member functions, so they take an argument that is an array:
+\begin{lstlisting}[language=C++]
+int ia[] = {0,1,2,3,4,5,6,7,8,9}; // ia is an array of ten ints 
+int *beg = begin(ia); // pointer to the first element in ia 
+int *last = end(ia); // pointer one past the last element in ia
+\end{lstlisting}
+
+Pointers that address array elements can use all iterator operations in Table~\ref{tab:iteratoroperations} and Table~\ref{tab:iteratorarithmetics}. When we add an itegral value to or from a pointer, the result is a new pointer. That new pointer points to the element the given number ahead of the original pointer:
+\begin{lstlisting}[language=C++]
+constexpr size_t sz = 5; 
+int arr[sz] = {1,2,3,4,5}; 
+int *ip = arr; // equivalent to int*ip=&arr[0] 
+int *ip2 = ip + 4; // ip2points to arr[4], the last element in arr
+
+// ok: arris converted to a pointer to its first element; ppoints one past the end of arr int *p = arr + sz; // use caution -- do not dereference! int *p2 = arr + 10; // error: arrhas only 5 elements; p2has undefined value
+\end{lstlisting}
+When we add \path{sz} to \path{arr}, the compiler converts \path{arr} to a pointer to the first element in \path{arr}. As a result, we can dereference the resulting pointer:
+\begin{lstlisting}[language=C++]
+int ia[] = {0,2,4,6,8}; // array with 5 elements of type int 
+int last = *(ia + 4); // ok: initializes last to 8, the value of ia[4]
+last = *ia + 4; // ok: last=4,equivalenttoi
+\end{lstlisting}
+
+As with iterators, subtracting two pointers gives us the distance between those pointers. The pointers must point to elements in the same array:
+\begin{lstlisting}[language=C++]
+auto n = end(arr) - begin(arr); // n is 5, the number of elements in arr
+\end{lstlisting}
+The result of subtracting two pointers is a library type named \path{ptrdiff_t} which is a machine-specific type and is defined in the \path{cstddef} header.
+
+When we subscript an array, we are subscripting a pointer to an element in that array:
+\begin{lstlisting}[language=C++]
+int i = ia[2];  // ia is converted to a pointer to the first element in ia 
+                // ia[2]fetches the element to which (ia+2)points 
+int *p = ia; // p points to the first element in ia 
+i=*(p + 2); // equivalent to i=ia[2]
+int k = p[-2]; // p[-2] is the same element as ia[0]
+\end{lstlisting}
+Unlike subscripts for \path{vector} and \path{string}, the index of the built-in subscript operator is not an unsigned type.
+
+Modern C++ programs should use vectors and iterators instead of built-in arrays and pointers, and use strings rather than C-style array-based character strings. Pointers are used for low-level manipulations and it is easy to make bookkeeping mistakes. Other problems arise because of the syntax, particularly the declaration syntax used with pointers.
+
+\subsubsection{Multidimensional Arrays}
+
+Multidimensional arrays in C++ are actually arrays of arrays:
+\begin{lstlisting}[language=C++]
+int ia[3][4]; // array of size 3; each element is an array of ints of size 4 
+// array of size 10; each element is a 20-element array whose elements are arrays of 30 ints 
+int arr[10][20][30] = {0}; // initialize all elements to 0
+
+int ia[3][4] = { // three elements; each element is an array of size 4 
+    {0, 1, 2, 3}, // initializers for the row indexed by 0 
+    {4, 5, 6, 7}, // initializers for the row indexed by 1 
+    {8, 9, 10, 11} // initializers for the row indexed by 2 
+};
+
+// equivalent initialization without the optional nested braces for each row int ia[3]int ia[4] = {0,1,2,3,4,5,6,7,8,9,10,11};
+
+// explicitly initialize only element 0 in each row 
+int ia[3][4] = {{ 0 }, { 4 }, { 8 }};
+
+// explicitly initialize row 0; the remaining elements are value initialized int ix[3]int ia[4] = {0, 3, 6, 9};
+
+// assigns the first element of arr to the last element in the last row of ia 
+ia[2][3] = arr[0][0][0]; 
+
+int (&row)[4] = ia[1]; // binds row to the second four-element array in ia
+\end{lstlisting}

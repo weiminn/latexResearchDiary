@@ -1,5 +1,5 @@
 % % % mainfile: ../../../../master.tex
-\subsection{C++ Strings, Vectors and Arrays}
+\subsection{C++ Strings and Vectors}
 \label{task:20231201_cpp}
 
 \subsubsection{Namespace \texttt{using} Declarations}
@@ -36,7 +36,7 @@ Most common ways to initialize \path{string}s:
 \begin{lstlisting}[language=C++]
 // direct initialization
 string s1; // default initialization; s1 is the empty string 
-string s4(10, ’c’); // s4 is cccccccccc
+string s4(10, 'c'); // s4 is cccccccccc
 string s6("hiya");
 
 // copy initialization
@@ -47,7 +47,7 @@ string s8 = string(10, 'c') // copying initialization; s8 is cccccccccc
 When we initialize a variable using \path{=}, we are asking the compiler to copy initialize the object by copying the initializer on the right-hand size into the object being created. When we omit the \texttt{=}, we use direct initialization.
 
 \path{string} Operations:
-\begin{longtable}{p{.3\linewidth} p{.5\linewidth}} 
+\begin{longtable}{p{.2\linewidth} p{.7\linewidth}} 
 \toprule
 Statement 	& Description \\
 \midrule
@@ -89,7 +89,7 @@ Statement 	& Description \\
 &Replaces characters in \path{s1} with a copy of \path{s2}.
 \\
 
-\texttt{s1 == s2} and texttt{s1 != s2}
+\texttt{s1 == s2} and \texttt{s1 != s2}
 &The \path{string}s in \path{s1} and \path{s2} are equal if they contain the same characters. The equality is case-sensitive.
 \\
 
@@ -104,7 +104,7 @@ Statement 	& Description \\
 
 To check individual character:
 
-\begin{longtable}{p{.3\linewidth} p{.5\linewidth}} 
+\begin{longtable}{p{.2\linewidth} p{.7\linewidth}} 
 \toprule
 Function & Description \\
 \midrule
@@ -198,7 +198,7 @@ When we mix \texttt{string}s and string or character literals, at least one oper
 string s4 = s1 + ", "; // ok: adding a string and a literal 
 string s5 = "hello" + ", "; // error: no string operand 
 string s6 = s1 + ", " + "world"; // ok: each + has a string operand 
-string s7 = "hello" + ", " + s2; // error: can’t add string literals
+string s7 = "hello" + ", " + s2; // error: can't add string literals
 \end{lstlisting}
 For compatibility reasons with C, string literals are NOT standard library \texttt{string}s. It is important to remember that these types differ when you use string literals and library \texttt{string}s.
 
@@ -290,7 +290,7 @@ Some classes require that we always supply an explicit initializer, and cannot b
 
 Two \texttt{vector}s are equal if they have the same numnber of elements, and if the corresponding elements all have the same value. If the vectors have differing sizes, but the elements that are in common are equal, then the vector with fewer elements is less than the one with more elements. If the elements have differing values, then the relationship between the \texttt{vector}s is determined by the relationship between the first elements that differ. We can compare two \texttt{vectors} only if we can compare the element in those \texttt{vector}s.
 
-\begin{longtable}{p{.3\linewidth} p{.6\linewidth}} 
+\begin{longtable}{p{.2\linewidth} p{.7\linewidth}} 
 \toprule
 Methods & Description \\
 \midrule
@@ -316,7 +316,7 @@ Methods & Description \\
 & Replaces the elements in \texttt{v1} with a copy of the elements in \texttt{v2}.
 \\
 
-\texttt{v1 = {a, b, c, ...}}
+\texttt{v1 = \{a, b, c, ...\}}
 & Replaces the elements in \texttt{v1} with a copy of the elements in the comma-separated list.
 \\
 
@@ -342,16 +342,3 @@ for (decltype(ivec.size()) ix = 0; ix != 10; ++ix)
     ivec[ix] = ix; // disaster: ivec has no elements
 \end{lstlisting}
 It is an error to subscript an element that doesn’t exist, but it is an error that the compiler is unlikely to detect. Instead, the value we get at run time is undefined\footnote{\textit{Buffer overflow} errors are the result of subscripting elements that don’t exist. Such bugs are the most common cause of security problems in PC and other applications.}. A good way to ensure that subscripts are in range is to avoid subscripting altogether by using a range \texttt{for} whenever possible.
-
-\subsubsection{Iterators}
-
-Iterators are more general mechanism than subscript operators. All of the library containers have iterators, but only a few of them support the subscript operator. Like pointers, iterators give us indirect acess to an object. 
-\begin{lstlisting}[language=C++]
-// the compiler determines the type of b and e; see § 2.5.2 (p. 68) 
-// b denotes the first element and e denotes one past the last element in v 
-auto b = v.begin(), e = v.end(); // b and e have the same type
-\end{lstlisting}
-The \texttt{begin} member returns an iterator that denotes the first element (if there is one). The \texttt{end} member returns an iterator positioned "one past the end" of the associated container (or \texttt{string}), also referred to as the off-the-end iterator. If the container is empty, \texttt{begin} returns the same iterator as the one returned by \texttt{end}.
-
-
-
