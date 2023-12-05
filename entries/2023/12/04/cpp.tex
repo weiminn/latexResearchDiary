@@ -1,0 +1,36 @@
+% % % mainfile: ../../../../master.tex
+\subsection{C++ Expressions I}
+\label{task:20231204_cpp}
+
+\subsubsection{lvalues and rvalues}
+
+Every expression is either an rvalue or an lvalue. lvalues could stand on the left-hand side of an assignment where as rvalue could not. Roughly speaking, when we use an object as an rvalue, we use the object's value (its contents). When we use an object as an lvalue, we use the object's identity (its location in memory). We can use an lvalue when an rvalue is required, but we cannot use an rvalue when an lvalue (i.e., a location) is required. When we use an lvalue in place of an rvalue, the object's contents (its value) are used:
+
+\begin{itemize}
+    \item Assignement requires a (non \texttt{const}) lvalue as its left-hand operand and yields its left-hand operand as an lvalue.
+    \item The address-of operator requires an lvalue operand and returns a pointer to its operand as an rvalue.
+    \item The built-in dereference and subscript operators and the iterator dereference and \texttt{string} and \texttt{vector} subscript operator all yield lvalues.
+    \item The buit-in and iterator increment and decrement operators require lvalue operands and the prefix versions also yield lvalues.
+\end{itemize}
+
+Lvalues and rvalues also differ when used with \texttt{decltype}. When we apply \texttt{decltype} to an expression, the result is a reference type if the expression yields an lvalue.
+
+
+\subsubsection{Arithmetic Operators}
+
+Division between integers returns an integer. If the quotient contains a fractional part, it is truncated toward zero:
+\begin{lstlisting}[language=C++]
+int ival1 = 21/6; // ival1 is 3; result is truncated; remainder is discarded int 
+ival2 = 21/7; // ival2 is 3; no remainder; result is an integral value
+\end{lstlisting}
+
+For most operators, operands of type bool are promoted to int. In this case, the value of b is true, which promotes to the int value 1. That (promoted) value is negated, yielding -1. The value-1 is converted back to bool and used to initialize b2. This initializer is a nonzero value, which when converted to bool is true.Thus,the value of b2 is true!
+
+The operands to \% must have integral type:
+\begin{lstlisting}[language=C++]
+int ival = 42; 
+double dval = 3.14; 
+
+ival % 12; // ok: result is 6 
+ival % dval; // error: floating-point operand
+\end{lstlisting}

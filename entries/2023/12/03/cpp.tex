@@ -279,12 +279,14 @@ int ia[3][4] = { // three elements; each element is an array of size 4
     {8, 9, 10, 11} // initializers for the row indexed by 2 
 };
 
-// equivalent initialization without the optional nested braces for each row int ia[3]int ia[4] = {0,1,2,3,4,5,6,7,8,9,10,11};
+// equivalent initialization without the optional nested braces for each row 
+int ia[3][4] = {0,1,2,3,4,5,6,7,8,9,10,11};
 
 // explicitly initialize only element 0 in each row 
 int ia[3][4] = {{ 0 }, { 4 }, { 8 }};
 
-// explicitly initialize row 0; the remaining elements are value initialized int ix[3]int ia[4] = {0, 3, 6, 9};
+// explicitly initialize row 0; the remaining elements are value initialized 
+int ix[3][4] = {0, 3, 6, 9};
 
 // assigns the first element of arr to the last element in the last row of ia 
 ia[2][3] = arr[0][0][0]; 
