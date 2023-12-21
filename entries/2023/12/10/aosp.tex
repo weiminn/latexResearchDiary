@@ -65,20 +65,19 @@ Subjects inherit the security context of their parent process, or they can chang
 Similarly the context of files can be revealed using the \texttt{-Z} option:
 \begin{lstlisting}[language=sh]
 # ls -Z
-lrwxr-xr-x 1 root shell u:object_r:system_file:s0                         6 2023-11-19 00:50 uuidgen -> toybox
--rwxr-xr-x 1 root shell u:object_r:vdc_exec:s0                       101920 2023-11-19 00:50 vdc
--rwxr-xr-x 1 root shell u:object_r:viewcompiler_exec:s0              277472 2023-11-19 00:50 viewcompiler
-lrwxr-xr-x 1 root shell u:object_r:system_file:s0                         6 2023-11-19 00:50 vmstat -> toybox
--rwxr-xr-x 1 root shell u:object_r:vold_exec:s0                      994368 2023-11-19 00:50 vold
--rwxr-xr-x 1 root shell u:object_r:vold_prepare_subdirs_exec:s0       38576 2023-11-19 00:50 vold_prepare_subdirs
--rwxr-xr-x 1 root shell u:object_r:system_file:s0                       169 2023-11-19 01:02 vr
-lrwxr-xr-x 1 root shell u:object_r:system_file:s0                         6 2023-11-19 00:50 watch -> toybox
--rwxr-xr-x 1 root shell u:object_r:watchdogd_exec:s0                  10760 2023-11-19 00:50 watchdogd
-lrwxr-xr-x 1 root shell u:object_r:system_file:s0                         6 2023-11-19 00:50 wc -> toybox
-lrwxr-xr-x 1 root shell u:object_r:system_file:s0                         6 2023-11-19 00:50 which -> toybox
-lrwxr-xr-x 1 root shell u:object_r:system_file:s0                         6 2023-11-19 00:50 whoami -> toybox
--rwxr-xr-x 1 root shell u:object_r:wificond_exec:s0                  393248 2023-11-19 00:50 wificond
-
+lrwxr-xr-x 1 root shell u:object_r:system_file:s0 6 2023-11-19 00:50 uuidgen -> toybox
+-rwxr-xr-x 1 root shell u:object_r:vdc_exec:s0 101920 2023-11-19 00:50 vdc
+-rwxr-xr-x 1 root shell u:object_r:viewcompiler_exec:s0 277472 2023-11-19 00:50 viewcompiler
+lrwxr-xr-x 1 root shell u:object_r:system_file:s0 6 2023-11-19 00:50 vmstat -> toybox
+-rwxr-xr-x 1 root shell u:object_r:vold_exec:s0 994368 2023-11-19 00:50 vold
+-rwxr-xr-x 1 root shell u:object_r:vold_prepare_subdirs_exec:s0 38576 2023-11-19 00:50 vold_prepare_subdirs
+-rwxr-xr-x 1 root shell u:object_r:system_file:s0 169 2023-11-19 01:02 vr
+lrwxr-xr-x 1 root shell u:object_r:system_file:s0 6 2023-11-19 00:50 watch -> toybox
+-rwxr-xr-x 1 root shell u:object_r:watchdogd_exec:s0 10760 2023-11-19 00:50 watchdogd
+lrwxr-xr-x 1 root shell u:object_r:system_file:s0 6 2023-11-19 00:50 wc -> toybox
+lrwxr-xr-x 1 root shell u:object_r:system_file:s0 6 2023-11-19 00:50 which -> toybox
+lrwxr-xr-x 1 root shell u:object_r:system_file:s0 6 2023-11-19 00:50 whoami -> toybox
+-rwxr-xr-x 1 root shell u:object_r:wificond_exec:s0 393248 2023-11-19 00:50 wificond
 \end{lstlisting}
 For objects, the security context is persistent and is usually stored as an extended attribute in the file's metadata. Objects typically inherit the type label of their parent (their directory), and can change to a different label via \textit{type transition}.
 
