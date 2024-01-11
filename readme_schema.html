@@ -1,0 +1,620 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>readme_schema.md</title>
+<meta http-equiv="Content-type" content="text/html;charset=UTF-8">
+
+<style>
+/* https://github.com/microsoft/vscode/blob/master/extensions/markdown-language-features/media/markdown.css */
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Microsoft Corporation. All rights reserved.
+ *  Licensed under the MIT License. See License.txt in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
+
+body {
+	font-family: var(--vscode-markdown-font-family, -apple-system, BlinkMacSystemFont, "Segoe WPC", "Segoe UI", "Ubuntu", "Droid Sans", sans-serif);
+	font-size: var(--vscode-markdown-font-size, 14px);
+	padding: 0 26px;
+	line-height: var(--vscode-markdown-line-height, 22px);
+	word-wrap: break-word;
+}
+
+#code-csp-warning {
+	position: fixed;
+	top: 0;
+	right: 0;
+	color: white;
+	margin: 16px;
+	text-align: center;
+	font-size: 12px;
+	font-family: sans-serif;
+	background-color:#444444;
+	cursor: pointer;
+	padding: 6px;
+	box-shadow: 1px 1px 1px rgba(0,0,0,.25);
+}
+
+#code-csp-warning:hover {
+	text-decoration: none;
+	background-color:#007acc;
+	box-shadow: 2px 2px 2px rgba(0,0,0,.25);
+}
+
+body.scrollBeyondLastLine {
+	margin-bottom: calc(100vh - 22px);
+}
+
+body.showEditorSelection .code-line {
+	position: relative;
+}
+
+body.showEditorSelection .code-active-line:before,
+body.showEditorSelection .code-line:hover:before {
+	content: "";
+	display: block;
+	position: absolute;
+	top: 0;
+	left: -12px;
+	height: 100%;
+}
+
+body.showEditorSelection li.code-active-line:before,
+body.showEditorSelection li.code-line:hover:before {
+	left: -30px;
+}
+
+.vscode-light.showEditorSelection .code-active-line:before {
+	border-left: 3px solid rgba(0, 0, 0, 0.15);
+}
+
+.vscode-light.showEditorSelection .code-line:hover:before {
+	border-left: 3px solid rgba(0, 0, 0, 0.40);
+}
+
+.vscode-light.showEditorSelection .code-line .code-line:hover:before {
+	border-left: none;
+}
+
+.vscode-dark.showEditorSelection .code-active-line:before {
+	border-left: 3px solid rgba(255, 255, 255, 0.4);
+}
+
+.vscode-dark.showEditorSelection .code-line:hover:before {
+	border-left: 3px solid rgba(255, 255, 255, 0.60);
+}
+
+.vscode-dark.showEditorSelection .code-line .code-line:hover:before {
+	border-left: none;
+}
+
+.vscode-high-contrast.showEditorSelection .code-active-line:before {
+	border-left: 3px solid rgba(255, 160, 0, 0.7);
+}
+
+.vscode-high-contrast.showEditorSelection .code-line:hover:before {
+	border-left: 3px solid rgba(255, 160, 0, 1);
+}
+
+.vscode-high-contrast.showEditorSelection .code-line .code-line:hover:before {
+	border-left: none;
+}
+
+img {
+	max-width: 100%;
+	max-height: 100%;
+}
+
+a {
+	text-decoration: none;
+}
+
+a:hover {
+	text-decoration: underline;
+}
+
+a:focus,
+input:focus,
+select:focus,
+textarea:focus {
+	outline: 1px solid -webkit-focus-ring-color;
+	outline-offset: -1px;
+}
+
+hr {
+	border: 0;
+	height: 2px;
+	border-bottom: 2px solid;
+}
+
+h1 {
+	padding-bottom: 0.3em;
+	line-height: 1.2;
+	border-bottom-width: 1px;
+	border-bottom-style: solid;
+}
+
+h1, h2, h3 {
+	font-weight: normal;
+}
+
+table {
+	border-collapse: collapse;
+}
+
+table > thead > tr > th {
+	text-align: left;
+	border-bottom: 1px solid;
+}
+
+table > thead > tr > th,
+table > thead > tr > td,
+table > tbody > tr > th,
+table > tbody > tr > td {
+	padding: 5px 10px;
+}
+
+table > tbody > tr + tr > td {
+	border-top: 1px solid;
+}
+
+blockquote {
+	margin: 0 7px 0 5px;
+	padding: 0 16px 0 10px;
+	border-left-width: 5px;
+	border-left-style: solid;
+}
+
+code {
+	font-family: Menlo, Monaco, Consolas, "Droid Sans Mono", "Courier New", monospace, "Droid Sans Fallback";
+	font-size: 1em;
+	line-height: 1.357em;
+}
+
+body.wordWrap pre {
+	white-space: pre-wrap;
+}
+
+pre:not(.hljs),
+pre.hljs code > div {
+	padding: 16px;
+	border-radius: 3px;
+	overflow: auto;
+}
+
+pre code {
+	color: var(--vscode-editor-foreground);
+	tab-size: 4;
+}
+
+/** Theming */
+
+.vscode-light pre {
+	background-color: rgba(220, 220, 220, 0.4);
+}
+
+.vscode-dark pre {
+	background-color: rgba(10, 10, 10, 0.4);
+}
+
+.vscode-high-contrast pre {
+	background-color: rgb(0, 0, 0);
+}
+
+.vscode-high-contrast h1 {
+	border-color: rgb(0, 0, 0);
+}
+
+.vscode-light table > thead > tr > th {
+	border-color: rgba(0, 0, 0, 0.69);
+}
+
+.vscode-dark table > thead > tr > th {
+	border-color: rgba(255, 255, 255, 0.69);
+}
+
+.vscode-light h1,
+.vscode-light hr,
+.vscode-light table > tbody > tr + tr > td {
+	border-color: rgba(0, 0, 0, 0.18);
+}
+
+.vscode-dark h1,
+.vscode-dark hr,
+.vscode-dark table > tbody > tr + tr > td {
+	border-color: rgba(255, 255, 255, 0.18);
+}
+
+</style>
+
+<style>
+/* Tomorrow Theme */
+/* http://jmblog.github.com/color-themes-for-google-code-highlightjs */
+/* Original theme - https://github.com/chriskempson/tomorrow-theme */
+
+/* Tomorrow Comment */
+.hljs-comment,
+.hljs-quote {
+	color: #8e908c;
+}
+
+/* Tomorrow Red */
+.hljs-variable,
+.hljs-template-variable,
+.hljs-tag,
+.hljs-name,
+.hljs-selector-id,
+.hljs-selector-class,
+.hljs-regexp,
+.hljs-deletion {
+	color: #c82829;
+}
+
+/* Tomorrow Orange */
+.hljs-number,
+.hljs-built_in,
+.hljs-builtin-name,
+.hljs-literal,
+.hljs-type,
+.hljs-params,
+.hljs-meta,
+.hljs-link {
+	color: #f5871f;
+}
+
+/* Tomorrow Yellow */
+.hljs-attribute {
+	color: #eab700;
+}
+
+/* Tomorrow Green */
+.hljs-string,
+.hljs-symbol,
+.hljs-bullet,
+.hljs-addition {
+	color: #718c00;
+}
+
+/* Tomorrow Blue */
+.hljs-title,
+.hljs-section {
+	color: #4271ae;
+}
+
+/* Tomorrow Purple */
+.hljs-keyword,
+.hljs-selector-tag {
+	color: #8959a8;
+}
+
+.hljs {
+	display: block;
+	overflow-x: auto;
+	color: #4d4d4c;
+	padding: 0.5em;
+}
+
+.hljs-emphasis {
+	font-style: italic;
+}
+
+.hljs-strong {
+	font-weight: bold;
+}
+</style>
+
+<style>
+/*
+ * Markdown PDF CSS
+ */
+
+ body {
+	font-family: -apple-system, BlinkMacSystemFont, "Segoe WPC", "Segoe UI", "Ubuntu", "Droid Sans", sans-serif, "Meiryo";
+	padding: 0 12px;
+}
+
+pre {
+	background-color: #f8f8f8;
+	border: 1px solid #cccccc;
+	border-radius: 3px;
+	overflow-x: auto;
+	white-space: pre-wrap;
+	overflow-wrap: break-word;
+}
+
+pre:not(.hljs) {
+	padding: 23px;
+	line-height: 19px;
+}
+
+blockquote {
+	background: rgba(127, 127, 127, 0.1);
+	border-color: rgba(0, 122, 204, 0.5);
+}
+
+.emoji {
+	height: 1.4em;
+}
+
+code {
+	font-size: 14px;
+	line-height: 19px;
+}
+
+/* for inline code */
+:not(pre):not(.hljs) > code {
+	color: #C9AE75; /* Change the old color so it seems less like an error */
+	font-size: inherit;
+}
+
+/* Page Break : use <div class="page"/> to insert page break
+-------------------------------------------------------- */
+.page {
+	page-break-after: always;
+}
+
+</style>
+
+<script src="https://unpkg.com/mermaid/dist/mermaid.min.js"></script>
+</head>
+<body>
+  <script>
+    mermaid.initialize({
+      startOnLoad: true,
+      theme: document.body.classList.contains('vscode-dark') || document.body.classList.contains('vscode-high-contrast')
+          ? 'dark'
+          : 'default'
+    });
+  </script>
+<h1 id="schema-sharing-between-android-runtime-art-and-bionic">Schema Sharing between Android Runtime (ART) and Bionic</h1>
+<p>Our plan is to pass a pointer object from <code>java_vm_ext.cc</code> inside <code>art</code> project to <code>linker_phdr.cpp</code> inside <code>bionic</code> project. The pointer object is supposed to be pointed to by a static member of <code>linker_phdr.cpp</code> as a way of remembering it. As the pointer is initialized inside <code>art</code> can be pass along to other <code>Runtime</code> instances and be manipulated for its values.</p>
+<h2 id="adding-modified-functions">Adding Modified Functions</h2>
+<h3 id="art-java-vm-hooks">ART Java VM Hooks</h3>
+<ol>
+<li>Go to <code>JNI_CreateJavaVM</code> function inside <code>art/runtime/jni/java_vm_ext.cc</code> and find <code>android::InitializeNativeLoader();</code>. Comment it out and insert new code as shown below:</li>
+</ol>
+<pre class="hljs"><code><div><span class="hljs-comment">// Initialize native loader. This step makes sure we have</span>
+<span class="hljs-comment">// everything set up before we start using JNI.</span>
+
+<span class="hljs-comment">// android::InitializeNativeLoader();</span>
+
+<span class="hljs-comment">// ADD THIS</span>
+<span class="hljs-keyword">char</span>* wei_ptr = (<span class="hljs-keyword">char</span>*) <span class="hljs-string">"Initialized in java_vm_ext.cc"</span>;
+android::InitializeNativeLoader2(wei_ptr);
+<span class="hljs-comment">// END OF ADD</span>
+</div></code></pre>
+<h3 id="art-native-loader">ART Native Loader</h3>
+<ol>
+<li>Go to <code>art/libnativeloader/include/nativeloader/native_loader.h</code> and find the declaration <code>void InitializeNativeLoader();</code>. Below it, add the declaration for new function <code>void InitializeNativeLoader2(char* wei_ptr);</code> as shown below:</li>
+</ol>
+<pre class="hljs"><code><div><span class="hljs-comment">// README: the char** error message parameter being passed</span>
+<span class="hljs-comment">// to the methods below need to be freed through calling NativeLoaderFreeErrorMessage.</span>
+<span class="hljs-comment">// It's the caller's responsibility to call that method.</span>
+
+__attribute__((visibility(<span class="hljs-string">"default"</span>)))
+<span class="hljs-function"><span class="hljs-keyword">void</span> <span class="hljs-title">InitializeNativeLoader</span><span class="hljs-params">()</span></span>;
+
+<span class="hljs-comment">// ADD THIS</span>
+__attribute__((visibility(<span class="hljs-string">"default"</span>)))
+<span class="hljs-function"><span class="hljs-keyword">void</span> <span class="hljs-title">InitializeNativeLoader2</span><span class="hljs-params">(<span class="hljs-keyword">char</span>* wei_ptr)</span></span>;
+<span class="hljs-comment">// END OF ADD</span>
+</div></code></pre>
+<ol start="2">
+<li>Go to <code>art/libnativeloader/include/nativeloader/native_loader.cpp</code> and find the definition of <code>InitializeNativeLoader</code>. Below it, add a new definition for new function <code>InitializeNativeLoader2</code> as shown below:</li>
+</ol>
+<pre class="hljs"><code><div><span class="hljs-function"><span class="hljs-keyword">void</span> <span class="hljs-title">InitializeNativeLoader</span><span class="hljs-params">()</span> </span>{
+  ALOGW(<span class="hljs-string">"[weiminn] native_loader.cpp: InitializeNativeLoader1"</span>);
+<span class="hljs-meta">#<span class="hljs-meta-keyword">if</span> defined(ART_TARGET_ANDROID)</span>
+  <span class="hljs-function"><span class="hljs-built_in">std</span>::lock_guard&lt;<span class="hljs-built_in">std</span>::mutex&gt; <span class="hljs-title">guard</span><span class="hljs-params">(g_namespaces_mutex)</span></span>;
+  g_namespaces-&gt;Initialize();
+<span class="hljs-meta">#<span class="hljs-meta-keyword">endif</span></span>
+}
+
+<span class="hljs-comment">// ADD THIS</span>
+<span class="hljs-function"><span class="hljs-keyword">void</span> <span class="hljs-title">InitializeNativeLoader2</span><span class="hljs-params">(<span class="hljs-keyword">char</span>* wei_ptr)</span> </span>{
+  ALOGW(<span class="hljs-string">"[weiminn] native_loader.cpp: InitializeNativeLoader2 | Received data: %s"</span>, wei_ptr);
+<span class="hljs-meta">#<span class="hljs-meta-keyword">if</span> defined(ART_TARGET_ANDROID)</span>
+  <span class="hljs-function"><span class="hljs-built_in">std</span>::lock_guard&lt;<span class="hljs-built_in">std</span>::mutex&gt; <span class="hljs-title">guard</span><span class="hljs-params">(g_namespaces_mutex)</span></span>;
+  g_namespaces-&gt;Initialize2(wei_ptr);
+<span class="hljs-meta">#<span class="hljs-meta-keyword">endif</span></span>
+}
+<span class="hljs-comment">// END OF ADD</span>
+</div></code></pre>
+<ol start="3">
+<li>Go to <code>art/libnativeloader/library_namespaces.h</code> and find the declaration <code>void Initialize();</code>. Below it, add the declaration for new function <code>void Initialize2(char* wei_ptr);</code> as shown below:</li>
+</ol>
+<pre class="hljs"><code><div><span class="hljs-function"><span class="hljs-keyword">void</span> <span class="hljs-title">Initialize</span><span class="hljs-params">()</span></span>;
+
+<span class="hljs-comment">// ADD THIS</span>
+<span class="hljs-function"><span class="hljs-keyword">void</span> <span class="hljs-title">Initialize2</span><span class="hljs-params">(<span class="hljs-keyword">char</span>* wei_ptr)</span></span>;
+<span class="hljs-comment">// END OF ADD</span>
+</div></code></pre>
+<ol start="4">
+<li>Go to <code>art/libnativeloader/library_namespaces.cpp</code> and find the definition of <code>LibraryNamespaces::Initialize</code>. Below it, add a new definition for new function <code>LibraryNamespaces::Initialize2</code> as shown below:</li>
+</ol>
+<pre class="hljs"><code><div><span class="hljs-function"><span class="hljs-keyword">void</span> <span class="hljs-title">LibraryNamespaces::Initialize</span><span class="hljs-params">()</span> </span>{
+  <span class="hljs-comment">// Once public namespace is initialized there is no</span>
+  <span class="hljs-comment">// point in running this code - it will have no effect</span>
+  <span class="hljs-comment">// on the current list of public libraries.</span>
+  <span class="hljs-keyword">if</span> (initialized_) {
+    <span class="hljs-keyword">return</span>;
+  }
+
+  <span class="hljs-comment">// Load the preloadable public libraries. Since libnativeloader is in the</span>
+  <span class="hljs-comment">// com_android_art namespace, use OpenSystemLibrary rather than dlopen to</span>
+  <span class="hljs-comment">// ensure the libraries are loaded in the system namespace.</span>
+  <span class="hljs-comment">//</span>
+  <span class="hljs-comment">// TODO(dimitry): this is a bit misleading since we do not know</span>
+  <span class="hljs-comment">// if the vendor public library is going to be opened from /vendor/lib</span>
+  <span class="hljs-comment">// we might as well end up loading them from /system/lib or /product/lib</span>
+  <span class="hljs-comment">// For now we rely on CTS test to catch things like this but</span>
+  <span class="hljs-comment">// it should probably be addressed in the future.</span>
+  <span class="hljs-keyword">for</span> (<span class="hljs-keyword">const</span> <span class="hljs-built_in">std</span>::<span class="hljs-built_in">string</span>&amp; soname : android::base::Split(preloadable_public_libraries(), <span class="hljs-string">":"</span>)) {
+    <span class="hljs-keyword">void</span>* handle = OpenSystemLibrary(soname.c_str(), RTLD_NOW | RTLD_NODELETE);
+    LOG_ALWAYS_FATAL_IF(handle == <span class="hljs-literal">nullptr</span>,
+                        <span class="hljs-string">"Error preloading public library %s: %s"</span>, soname.c_str(), dlerror());
+  }
+}
+
+
+<span class="hljs-comment">// ADD THIS</span>
+<span class="hljs-function"><span class="hljs-keyword">void</span> <span class="hljs-title">LibraryNamespaces::Initialize2</span><span class="hljs-params">(<span class="hljs-keyword">char</span>* wei_ptr)</span> </span>{
+  ALOGW(<span class="hljs-string">"[weiminn] library_namespaces.cpp: Initialize2"</span>);
+  
+  <span class="hljs-keyword">if</span> (initialized_) {
+    <span class="hljs-keyword">return</span>;
+  }
+  
+  <span class="hljs-keyword">for</span> (<span class="hljs-keyword">const</span> <span class="hljs-built_in">std</span>::<span class="hljs-built_in">string</span>&amp; soname : android::base::Split(preloadable_public_libraries(), <span class="hljs-string">":"</span>)) {
+    ALOGW(<span class="hljs-string">"[weiminn] library_namespaces.cpp: Initialize2 is opening %s"</span>, soname.c_str());
+    
+    <span class="hljs-keyword">void</span>* handle = OpenSystemLibrary2(soname.c_str(), RTLD_NOW | RTLD_NODELETE, wei_ptr);
+
+    LOG_ALWAYS_FATAL_IF(handle == <span class="hljs-literal">nullptr</span>,
+                        <span class="hljs-string">"Error preloading public library %s: %s"</span>, soname.c_str(), dlerror());
+  }
+}
+<span class="hljs-comment">// END OF ADD</span>
+</div></code></pre>
+<h3 id="art-native-bridge">ART Native Bridge</h3>
+<ol>
+<li>Go to <code>art/libnativebridge/include/nativebridge/native_bridge.h</code> and find the declaration <code>void* OpenSystemLibrary(const char* path, int flags);</code>. Below it, add the declaration for new function <code>void* OpenSystemLibrary2(const char* path, int flags, char* wei_ptr);</code> as shown below:</li>
+</ol>
+<pre class="hljs"><code><div><span class="hljs-comment">// Loads a shared library from the system linker namespace, suitable for</span>
+<span class="hljs-comment">// platform libraries in /system/lib(64). If linker namespaces don't exist (i.e.</span>
+<span class="hljs-comment">// on host), this simply calls dlopen().</span>
+<span class="hljs-function"><span class="hljs-keyword">void</span>* <span class="hljs-title">OpenSystemLibrary</span><span class="hljs-params">(<span class="hljs-keyword">const</span> <span class="hljs-keyword">char</span>* path, <span class="hljs-keyword">int</span> flags)</span></span>;
+
+<span class="hljs-comment">// ADD THIS</span>
+<span class="hljs-function"><span class="hljs-keyword">void</span>* <span class="hljs-title">OpenSystemLibrary2</span><span class="hljs-params">(<span class="hljs-keyword">const</span> <span class="hljs-keyword">char</span>* path, <span class="hljs-keyword">int</span> flags, <span class="hljs-keyword">char</span>* wei_ptr)</span></span>;
+<span class="hljs-comment">// END OF ADD</span>
+</div></code></pre>
+<ol start="2">
+<li>Go to <code>art/libnativebridge/native_bridge.cc</code> and find the definition of <code>OpenSystemLibrary</code>. Below it, add a new definition for new function <code>InitializeNativeLoader2</code> as shown below:</li>
+</ol>
+<pre class="hljs"><code><div><span class="hljs-function"><span class="hljs-keyword">void</span>* <span class="hljs-title">OpenSystemLibrary</span><span class="hljs-params">(<span class="hljs-keyword">const</span> <span class="hljs-keyword">char</span>* path, <span class="hljs-keyword">int</span> flags)</span> </span>{
+<span class="hljs-meta">#<span class="hljs-meta-keyword">ifdef</span> ART_TARGET_ANDROID</span>
+  <span class="hljs-comment">// The system namespace is called "default" for binaries in /system and</span>
+  <span class="hljs-comment">// "system" for those in the Runtime APEX. Try "system" first since</span>
+  <span class="hljs-comment">// "default" always exists.</span>
+  <span class="hljs-comment">// TODO(b/185587109): Get rid of this error prone logic.</span>
+  ALOGW(<span class="hljs-string">"[weiminn] native_bridge.cc: OpenSystemLibrary %s"</span>, path);
+  <span class="hljs-keyword">android_namespace_t</span>* system_ns = android_get_exported_namespace(<span class="hljs-string">"system"</span>);
+  <span class="hljs-keyword">if</span> (system_ns == <span class="hljs-literal">nullptr</span>) {
+    system_ns = android_get_exported_namespace(<span class="hljs-string">"default"</span>);
+    LOG_ALWAYS_FATAL_IF(system_ns == <span class="hljs-literal">nullptr</span>,
+                        <span class="hljs-string">"Failed to get system namespace for loading %s"</span>, path);
+  }
+  <span class="hljs-keyword">const</span> android_dlextinfo dlextinfo = {
+      .flags = ANDROID_DLEXT_USE_NAMESPACE,
+      .library_namespace = system_ns,
+  };
+  <span class="hljs-keyword">return</span> android_dlopen_ext(path, flags, &amp;dlextinfo);
+<span class="hljs-meta">#<span class="hljs-meta-keyword">else</span></span>
+  <span class="hljs-keyword">return</span> dlopen(path, flags);
+<span class="hljs-meta">#<span class="hljs-meta-keyword">endif</span></span>
+}
+
+<span class="hljs-comment">// ADD THIS</span>
+<span class="hljs-function"><span class="hljs-keyword">void</span>* <span class="hljs-title">OpenSystemLibrary2</span><span class="hljs-params">(<span class="hljs-keyword">const</span> <span class="hljs-keyword">char</span>* path, <span class="hljs-keyword">int</span> flags, <span class="hljs-keyword">char</span>* wei_ptr)</span> </span>{
+<span class="hljs-meta">#<span class="hljs-meta-keyword">ifdef</span> ART_TARGET_ANDROID</span>
+  <span class="hljs-comment">// The system namespace is called "default" for binaries in /system and</span>
+  <span class="hljs-comment">// "system" for those in the Runtime APEX. Try "system" first since</span>
+  <span class="hljs-comment">// "default" always exists.</span>
+  <span class="hljs-comment">// TODO(b/185587109): Get rid of this error prone logic.</span>
+  ALOGW(<span class="hljs-string">"[weiminn] native_bridge.cc: From Initializer: OpenSystemLibrary %s"</span>, path);
+  <span class="hljs-keyword">android_namespace_t</span>* system_ns = android_get_exported_namespace(<span class="hljs-string">"system"</span>);
+  <span class="hljs-keyword">if</span> (system_ns == <span class="hljs-literal">nullptr</span>) {
+    system_ns = android_get_exported_namespace(<span class="hljs-string">"default"</span>);
+    LOG_ALWAYS_FATAL_IF(system_ns == <span class="hljs-literal">nullptr</span>,
+                        <span class="hljs-string">"Failed to get system namespace for loading %s"</span>, path);
+  }
+
+  <span class="hljs-comment">// char* wei_ptr = (char*) "Assigned in native_bridge";</span>
+  <span class="hljs-keyword">const</span> android_dlextinfo dlextinfo = {
+      .flags = ANDROID_DLEXT_USE_NAMESPACE,
+      .library_namespace = system_ns,
+      .weiminn_msg = wei_ptr
+  };
+  <span class="hljs-keyword">return</span> android_dlopen_ext(path, flags, &amp;dlextinfo);
+  <span class="hljs-comment">// return wei_ptr;</span>
+<span class="hljs-meta">#<span class="hljs-meta-keyword">else</span></span>
+  ALOGW(<span class="hljs-string">"[weiminn] [placeholder workaround]: %s"</span>, wei_ptr); <span class="hljs-comment">// work around to prevent -Wunused-parameter exceptions</span>
+  <span class="hljs-keyword">return</span> dlopen(path, flags);
+<span class="hljs-meta">#<span class="hljs-meta-keyword">endif</span></span>
+}
+<span class="hljs-comment">// END OF ADD</span>
+</div></code></pre>
+<h3 id="bionic-libc">Bionic Libc</h3>
+<ol>
+<li>Go to <code>bionic/libc/include/android/dlext.h</code> and find the <code>alias</code> definition for <code>android_dlextinfo</code>. Inside it, add a new member <code>char* weiminn_msg</code> as shown below:</li>
+</ol>
+<pre class="hljs"><code><div><span class="hljs-comment">/** Used to pass Android-specific arguments to `android_dlopen_ext`. */</span>
+<span class="hljs-keyword">typedef</span> <span class="hljs-class"><span class="hljs-keyword">struct</span> {</span>
+  <span class="hljs-comment">/** A bitmask of `ANDROID_DLEXT_` enum values. */</span>
+  <span class="hljs-keyword">uint64_t</span> flags;
+
+  <span class="hljs-comment">/** Used by `ANDROID_DLEXT_RESERVED_ADDRESS` and `ANDROID_DLEXT_RESERVED_ADDRESS_HINT`. */</span>
+  <span class="hljs-keyword">void</span>*   reserved_addr;
+  <span class="hljs-comment">/** Used by `ANDROID_DLEXT_RESERVED_ADDRESS` and `ANDROID_DLEXT_RESERVED_ADDRESS_HINT`. */</span>
+  <span class="hljs-keyword">size_t</span>  reserved_size;
+
+  <span class="hljs-comment">/** Used by `ANDROID_DLEXT_WRITE_RELRO` and `ANDROID_DLEXT_USE_RELRO`. */</span>
+  <span class="hljs-keyword">int</span>     relro_fd;
+
+  <span class="hljs-comment">/** Used by `ANDROID_DLEXT_USE_LIBRARY_FD`. */</span>
+  <span class="hljs-keyword">int</span>     library_fd;
+  <span class="hljs-comment">/** Used by `ANDROID_DLEXT_USE_LIBRARY_FD_OFFSET` */</span>
+  <span class="hljs-keyword">off64_t</span> library_fd_offset;
+
+  <span class="hljs-comment">/** Used by `ANDROID_DLEXT_USE_NAMESPACE`. */</span>
+  <span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">android_namespace_t</span>* <span class="hljs-title">library_namespace</span>;</span>
+
+  <span class="hljs-comment">// ADD THIS</span>
+  <span class="hljs-keyword">char</span>* weiminn_msg;
+  <span class="hljs-comment">// END OF ADD</span>
+
+} android_dlextinfo;
+</div></code></pre>
+<h3 id="bionic-linker">Bionic Linker</h3>
+<ol>
+<li>Go to <code>bionic/linker/dlfcn.cpp</code> and find the definition of <code>__loader_android_dlopen_ext</code>. Inside it, put additional code for printing message and calling a function of <code>linker_phdr.cpp</code> as shown below:</li>
+</ol>
+<pre class="hljs"><code><div><span class="hljs-keyword">void</span>* __loader_android_dlopen_ext(<span class="hljs-keyword">const</span> <span class="hljs-keyword">char</span>* filename,
+                           <span class="hljs-keyword">int</span> flags,
+                           <span class="hljs-keyword">const</span> android_dlextinfo* extinfo,
+                           <span class="hljs-keyword">const</span> <span class="hljs-keyword">void</span>* caller_addr) {
+
+  <span class="hljs-comment">// ADD THIS</span>
+  <span class="hljs-keyword">if</span>(extinfo-&gt;weiminn_msg != <span class="hljs-literal">nullptr</span>){
+    LD_LOG(kLogErrors, <span class="hljs-string">"[weiminn] dlfcn.cpp RECEIVED MESSAGE ART!!!: %s | Opening: %s"</span>, <span class="hljs-keyword">static_cast</span>&lt;<span class="hljs-keyword">char</span>*&gt;(extinfo-&gt;weiminn_msg),filename);
+    weiminn_linker_phdr_print2(extinfo-&gt;weiminn_msg);
+  } <span class="hljs-keyword">else</span> {
+    LD_LOG(kLogErrors, <span class="hljs-string">"[weiminn] dlfcn.cpp Opening: %s"</span>,filename);
+  }
+  <span class="hljs-comment">// END OF ADD</span>
+
+  <span class="hljs-keyword">return</span> dlopen_ext(filename, flags, extinfo, caller_addr);
+}
+</div></code></pre>
+<ol start="2">
+<li>Go to <code>bionic/linker/linker_phdr.cpp</code> and at the bottom of the file add this function:</li>
+</ol>
+<pre class="hljs"><code><div><span class="hljs-function"><span class="hljs-keyword">void</span> <span class="hljs-title">weiminn_linker_phdr_print2</span><span class="hljs-params">(<span class="hljs-keyword">char</span>* wei_ptr)</span></span>{
+  DL_ERR_AND_LOG(<span class="hljs-string">"[weiminn] linker_phdr.cpp *****ACCOMPLISHED***** | called from dlfcn.cpp | %s"</span>, wei_ptr);    
+}
+</div></code></pre>
+<h2 id="fix-abi-compliance">Fix ABI Compliance</h2>
+<p>Because we changed the format of <code>android_dlextinfo</code> inside header file included by <code>libdl</code> library, and changes to <code>libdl</code> (and also all other shared system libraries) are being monitored strictly by the Android build system (See <a href="https://source.android.com/docs/core/architecture/vndk/abi-stability?hl=en#about-vndk-abi-compliance">ABI Compliance</a>), we will encounter error if we go ahead and <code>make</code> the project. To fix this, we need to redump ABI references of <code>libdl</code> by running following command:</p>
+<pre class="hljs"><code><div>python3 development/vndk/tools/header-checker/utils/create_reference_dumps.py -l libdl
+</div></code></pre>
+<p>Afterwards, you can go ahead with compiling, running and logging the
+AOSP build:</p>
+<pre class="hljs"><code><div>$ make
+$ adb reboot bootloader &amp;&amp; fastboot -w flashall
+</div></code></pre>
+<p>Immediately after the new OS finished installing into the phone, run:</p>
+<pre class="hljs"><code><div>$ adb root &amp;&amp; adb shell setprop debug.ld.all dlerror,dlopen &amp;&amp; rm logcat.txt &amp;&amp; adb logcat &gt;&gt; logcat.txt
+</div></code></pre>
+
+</body>
+</html>

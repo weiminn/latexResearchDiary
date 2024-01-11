@@ -191,7 +191,9 @@ The \texttt{android\_dlopen\_ext} object is passed from \texttt{OpenSystemLibrar
 \begin{lstlisting}
 LD_LOG(kLogErrors, "[weiminn] linker.cpp RECEIVED FROM NATIVE BRIDGE!!!: %s", extinfo->weiminn_msg);
 \end{lstlisting}
-Using the code will cause Android stuck in Recovery mode in infinite loop, even though the project successfully compiles.
+Using the code will cause Android stuck in Recovery mode in infinite loop, even though the project successfully compiles. 
+
+Successfully called a custom function inside \texttt{linker\_phdr.cpp} from \texttt{dlfcn.cpp}. So, we are skipping \texttt{linker.cpp} which is not required by Zicheng anyway.
 
 % \subsubsection{Configure SELinux}
 
