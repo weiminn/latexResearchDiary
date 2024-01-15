@@ -188,3 +188,4 @@ Got to \path{build/sample/platform/linux/telemetry/CMakeFiles/djiosdk-telemetry-
 \begin{lstlisting}[language=bash]
 cd ~/Documents/x1_backup/DronLomaly/1_TelemetrySubscriber/ && rm -rf build && mkdir build && cd build && cmake .. && make && cp ../../UserConfig.txt bin
 \end{lstlisting}
+Since we have to modify the CMakeFiles, we are not supposed to \texttt{rm} the whole directory anymore, so, we'll just run \texttt{make} to update the binaries after making changes in the code.
