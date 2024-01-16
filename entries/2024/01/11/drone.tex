@@ -189,3 +189,26 @@ Got to \path{build/sample/platform/linux/telemetry/CMakeFiles/djiosdk-telemetry-
 cd ~/Documents/x1_backup/DronLomaly/1_TelemetrySubscriber/ && rm -rf build && mkdir build && cd build && cmake .. && make && cp ../../UserConfig.txt bin
 \end{lstlisting}
 Since we have to modify the CMakeFiles, we are not supposed to \texttt{rm} the whole directory anymore, so, we'll just run \texttt{make} to update the binaries after making changes in the code.
+
+I fucked up and installed Python 3.7 from source and the versions are mixed up right now. Successfully reversed it using:
+\begin{lstlisting}[language=bash]
+rm -f /usr/local/bin/python3.7
+sudo rm -f /usr/local/bin/python3.7
+sudo rm -f /usr/local/bin/pip3.7
+sudo rm -f /usr/local/bin/pydoc
+sudo rm -rf /usr/local/include/python3.7m/
+sudo rm -f /usr/local/lib/libpython3.7m.a 
+sudo rm -rf /usr/local/lib/python3.7
+sudo rm -rf /usr/local/lib/pkgconfig/
+sudo rm -f /usr/local/bin/idle
+sudo rm -f /usr/local/bin/easy_install-2.7
+\end{lstlisting}
+
+Packages need to run:
+\begin{lstlisting}[language=bash]
+pip3 install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cpu
+pip3 install matplotlib pandas
+pip3 install pyqt5
+sudo apt install python3-tk
+\end{lstlisting}
+It works! The key is to NOT install anything \texttt{qt}-related and install \texttt{python3-tk} instead.
