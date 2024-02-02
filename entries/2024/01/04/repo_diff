@@ -1,0 +1,3990 @@
+
+project art/
+diff --git a/build/boot/boot-image-profile.txt b/build/boot/boot-image-profile.txt
+old mode 100644
+new mode 100755
+index a842df1682..609a40691b
+--- a/build/boot/boot-image-profile.txt
++++ b/build/boot/boot-image-profile.txt
+@@ -1842,7 +1842,7 @@ HSPLjava/io/StringWriter;->write([CII)V
+ HSPLjava/io/UnixFileSystem;->canonicalize(Ljava/lang/String;)Ljava/lang/String;
+ HSPLjava/io/UnixFileSystem;->checkAccess(Ljava/io/File;I)Z
+ HSPLjava/io/UnixFileSystem;->compare(Ljava/io/File;Ljava/io/File;)I+]Ljava/io/File;Ljava/io/File;
+-HSPLjava/io/UnixFileSystem;->createDirectory(Ljava/io/File;)Z
++HSPLjava/io/UnixFileSystem;->rectory(Ljava/io/File;)Z
+ HSPLjava/io/UnixFileSystem;->createFileExclusively(Ljava/lang/String;)Z
+ HSPLjava/io/UnixFileSystem;->delete(Ljava/io/File;)Z
+ HSPLjava/io/UnixFileSystem;->getBooleanAttributes(Ljava/io/File;)I+]Ljava/io/File;Ljava/io/File;]Ldalvik/system/BlockGuard$VmPolicy;Landroid/os/StrictMode$5;]Ldalvik/system/BlockGuard$Policy;Ldalvik/system/BlockGuard$1;,Landroid/os/StrictMode$AndroidBlockGuardPolicy;
+diff --git a/libartbase/base/os.h b/libartbase/base/os.h
+old mode 100644
+new mode 100755
+index cb71d211af..507cf36c51
+--- a/libartbase/base/os.h
++++ b/libartbase/base/os.h
+@@ -45,6 +45,9 @@ class OS {
+   // already exists, it is *not* overwritten, but unlinked, and a new inode will be used.
+   static File* CreateEmptyFileWriteOnly(const char* name);
+ 
++  //added by zicheng 20230314 for creating MIMIMA file with all read and write 
++  static File* CreateMINIMAFile(const char* name);
++
+   // Open a file with the specified open(2) flags.
+   static File* OpenFileWithFlags(const char* name, int flags, bool auto_flush = true);
+ 
+@@ -56,6 +59,8 @@ class OS {
+ 
+   // Get the size of a file (or -1 if it does not exist).
+   static int64_t GetFileSizeBytes(const char* name);
++
++  static bool CreateDirectories2(const char* child_path);
+ };
+ 
+ }  // namespace art
+diff --git a/libartbase/base/os_linux.cc b/libartbase/base/os_linux.cc
+old mode 100644
+new mode 100755
+index 337c54f1d1..f146c39ed0
+--- a/libartbase/base/os_linux.cc
++++ b/libartbase/base/os_linux.cc
+@@ -13,7 +13,6 @@
+  * See the License for the specific language governing permissions and
+  * limitations under the License.
+  */
+-
+ #include "os.h"
+ 
+ #include <fcntl.h>
+@@ -45,6 +44,16 @@ static File* CreateEmptyFile(const char* name, int extra_flags) {
+   return OS::OpenFileWithFlags(name, O_CREAT | extra_flags);
+ }
+ 
++File* OS::CreateMINIMAFile(const char* name){
++  std::string this_name = name;
++  std::string MINIMA_FILE_PATH = "/data/local/tmp/mySchema.txt";
++  if(this_name.compare(MINIMA_FILE_PATH)!=0){
++    return nullptr;
++  }
++  int flags = S_IRUSR | S_IROTH | S_IWUSR | S_IWOTH | O_TRUNC;
++  return art::CreateEmptyFile(name, flags);
++}
++
+ File* OS::CreateEmptyFile(const char* name) {
+   return art::CreateEmptyFile(name, O_RDWR | O_TRUNC);
+ }
+@@ -103,4 +112,23 @@ int64_t OS::GetFileSizeBytes(const char* name) {
+   }
+ }
+ 
++bool OS::CreateDirectories2(const char* child_path) {
++  std::string child_path_str = child_path;
++  size_t last_slash_pos = child_path_str.find_last_of('/');
++  CHECK_NE(last_slash_pos, std::string::npos) << "Invalid path: " << child_path_str;
++  std::string parent_path = child_path_str.substr(0, last_slash_pos);
++  const char* parent_path_char = parent_path.c_str();
++  if (OS::DirectoryExists(parent_path.c_str())) {
++    return true;
++  } else if (CreateDirectories2(parent_path_char)){
++    if (mkdir(parent_path.c_str(), 0666) == 0) {
++      return true;
++    }
++    return false;
++  } else {
++    return false;
++  }
++}
++
++
+ }  // namespace art
+diff --git a/libdexfile/dex/art_dex_file_loader.cc b/libdexfile/dex/art_dex_file_loader.cc
+old mode 100644
+new mode 100755
+index a7dd13e1ed..d141ec02fc
+--- a/libdexfile/dex/art_dex_file_loader.cc
++++ b/libdexfile/dex/art_dex_file_loader.cc
+@@ -13,7 +13,7 @@
+  * See the License for the specific language governing permissions and
+  * limitations under the License.
+  */
+-
++#define LOG_TAG "zicheng"
+ #include "art_dex_file_loader.h"
+ 
+ #include <sys/stat.h>
+@@ -32,6 +32,7 @@
+ #include "dex/dex_file.h"
+ #include "dex/dex_file_verifier.h"
+ #include "dex/standard_dex_file.h"
++#include "utils/Log.h"
+ 
+ namespace art {
+ 
+@@ -188,9 +189,10 @@ std::unique_ptr<const DexFile> ArtDexFileLoader::Open(const std::string& locatio
+                                                       MemMap&& map,
+                                                       bool verify,
+                                                       bool verify_checksum,
+-                                                      std::string* error_msg) const {
++                                                            std::string* error_msg) const {
+   ScopedTrace trace(std::string("Open dex file from mapped-memory ") + location);
+   CHECK(map.IsValid());
++  // ALOGI("art_dex_file_loader.cc zicheng Open dex file from mapped-memory:%s",location.c_str() );
+ 
+   size_t size = map.Size();
+   if (size < sizeof(DexFile::Header)) {
+diff --git a/libdexfile/dex/dex_file_loader.cc b/libdexfile/dex/dex_file_loader.cc
+old mode 100644
+new mode 100755
+index 861f911b67..fef2db6deb
+--- a/libdexfile/dex/dex_file_loader.cc
++++ b/libdexfile/dex/dex_file_loader.cc
+@@ -354,6 +354,7 @@ std::unique_ptr<DexFile> DexFileLoader::OpenCommon(const uint8_t* base,
+     *verify_result = VerifyResult::kVerifyNotAttempted;
+   }
+   std::unique_ptr<DexFile> dex_file;
++  //dex
+   if (size >= sizeof(StandardDexFile::Header) && StandardDexFile::IsMagicValid(base)) {
+     if (data_size != 0) {
+       CHECK_EQ(base, data_base) << "Unsupported for standard dex";
+@@ -364,6 +365,7 @@ std::unique_ptr<DexFile> DexFileLoader::OpenCommon(const uint8_t* base,
+                                        location_checksum,
+                                        oat_dex_file,
+                                        std::move(container)));
++  //cdex
+   } else if (size >= sizeof(CompactDexFile::Header) && CompactDexFile::IsMagicValid(base)) {
+     if (data_base == nullptr) {
+       // TODO: Is there a clean way to support both an explicit data section and reading the one
+diff --git a/libnativebridge/Android.bp b/libnativebridge/Android.bp
+index 356a1f4b48..c3ba721d3f 100644
+--- a/libnativebridge/Android.bp
++++ b/libnativebridge/Android.bp
+@@ -67,6 +67,13 @@ art_cc_library {
+         },
+     },
+ 
++    // WEIMINN
++    //cppflags: [
++    //    "-Wall",
++    //    "-Werror",
++    //    "-Wunused-parameter",
++    //],
++
+     stubs: {
+         symbol_file: "libnativebridge.map.txt",
+         versions: ["1"],
+diff --git a/libnativebridge/include/nativebridge/native_bridge.h b/libnativebridge/include/nativebridge/native_bridge.h
+index 2199bab552..ecc515508f 100644
+--- a/libnativebridge/include/nativebridge/native_bridge.h
++++ b/libnativebridge/include/nativebridge/native_bridge.h
+@@ -34,6 +34,9 @@ extern "C" {
+ // on host), this simply calls dlopen().
+ void* OpenSystemLibrary(const char* path, int flags);
+ 
++// WEIMINN
++void* OpenSystemLibrary2(const char* path, int flags, char* wei_ptr);
++
+ struct NativeBridgeRuntimeCallbacks;
+ struct NativeBridgeRuntimeValues;
+ 
+diff --git a/libnativebridge/native_bridge.cc b/libnativebridge/native_bridge.cc
+index fb13d62be0..001b2db695 100644
+--- a/libnativebridge/native_bridge.cc
++++ b/libnativebridge/native_bridge.cc
+@@ -50,6 +50,7 @@ void* OpenSystemLibrary(const char* path, int flags) {
+   // "system" for those in the Runtime APEX. Try "system" first since
+   // "default" always exists.
+   // TODO(b/185587109): Get rid of this error prone logic.
++  ALOGW("[weiminn] native_bridge.cc: OpenSystemLibrary %s", path);
+   android_namespace_t* system_ns = android_get_exported_namespace("system");
+   if (system_ns == nullptr) {
+     system_ns = android_get_exported_namespace("default");
+@@ -66,6 +67,35 @@ void* OpenSystemLibrary(const char* path, int flags) {
+ #endif
+ }
+ 
++// WEIMINN
++void* OpenSystemLibrary2(const char* path, int flags, char* wei_ptr) {
++#ifdef ART_TARGET_ANDROID
++  // The system namespace is called "default" for binaries in /system and
++  // "system" for those in the Runtime APEX. Try "system" first since
++  // "default" always exists.
++  // TODO(b/185587109): Get rid of this error prone logic.
++  ALOGW("[weiminn] native_bridge.cc: From Initializer: OpenSystemLibrary %s", path);
++  android_namespace_t* system_ns = android_get_exported_namespace("system");
++  if (system_ns == nullptr) {
++    system_ns = android_get_exported_namespace("default");
++    LOG_ALWAYS_FATAL_IF(system_ns == nullptr,
++                        "Failed to get system namespace for loading %s", path);
++  }
++
++  // char* wei_ptr = (char*) "Assigned in native_bridge";
++  const android_dlextinfo dlextinfo = {
++      .flags = ANDROID_DLEXT_USE_NAMESPACE,
++      .library_namespace = system_ns,
++      .weiminn_msg = wei_ptr
++  };
++  return android_dlopen_ext(path, flags, &dlextinfo);
++  // return wei_ptr;
++#else
++  ALOGW("[weiminn] [placeholder workaround]: %s", wei_ptr); // work around to prevent -Wunused-parameter exceptions
++  return dlopen(path, flags);
++#endif
++}
++
+ // Environment values required by the apps running with native bridge.
+ struct NativeBridgeRuntimeValues {
+     const char* os_arch;
+diff --git a/libnativeloader/include/nativeloader/native_loader.h b/libnativeloader/include/nativeloader/native_loader.h
+index 92d192ff25..5376b8d086 100644
+--- a/libnativeloader/include/nativeloader/native_loader.h
++++ b/libnativeloader/include/nativeloader/native_loader.h
+@@ -36,6 +36,10 @@ extern "C" {
+ __attribute__((visibility("default")))
+ void InitializeNativeLoader();
+ 
++// WEIMINN
++__attribute__((visibility("default")))
++void InitializeNativeLoader2(char* wei_ptr);
++
+ __attribute__((visibility("default"))) jstring CreateClassLoaderNamespace(
+     JNIEnv* env, int32_t target_sdk_version, jobject class_loader, bool is_shared, jstring dex_path,
+     jstring library_path, jstring permitted_path, jstring uses_library_list);
+diff --git a/libnativeloader/library_namespaces.cpp b/libnativeloader/library_namespaces.cpp
+index f31c4302a4..5f8309f573 100644
+--- a/libnativeloader/library_namespaces.cpp
++++ b/libnativeloader/library_namespaces.cpp
+@@ -142,6 +142,26 @@ void LibraryNamespaces::Initialize() {
+   }
+ }
+ 
++
++// WEIMINN
++void LibraryNamespaces::Initialize2(char* wei_ptr) {
++  ALOGW("[weiminn] library_namespaces.cpp: Initialize2");
++  
++  if (initialized_) {
++    return;
++  }
++  
++  for (const std::string& soname : android::base::Split(preloadable_public_libraries(), ":")) {
++    ALOGW("[weiminn] library_namespaces.cpp: Initialize2 is opening %s", soname.c_str());
++    
++    // WEIMINN
++    void* handle = OpenSystemLibrary2(soname.c_str(), RTLD_NOW | RTLD_NODELETE, wei_ptr);
++
++    LOG_ALWAYS_FATAL_IF(handle == nullptr,
++                        "Error preloading public library %s: %s", soname.c_str(), dlerror());
++  }
++}
++
+ // "ALL" is a magic name that allows all public libraries even when the
+ // target SDK is > 30. Currently this is used for (Java) shared libraries
+ // which don't use <uses-native-library>
+diff --git a/libnativeloader/library_namespaces.h b/libnativeloader/library_namespaces.h
+index 4871528f47..946440156e 100644
+--- a/libnativeloader/library_namespaces.h
++++ b/libnativeloader/library_namespaces.h
+@@ -48,6 +48,10 @@ class LibraryNamespaces {
+   LibraryNamespaces& operator=(const LibraryNamespaces&) = delete;
+ 
+   void Initialize();
++
++  // WEIMINN
++  void Initialize2(char* wei_ptr);
++
+   void Reset() {
+     namespaces_.clear();
+     initialized_ = false;
+diff --git a/libnativeloader/native_loader.cpp b/libnativeloader/native_loader.cpp
+old mode 100644
+new mode 100755
+index 2deb5ef3d0..e185c3f248
+--- a/libnativeloader/native_loader.cpp
++++ b/libnativeloader/native_loader.cpp
+@@ -33,6 +33,7 @@
+ #include <android-base/thread_annotations.h>
+ #include <nativebridge/native_bridge.h>
+ #include <nativehelper/scoped_utf_chars.h>
++#include "utils/Log.h"
+ 
+ #ifdef ART_TARGET_ANDROID
+ #include <log/log.h>
+@@ -168,12 +169,22 @@ Result<NativeLoaderNamespace*> CreateClassLoaderNamespaceLocked(JNIEnv* env,
+ }  // namespace
+ 
+ void InitializeNativeLoader() {
++  ALOGW("[weiminn] native_loader.cpp: InitializeNativeLoader1");
+ #if defined(ART_TARGET_ANDROID)
+   std::lock_guard<std::mutex> guard(g_namespaces_mutex);
+   g_namespaces->Initialize();
+ #endif
+ }
+ 
++// WEIMINN
++void InitializeNativeLoader2(char* wei_ptr) {
++  ALOGW("[weiminn] native_loader.cpp: InitializeNativeLoader2 | Received data: %s", wei_ptr);
++#if defined(ART_TARGET_ANDROID)
++  std::lock_guard<std::mutex> guard(g_namespaces_mutex);
++  g_namespaces->Initialize2(wei_ptr);
++#endif
++}
++
+ void ResetNativeLoader() {
+ #if defined(ART_TARGET_ANDROID)
+   std::lock_guard<std::mutex> guard(g_namespaces_mutex);
+@@ -211,7 +222,7 @@ void* OpenNativeLibrary(JNIEnv* env, int32_t target_sdk_version, const char* pat
+                         bool* needs_native_bridge, char** error_msg) {
+ #if defined(ART_TARGET_ANDROID)
+   UNUSED(target_sdk_version);
+-
++  ALOGE("[Zicheng_native] Native_loader.cpp OpenNativeLibrary() 1 %s",path);
+   if (class_loader == nullptr) {
+     *needs_native_bridge = false;
+     if (caller_location != nullptr) {
+@@ -275,7 +286,7 @@ void* OpenNativeLibrary(JNIEnv* env, int32_t target_sdk_version, const char* pat
+       ns = *isolated_ns;
+     }
+   }
+-
++  ALOGE("[Zicheng_native] Native_loader.cpp OpenNativeLibrary() 2 %s",path);
+   return OpenNativeLibraryInNamespace(ns, path, needs_native_bridge, error_msg);
+ #else
+   UNUSED(env, target_sdk_version, class_loader, caller_location);
+@@ -351,6 +362,7 @@ void NativeLoaderFreeErrorMessage(char* msg) {
+ #if defined(ART_TARGET_ANDROID)
+ void* OpenNativeLibraryInNamespace(NativeLoaderNamespace* ns, const char* path,
+                                    bool* needs_native_bridge, char** error_msg) {
++  ALOGE("[Zicheng_native] Native_loader.cpp OpenNativeLibraryInNamespace() 1 %s",path);
+   auto handle = ns->Load(path);
+   if (!handle.ok() && error_msg != nullptr) {
+     *error_msg = strdup(handle.error().message().c_str());
+diff --git a/libnativeloader/native_loader_namespace.cpp b/libnativeloader/native_loader_namespace.cpp
+old mode 100644
+new mode 100755
+index 669fa74dc2..e34404b6b2
+--- a/libnativeloader/native_loader_namespace.cpp
++++ b/libnativeloader/native_loader_namespace.cpp
+@@ -29,6 +29,7 @@
+ #include <nativebridge/native_bridge.h>
+ 
+ #include "nativeloader/dlext_namespaces.h"
++#include "utils/Log.h"
+ 
+ using android::base::Error;
+ 
+@@ -161,6 +162,7 @@ Result<void> NativeLoaderNamespace::Link(const NativeLoaderNamespace* target,
+ 
+ Result<void*> NativeLoaderNamespace::Load(const char* lib_name) const {
+   if (!IsBridged()) {
++    ALOGE("[Zicheng_native] native_loader_namespace.cpp NativeLoaderNamespace::Load() not bridged %s",lib_name);
+     android_dlextinfo extinfo;
+     extinfo.flags = ANDROID_DLEXT_USE_NAMESPACE;
+     extinfo.library_namespace = this->ToRawAndroidNamespace();
+@@ -169,6 +171,7 @@ Result<void*> NativeLoaderNamespace::Load(const char* lib_name) const {
+       return handle;
+     }
+   } else {
++    ALOGE("[Zicheng_native] native_loader_namespace.cpp NativeLoaderNamespace::Load() bridged %s",lib_name);
+     void* handle =
+         NativeBridgeLoadLibraryExt(lib_name, RTLD_NOW, this->ToRawNativeBridgeNamespace());
+     if (handle != nullptr) {
+diff --git a/odrefresh/odrefresh.cc b/odrefresh/odrefresh.cc
+old mode 100644
+new mode 100755
+index f829bb8ee1..47183c5298
+--- a/odrefresh/odrefresh.cc
++++ b/odrefresh/odrefresh.cc
+@@ -424,7 +424,7 @@ void AddDex2OatProfileAndCompilerFilter(
+   if (has_any_profile) {
+     args.emplace_back("--compiler-filter=speed-profile");
+   } else {
+-    args.emplace_back("--compiler-filter=speed");
++    args.emplace_back("--compiler-filter=verify");
+   }
+ }
+ 
+diff --git a/odrefresh/odrefresh_main.cc b/odrefresh/odrefresh_main.cc
+old mode 100644
+new mode 100755
+index 58ef28fdf7..ec8702bf3b
+--- a/odrefresh/odrefresh_main.cc
++++ b/odrefresh/odrefresh_main.cc
+@@ -172,7 +172,7 @@ int InitializeConfig(int argc, char** argv, OdrConfig* config) {
+   config->SetZygoteKind(zygote_kind);
+ 
+   if (config->GetSystemServerCompilerFilter().empty()) {
+-    std::string filter = GetProperty("dalvik.vm.systemservercompilerfilter", "speed");
++    std::string filter = GetProperty("dalvik.vm.systemservercompilerfilter", "verify");
+     config->SetSystemServerCompilerFilter(filter);
+   }
+ 
+diff --git a/runtime/app_info.cc b/runtime/app_info.cc
+old mode 100644
+new mode 100755
+index c72951eebc..ce649d63b4
+--- a/runtime/app_info.cc
++++ b/runtime/app_info.cc
+@@ -130,4 +130,9 @@ std::ostream& operator<<(std::ostream& os, AppInfo& rhs) {
+   return os;
+ }
+ 
++std::string AppInfo::GetPackageName(){
++  MutexLock mu(Thread::Current(), update_mutex_);
++  return package_name_.value_or(kUnknownValue);
++}
++
+ }  // namespace art
+diff --git a/runtime/app_info.h b/runtime/app_info.h
+old mode 100644
+new mode 100755
+index 68f2c586da..5b58caaa60
+--- a/runtime/app_info.h
++++ b/runtime/app_info.h
+@@ -77,6 +77,9 @@ class AppInfo {
+   void GetPrimaryApkOptimizationStatus(std::string* out_compiler_filter,
+                                        std::string* out_compilation_reason);
+ 
++  //added by zicheng 230620
++  std::string GetPackageName();
++
+  private:
+   // Encapsulates optimization information about a particular code location.
+   struct CodeLocationInfo {
+diff --git a/runtime/art_field.cc b/runtime/art_field.cc
+old mode 100644
+new mode 100755
+index c248bf73a1..921374ff1d
+--- a/runtime/art_field.cc
++++ b/runtime/art_field.cc
+@@ -28,9 +28,161 @@
+ #include "runtime.h"
+ #include "scoped_thread_state_change-inl.h"
+ #include "well_known_classes.h"
++#include "thread.h"
++#include "thread_list.h"
++#include "utils/Log.h"
++#include <iostream>
++#include <sstream>
++#include <fstream>
++#include <stdio.h>
++#include <dirent.h>
++// #include <runtime_globals.h>
+ 
+ namespace art {
+ 
++// static std::string MINIMA_file_path = "/data/data/edu.smu.minimaconfig/files/schema/mySchema.txt";
++
++// static std::string hook_method_name = "void edu.smu.minimaconfig.SettingsActivity.empty_Hook()";
++
++// static std::vector<std::string> target_method_string_vector = {};
++
++//"void de.drmaxnix.birthdaycountdown.MainActivity.birthdate_picker_open(int, int, int)", 
++// void MY_getFiles(){
++// 	long   hFile   =   0;
++
++// 	struct _finddata_t fileinfo;
++// 	string p;
++// 	if((hFile = _findfirst(p.assign(path).append("/*").c_str(),&fileinfo)) !=  -1)
++// 	{
++// 		do
++// 		{
++// 			if((fileinfo.attrib &  _A_SUBDIR))
++// 			{
++// 				if(strcmp(fileinfo.name,".") != 0  &&  strcmp(fileinfo.name,"..") != 0)
++// 					getFiles( p.assign(path).append("/").append(fileinfo.name), files );
++// 			}
++// 			else
++// 			{
++// 				files.push_back(p.assign(path).append("/").append(fileinfo.name) );
++// 			}
++// 		}while(_findnext(hFile, &fileinfo)  == 0);
++// 		_findclose(hFile);
++// 	}
++
++// }
++
++
++// void* RunMonitoringThread() {
++//   Runtime* runtime = Runtime::Current();
++//   CHECK(runtime->AttachCurrentThread("Start Schema Monitoring",true, runtime->GetSystemThreadGroup(),!runtime->IsAotCompiler()));
++// }
++
++// void MYadd_target_vector(std::string methodString){
++//   target_method_string_vector.push_back(methodString);
++// }
++
++// bool MYmatch_hook_method(std::string methodString){
++//     if (methodString.compare(hook_method_name) == 0) {
++//         ALOGI("Match hook method!");
++//         return true;
++//     }
++//     return false;
++// }
++
++// bool MYmatch_target_method(std::string s){
++//     // if(MYis_target_vector_empty())
++//       // MYadd_target_vector("void de.drmaxnix.birthdaycountdown.MainActivity.birthdate_picker_open(int, int, int)");
++//     // ALOGI("Current vector address: %p", &target_method_string_vector);
++//     ALOGI("Current vector size: %d", (int)target_method_string_vector.size());
++//     // for(unsigned int i=0;i<target_method_string_vector.size();i++){
++//     //     ALOGI("%s", target_method_string_vector[i].c_str());
++//     // }
++//     for (auto str : target_method_string_vector) {
++//           if (str.compare(s) == 0) {
++//             ALOGI("Match target method!");
++//             return true;
++//           }
++//     }
++//     return false;
++// } 
++
++// void MYmake_file(std::string fileName){
++//   ALOGI("Start to add a file at %s", fileName.c_str());
++//   std::ofstream fout(fileName.c_str());
++//   if(!OS::FileExists(fileName.c_str())){
++//     ALOGI("File does not exist at %s, create it.", fileName.c_str());
++//     if (fout) { 
++//       fout <<"test this message"<< std::endl; 
++//       fout.close(); 
++//     }
++//   }else{
++//     ALOGI("File exists at %s, create it.", fileName.c_str());
++//   }
++// }
++
++
++// std::vector<std::string> MYreadFile(){
++//   // std::string file_name = "/mnt/sdcard/mySchema.txt";
++//   // fin.open(, std::iso::in);
++//   std::vector<std::string> _method_string_vector = {};
++//   if(!target_method_string_vector.empty()){
++//     _method_string_vector = target_method_string_vector;
++//   }
++//   ALOGI("Start looking for %s",MINIMA_file_path.c_str());
++//   std::ifstream fin;
++//   fin.open(MINIMA_file_path.data());
++//   // if(OS::FileExists(MINIMA_file_path.c_str())){
++//   if(fin){
++//       ALOGI("File Exists%s",MINIMA_file_path.c_str());
++//       // std::ifstream fin(MINIMA_file_path);
++//       // if(fin){
++//         // _method_string_vector = {};
++//         std::string line;
++//         while(getline(fin, line)){
++//           line.erase(line.find_last_not_of(' ')+1, std::string::npos);
++//           line.erase(0, line.find_first_not_of(' '));
++//          _method_string_vector.push_back(line);
++//         }
++//       // }
++//       for(unsigned int i=0;i<_method_string_vector.size();i++){
++//         ALOGI("%s", _method_string_vector[i].c_str());
++//       }
++//   }else{
++//     ALOGI("File Not Exist:%s",MINIMA_file_path.c_str());
++//   }
++//   return _method_string_vector;
++// }
++
++// bool MYis_target_vector_empty(){
++//   return target_method_string_vector.empty(); 
++// }
++
++// void MY_print_all_files_in_root(std::string file_path){
++//   ALOGI("start to print out files1: %s", file_path.c_str());
++//   DIR *dir;
++//   if ( (dir=opendir(file_path.c_str())) == 0 ){
++//     ALOGI("open dir failed");
++//     return;
++//   }
++//   struct dirent *stdinfo;
++//   ALOGI("start to print out files: %s", file_path.c_str());
++//   while ((stdinfo=readdir(dir)))
++//   {
++//         switch(stdinfo->d_type) {
++//                 case DT_DIR:
++//                         ALOGI("DIR        %s\n", stdinfo->d_name); 
++//                         break;
++//                 case DT_REG:
++//                         ALOGI("REGFILE    %s\n", stdinfo->d_name); 
++//                         break;
++//                 default:
++//                         //man readdir
++//                         break;
++//         }
++//   }
++//   closedir(dir);   
++// }
++
+ void ArtField::SetOffset(MemberOffset num_bytes) {
+   DCHECK(GetDeclaringClass()->IsLoaded() || GetDeclaringClass()->IsErroneous());
+   DCHECK_ALIGNED_PARAM(num_bytes.Uint32Value(),
+diff --git a/runtime/art_field.h b/runtime/art_field.h
+old mode 100644
+new mode 100755
+index 4e77e7f0a5..8ef667d30e
+--- a/runtime/art_field.h
++++ b/runtime/art_field.h
+@@ -37,9 +37,39 @@ class Object;
+ class String;
+ }  // namespace mirror
+ 
++
++//added by Zicheng 202302
++// extern bool debugging;
++
++
++// extern static std::string hook_method_name;
++// extern static std::vector<std::string> target_method_string_vector;
++// //  = {"void de.drmaxnix.birthdaycountdown.MainActivity.birthdate_picker_open(int, int, int)"};
++// extern static std::string MINIMA_file_path;
++
++
++// extern bool MYmatch_hook_method(std::string methodString);
++
++// extern void MY_print_all_files_in_root(std::string file_path);
++
++// extern bool MYis_target_vector_empty();
++
++// extern void MYadd_target_vector(std::string methodString);
++
++// extern bool MYmatch_target_method(std::string s); 
++
++// extern std::vector<std::string> MYreadFile();
++
++// extern void MYmake_file(std::string fileName);
++
++
++
+ class ArtField final {
+  public:
+   template<ReadBarrierOption kReadBarrierOption = kWithReadBarrier>
++
++  
++
+   ObjPtr<mirror::Class> GetDeclaringClass() REQUIRES_SHARED(Locks::mutator_lock_);
+ 
+   ObjPtr<mirror::ClassLoader> GetClassLoader() REQUIRES_SHARED(Locks::mutator_lock_);
+diff --git a/runtime/art_method-inl.h b/runtime/art_method-inl.h
+old mode 100644
+new mode 100755
+index 844a0ffa9b..cddcd560a0
+--- a/runtime/art_method-inl.h
++++ b/runtime/art_method-inl.h
+@@ -17,6 +17,10 @@
+ #ifndef ART_RUNTIME_ART_METHOD_INL_H_
+ #define ART_RUNTIME_ART_METHOD_INL_H_
+ 
++#ifndef LOG_TAG
++#  define LOG_TAG "zicheng"
++#endif
++
+ #include "art_method.h"
+ 
+ #include "art_field.h"
+@@ -45,9 +49,20 @@
+ #include "read_barrier-inl.h"
+ #include "runtime-inl.h"
+ #include "thread-current-inl.h"
+-
++#include "utils/Log.h"
++#include <vector>
++#include "runtime_globals.h"
+ namespace art {
+ 
++// static std::string target_method_string = "void de.drmaxnix.birthdaycountdown.MainActivity$$ExternalSyntheticLambda1.onClick(android.content.DialogInterface, int)";
++// static std::string target_method_string = "void de.drmaxnix.birthdaycountdown.MainActivity.birthdate_picker_open(int, int, int)";
++
++
++// pre-generate function for adding string to the vector
++// static void add_target_method_string(std::string str){
++//     target_method_string_vector.push_back(str);
++// }
++
+ template <ReadBarrierOption kReadBarrierOption>
+ inline ObjPtr<mirror::Class> ArtMethod::GetDeclaringClassUnchecked() {
+   GcRootSource gc_root_source(this);
+@@ -110,6 +125,7 @@ inline bool ArtMethod::IsOverridableByDefaultMethod() {
+ }
+ 
+ inline bool ArtMethod::CheckIncompatibleClassChange(InvokeType type) {
++  LOG(DEBUG) << "art_method-inl.h " << "invocation type: " << type;
+   switch (type) {
+     case kStatic:
+       return !IsStatic();
+@@ -468,10 +484,21 @@ inline void ArtMethod::UpdateCounter(int32_t new_samples) {
+   }
+   uint16_t old_hotness_count = hotness_count_;
+   uint16_t new_count = (old_hotness_count <= new_samples) ? 0u : old_hotness_count - new_samples;
++  // std::string s2 = "void de.drmaxnix.birthdaycountdown.MainActivity$$ExternalSyntheticLambda1.onClick(android.content.DialogInterface, int)";
++ 
++  std::string hotness_count_string = std::to_string(hotness_count_);
++  std::string methodName = PrettyMethod();
++  // std::string s2 = "void com.example.testjumpingubuntu.MainActivity$1.onClick(android.view.View)";
++  // 230622 replaced by new approach
++  // if(Runtime::MYmatch_target_method(methodName)||Runtime::MYmatch_hook_method(methodName)){
++  //   new_count = old_hotness_count;
++  //   ALOGI("art_method-inl.h [Zicheng] UpdateCounter() [freeze counter] Method:%s, current counter:%d",PrettyMethod().c_str(),hotness_count_);
++  // }
+   // Avoid dirtying the value if possible.
+   if (old_hotness_count != new_count) {
+     hotness_count_ = new_count;
+   }
++  // ALOGI("art_method-inl.h [Zicheng] UpdateCounter() Method:%s, current counter:%d",PrettyMethod().c_str(),hotness_count_);
+ }
+ 
+ inline bool ArtMethod::CounterIsHot() {
+diff --git a/runtime/art_method.cc b/runtime/art_method.cc
+old mode 100644
+new mode 100755
+index f6f8b5f545..3ee5fe9833
+--- a/runtime/art_method.cc
++++ b/runtime/art_method.cc
+@@ -14,6 +14,7 @@
+  * limitations under the License.
+  */
+ 
++#define LOG_TAG "zicheng"
+ #include "art_method.h"
+ 
+ #include <algorithm>
+@@ -53,7 +54,7 @@
+ #include "runtime_callbacks.h"
+ #include "scoped_thread_state_change-inl.h"
+ #include "vdex_file.h"
+-
++#include "utils/Log.h"
+ namespace art {
+ 
+ using android::base::StringPrintf;
+@@ -328,31 +329,55 @@ void ArtMethod::Invoke(Thread* self, uint32_t* args, uint32_t args_size, JValue*
+   self->PushManagedStackFragment(&fragment);
+ 
+   Runtime* runtime = Runtime::Current();
++  // ALOGI("art_method.cc zicheng Invoke '%s' static=%d", PrettyMethod().c_str(),
++  //           static_cast<int>(IsStatic() ?  1 : 0));
+   // Call the invoke stub, passing everything as arguments.
+   // If the runtime is not yet started or it is required by the debugger, then perform the
+   // Invocation by the interpreter, explicitly forcing interpretation over JIT to prevent
+   // cycling around the various JIT/Interpreter methods that handle method invocation.
++  // std::string s2 = "void de.drmaxnix.birthdaycountdown.MainActivity$$ExternalSyntheticLambda1.onClick(android.content.DialogInterface, int)";
++  std::string methodName = PrettyMethod();
++
++  // if(Runtime::MYmatch_target_method(methodName)){
++  //       ALOGI("art_method.cc zicheng Invoke() invoke '%s', static=%d", PrettyMethod().c_str(), static_cast<int>(IsStatic() ? 1 : 0));
++  // }
++
+   if (UNLIKELY(!runtime->IsStarted() ||
+                (self->IsForceInterpreter() && !IsNative() && !IsProxyMethod() && IsInvokable()))) {
++    // ALOGE("art_method.cc IsStarted Invoke '%s' static=%d", PrettyMethod().c_str(),
++            // static_cast<int>(IsStatic() ? 1 : 0));
+     if (IsStatic()) {
+       art::interpreter::EnterInterpreterFromInvoke(
+           self, this, nullptr, args, result, /*stay_in_interpreter=*/ true);
+     } else {
++      // if(Runtime::MYmatch_target_method(methodName)){
++      //     ALOGI("art_method.cc zicheng Invoke() FromInvoke==true '%s' static=%d", PrettyMethod().c_str(),
++      //       static_cast<int>(IsStatic() ?  1 : 0));
++      // }
+       mirror::Object* receiver =
+           reinterpret_cast<StackReference<mirror::Object>*>(&args[0])->AsMirrorPtr();
+       art::interpreter::EnterInterpreterFromInvoke(
+           self, this, receiver, args + 1, result, /*stay_in_interpreter=*/ true);
+     }
+   } else {
++    // ALOGE("art_method.cc !IsStarted Invoke '%s' static=%d", PrettyMethod().c_str(),
++            // static_cast<int>(IsStatic() ? 1 : 0));
+     DCHECK_EQ(runtime->GetClassLinker()->GetImagePointerSize(), kRuntimePointerSize);
+ 
+     constexpr bool kLogInvocationStartAndReturn = false;
+     bool have_quick_code = GetEntryPointFromQuickCompiledCode() != nullptr;
+     if (LIKELY(have_quick_code)) {
++      //See if it will use the quick code to enter interpreter (via art_quick_to_interpreter_bridge)
++      if(Runtime::MYmatch_target_method(methodName)){
++          ALOGI("art_method.cc zicheng Invoke() have_quick_code==true '%s' quick code=%p, static=%d", PrettyMethod().c_str(), GetEntryPointFromQuickCompiledCode(),
++            static_cast<int>(IsStatic() ?  1 : 0));
++      }
+       if (kLogInvocationStartAndReturn) {
+         LOG(INFO) << StringPrintf(
+             "Invoking '%s' quick code=%p static=%d", PrettyMethod().c_str(),
+             GetEntryPointFromQuickCompiledCode(), static_cast<int>(IsStatic() ? 1 : 0));
++        // ALOGE("art_method.cc Invoke '%s' quick code=%p static=%d", PrettyMethod().c_str(),
++            // GetEntryPointFromQuickCompiledCode(), static_cast<int>(IsStatic() ? 1 : 0));
+       }
+ 
+       // Ensure that we won't be accidentally calling quick compiled code when -Xint.
+@@ -785,16 +810,22 @@ std::string ArtMethod::PrettyMethod(bool with_signature) {
+     std::string result = GetDeclaringClassDescriptor();
+     result += '.';
+     result += GetName();
++    result += " "+std::to_string(GetDexMethodIndex());
++    result += " "+std::to_string(GetCounter());
++    result += " "+std::to_string(GetMethodIndex());
+     // Do not add "<no signature>" even if `with_signature` is true.
+     return result;
+   }
+   ArtMethod* m =
+       GetInterfaceMethodIfProxy(Runtime::Current()->GetClassLinker()->GetImagePointerSize());
+   std::string res(m->GetDexFile()->PrettyMethod(m->GetDexMethodIndex(), with_signature));
++  // res += " counter="+std::to_string(m->GetCounter());
+   if (with_signature && m->IsObsolete()) {
+-    return "<OBSOLETE> " + res;
++    // ALOGI("art_method.cc zicheng PrettyMethod OBSOLETE res:%s", res.c_str());
++    return "<OBSOLETE> " + res /*+" "+ std::to_string(GetDexMethodIndex())+" counter="+std::to_string(GetCounter())*/;
+   } else {
+-    return res;
++    // ALOGI("art_method.cc zicheng PrettyMethod not OBSOLETE res:%s", res.c_str());
++    return res /*+ " !here!" + " dexmethodIndex=" + std::to_string(GetDexMethodIndex()) +" counter="+std::to_string(GetCounter())*/;
+   }
+ }
+ 
+diff --git a/runtime/art_method.h b/runtime/art_method.h
+old mode 100644
+new mode 100755
+index c2de71829e..9170760d1b
+--- a/runtime/art_method.h
++++ b/runtime/art_method.h
+@@ -721,7 +721,7 @@ class ArtMethod final {
+       REQUIRES_SHARED(Locks::mutator_lock_);
+ 
+   ALWAYS_INLINE void ResetCounter(uint16_t new_value);
+-  ALWAYS_INLINE void UpdateCounter(int32_t new_samples);
++  ALWAYS_INLINE void UpdateCounter(int32_t new_samples) REQUIRES_SHARED(Locks::mutator_lock_);
+   ALWAYS_INLINE void SetHotCounter();
+   ALWAYS_INLINE bool CounterIsHot();
+   ALWAYS_INLINE bool CounterHasReached(uint16_t samples, uint16_t threshold);
+diff --git a/runtime/class_linker.cc b/runtime/class_linker.cc
+old mode 100644
+new mode 100755
+index c8dbc75e61..d43ee15ace
+--- a/runtime/class_linker.cc
++++ b/runtime/class_linker.cc
+@@ -13,7 +13,7 @@
+  * See the License for the specific language governing permissions and
+  * limitations under the License.
+  */
+-
++#define LOG_TAG "zicheng"
+ #include "class_linker.h"
+ 
+ #include <unistd.h>
+@@ -150,6 +150,7 @@
+ #include "verifier/class_verifier.h"
+ #include "verifier/verifier_deps.h"
+ #include "well_known_classes.h"
++#include "utils/Log.h"
+ 
+ namespace art {
+ 
+@@ -2879,6 +2880,8 @@ ObjPtr<mirror::Class> ClassLinker::FindClass(Thread* self,
+                                              Handle<mirror::ClassLoader> class_loader) {
+   DCHECK_NE(*descriptor, '\0') << "descriptor is empty string";
+   DCHECK(self != nullptr);
++  
++
+   self->AssertNoPendingException();
+   self->PoisonObjectPointers();  // For DefineClass, CreateArrayClass, etc...
+   if (descriptor[1] == '\0') {
+@@ -2886,14 +2889,35 @@ ObjPtr<mirror::Class> ClassLinker::FindClass(Thread* self,
+     // for primitive classes that aren't backed by dex files.
+     return FindPrimitiveClass(descriptor[0]);
+   }
++  // ALOGI("class_linker.cc [zicheng] FindClass:descriptor=%s",descriptor);
++  
++  /*hard code a descriptor to intersect the code loading*/
++  // std::string target_descriptor="Lcom/example/testjumpingubuntu/MainActivity2;";
++  // std::string target_descriptor="Lorg/woheller69/spritpreise/widget/Widget;";
++  // std::string s2 = descriptor;
++  
++  // if(s2.compare(target_descriptor)==0){
++  //     ALOGI("class_linker.cc zicheng FindClass() %s loading is intersected", descriptor);
++  //     ObjPtr<mirror::Throwable> pre_allocated =
++  //         Runtime::Current()->GetPreAllocatedNoClassDefFoundError();
++  //     self->SetException(pre_allocated);
++  //     return nullptr;
++  // }
++
+   const size_t hash = ComputeModifiedUtf8Hash(descriptor);
+   // Find the class in the loaded classes table.
+   ObjPtr<mirror::Class> klass = LookupClass(self, descriptor, hash, class_loader.Get());
+   if (klass != nullptr) {
++    // ALOGI("class_linker.cc zicheng FindClass() %s is loaded", descriptor);
+     return EnsureResolved(self, descriptor, klass);
+   }
++  // ALOGI("class_linker.cc zicheng FindClass() %s is not loaded", descriptor);
+   // Class is not yet loaded.
+   if (descriptor[0] != '[' && class_loader == nullptr) {
++    if(Runtime::getDebugging()){
++      ALOGI("class_linker.cc zicheng FindClass() %s is a system class", descriptor);
++    }
++    //it is a system class
+     // Non-array class and the boot class loader, search the boot class path.
+     ClassPathEntry pair = FindInClassPath(descriptor, hash, boot_class_path_);
+     if (pair.second != nullptr) {
+@@ -3418,16 +3442,30 @@ static void LinkCode(ClassLinker* class_linker,
+                      uint32_t class_def_method_index) REQUIRES_SHARED(Locks::mutator_lock_) {
+   ScopedAssertNoThreadSuspension sants(__FUNCTION__);
+   Runtime* const runtime = Runtime::Current();
++
++  std::string s1 = ArtMethod::PrettyMethod(method); 
++
+   if (runtime->IsAotCompiler()) {
++    if(Runtime::getDebugging()){
++      ALOGI("class_linker.cc zicheng LinkCode() IsAotCompiler %s", s1.c_str());
++    }
+     // The following code only applies to a non-compiler runtime.
+     return;
++  }                                           
++
++  if(Runtime::MYmatch_target_method(s1)||Runtime::MYmatch_hook_method(s1)){
++    method->SetDontCompile();
+   }
+ 
++  // ALOGI("class_linker.cc zicheng LinkCode() startLinkCode %s", s1.c_str());
+   // Method shouldn't have already been linked.
+   DCHECK(method->GetEntryPointFromQuickCompiledCode() == nullptr);
++  // ALOGI("class_linker.cc zicheng LinkCode() pass checking compiledCode is null %s", s1.c_str());
+   DCHECK(!method->GetDeclaringClass()->IsVisiblyInitialized());  // Actually ClassStatus::Idx.
++  // ALOGI("class_linker.cc zicheng LinkCode() pass checking class is visiblyInitialized%s", s1.c_str());
+ 
+   if (!method->IsInvokable()) {
++    // ALOGI("class_linker.cc zicheng LinkCode() not invokable %s", s1.c_str());
+     EnsureThrowsInvocationError(class_linker, method);
+     return;
+   }
+@@ -3436,16 +3474,49 @@ static void LinkCode(ClassLinker* class_linker,
+   if (oat_class != nullptr) {
+     // Every kind of method should at least get an invoke stub from the oat_method.
+     // non-abstract methods also get their code pointers.
++    if(Runtime::getDebugging()){
++      ALOGI("class_linker.cc zicheng LinkCode() has oat code %s", s1.c_str());
++    }
+     const OatFile::OatMethod oat_method = oat_class->GetOatMethod(class_def_method_index);
+     quick_code = oat_method.GetQuickCode();
++    if(quick_code!=nullptr && Runtime::getDebugging()){
++      ALOGI("class_linker.cc zicheng LinkCode() has quick code %s", s1.c_str());
++    }else if(Runtime::getDebugging()){
++      ALOGI("class_linker.cc zicheng LinkCode() has oat_class but no quick code %s", s1.c_str());
++    }
+   }
+-  runtime->GetInstrumentation()->InitializeMethodsCode(method, quick_code);
++  
++  // std::string s2 = "void com.example.testjumpingubuntu.MainActivity$1.onClick(android.view.View)";
++  // std::string s2 = "void org.woheller69.spritpreise.widget.Widget.updateLocation(android.content.Context, int, boolean)";
+ 
++  // std::string s2 = "void de.drmaxnix.birthdaycountdown.MainActivity$$ExternalSyntheticLambda1.onClick(android.content.DialogInterface, int)";
++  // if(s1.compare(s2)==0 && quick_code != nullptr){
++  //   quick_code = nullptr;
++  //   ALOGI("class_linker.cc zicheng set %s quick_code to nullptr", s1.c_str());
++  // }
++
++
++
++
++  // if(s1.compare(s2)!=0){
++    //Only set the entry points for non-target methods
++    runtime->GetInstrumentation()->InitializeMethodsCode(method, quick_code);
++  // }else{
++    // ALOGI("Do not set entrypoint for %s",s2.c_str());
++  // }
++
++  // ALOGI("class_linker.cc zicheng LinkCode() afterInitializeMethodsCode %s", s1.c_str());
+   if (method->IsNative()) {
+     // Set up the dlsym lookup stub. Do not go through `UnregisterNative()`
+     // as the extra processing for @CriticalNative is not needed yet.
+     method->SetEntryPointFromJni(
+         method->IsCriticalNative() ? GetJniDlsymLookupCriticalStub() : GetJniDlsymLookupStub());
++    // ALOGI("class_linker.cc zicheng LinkCode() SetEntryPointFromJni %s", s1.c_str());
++    // if(method->IsCriticalNative()){
++    //   method->SetEntryPointFromJni(GetJniDlsymLookupCriticalStub());
++    // }else{
++    //   method->SetEntryPointFromJni(GetJniDlsymLookupStub());
++    // }
+   }
+ }
+ 
+@@ -3597,7 +3668,13 @@ void ClassLinker::LoadClass(Thread* self,
+           ArtMethod* art_method = klass->GetDirectMethodUnchecked(class_def_method_index,
+               image_pointer_size_);
+           LoadMethod(dex_file, method, klass.Get(), art_method);
++          if (!runtime->IsAotCompiler() && Runtime::getDebugging()){
++            ALOGI("class_linker.cc [zicheng] LoadClass() after loadDirectMethod:%s",art_method->PrettyMethod().c_str());
++          }
+           LinkCode(this, art_method, oat_class_ptr, class_def_method_index);
++          if (!runtime->IsAotCompiler() && Runtime::getDebugging()){
++            ALOGI("class_linker.cc [zicheng] LoadClass() after linkDirectMethod:%s",art_method->PrettyMethod().c_str());
++          }
+           uint32_t it_method_index = method.GetIndex();
+           if (last_dex_method_index == it_method_index) {
+             // duplicate case
+@@ -3615,7 +3692,13 @@ void ClassLinker::LoadClass(Thread* self,
+               image_pointer_size_);
+           art_method->ResetCounter(hotness_threshold);
+           LoadMethod(dex_file, method, klass.Get(), art_method);
++          if (!runtime->IsAotCompiler() && Runtime::getDebugging()){
++            ALOGI("class_linker.cc [zicheng] LoadClass() after loadVirtualMethod:%s",art_method->PrettyMethod().c_str());
++          }
+           LinkCode(this, art_method, oat_class_ptr, class_def_method_index);
++          if (!runtime->IsAotCompiler() && Runtime::getDebugging()){
++            ALOGI("class_linker.cc [zicheng] LoadClass() after linkVirtualMethod:%s",art_method->PrettyMethod().c_str());
++          }
+           ++class_def_method_index;
+         });
+ 
+diff --git a/runtime/entrypoints/quick/quick_trampoline_entrypoints.cc b/runtime/entrypoints/quick/quick_trampoline_entrypoints.cc
+old mode 100644
+new mode 100755
+index b6ece4a86e..9863bcd834
+--- a/runtime/entrypoints/quick/quick_trampoline_entrypoints.cc
++++ b/runtime/entrypoints/quick/quick_trampoline_entrypoints.cc
+@@ -706,6 +706,11 @@ extern "C" uint64_t artQuickToInterpreterBridge(ArtMethod* method, Thread* self,
+       }
+     }
+ 
++    // std::string method_name = method->PrettyMethod();
++    // if(Runtime::MYmatch_target_method(method_name)){
++    //   ALOGI("runtime/entrypoints/quick/quick_trampoline_entrypoints.cc [zicheng] artQuickToInterpreterBridge() method:%s", method_name.c_str());
++    // } 
++
+     result = interpreter::EnterInterpreterFromEntryPoint(self, accessor, shadow_frame);
+     force_frame_pop = shadow_frame->GetForcePopFrame();
+   }
+@@ -2095,6 +2100,11 @@ extern "C" const void* artQuickGenericJniTrampoline(Thread* self,
+ 
+   self->VerifyStack();
+ 
++  // std::string method_name = called->PrettyMethod();
++  // if(Runtime::MYmatch_target_method(method_name)){
++  //   ALOGI("runtime/entrypoints/quick/quick_trampoline_entrypoints.cc [zicheng] artQuickGenericJniTrampoline() method:%s", method_name.c_str());
++  // } 
++
+   // We can now walk the stack if needed by JIT GC from MethodEntered() for JIT-on-first-use.
+   jit::Jit* jit = runtime->GetJit();
+   if (jit != nullptr) {
+diff --git a/runtime/instrumentation.cc b/runtime/instrumentation.cc
+old mode 100644
+new mode 100755
+index 6ec98ff4d8..4520f672e3
+--- a/runtime/instrumentation.cc
++++ b/runtime/instrumentation.cc
+@@ -329,7 +329,11 @@ static bool CanUseAotCode(ArtMethod* method, const void* quick_code)
+   return true;
+ }
+ 
++//do not use Nterp
+ static bool CanUseNterp(ArtMethod* method) REQUIRES_SHARED(Locks::mutator_lock_) {
++  std::string s1 = method->PrettyMethod();
++  if(Runtime::MYmatch_target_method(s1)||Runtime::MYmatch_hook_method(s1))
++      return false;
+   return interpreter::CanRuntimeUseNterp() &&
+       CanMethodUseNterp(method) &&
+       method->GetDeclaringClass()->IsVerified();
+@@ -370,19 +374,43 @@ static const void* GetOptimizedCodeFor(ArtMethod* method) REQUIRES_SHARED(Locks:
+ 
+ void Instrumentation::InitializeMethodsCode(ArtMethod* method, const void* aot_code)
+     REQUIRES_SHARED(Locks::mutator_lock_) {
++  
++  //added by Zicheng
++  std::string s1 = method->PrettyMethod();
++  std::string str1 = "empty_Hook()";
++  std::string::size_type idx = s1.find(str1);
++  if ( idx != std::string::npos )
++    ALOGI("%s",s1.c_str());//check the name of empty_Hook()
+   // Use instrumentation entrypoints if instrumentation is installed.
+   if (UNLIKELY(EntryExitStubsInstalled()) && !IsProxyInit(method)) {
+     if (!method->IsNative() && InterpretOnly(method)) {
++      if(Runtime::getDebugging()){
++        ALOGI("instrumentation.cc zicheng InitializeMethodsCode() entrypoints GetQuickToInterpreterBridge1 method=%s", s1.c_str());
++      }
+       UpdateEntryPoints(method, GetQuickToInterpreterBridge());
+     } else {
++      if(Runtime::getDebugging()){
++        ALOGI("instrumentation.cc zicheng InitializeMethodsCode() entrypoints GetQuickInstrumentationEntryPoint method=%s", s1.c_str());
++      }
+       UpdateEntryPoints(method, GetQuickInstrumentationEntryPoint());
+     }
+     return;
+   }
+ 
+   if (UNLIKELY(IsForcedInterpretOnly() || IsDeoptimized(method))) {
+-    UpdateEntryPoints(
+-        method, method->IsNative() ? GetQuickGenericJniStub() : GetQuickToInterpreterBridge());
++    if(method->IsNative()){
++      if(Runtime::getDebugging()){
++        ALOGI("instrumentation.cc zicheng InitializeMethodsCode() entrypoints GetQuickGenericJniStub1 method=%s", s1.c_str());
++      }
++      UpdateEntryPoints(method, GetQuickGenericJniStub());
++    }else{
++      if(Runtime::getDebugging()){
++        ALOGI("instrumentation.cc zicheng InitializeMethodsCode() entrypoints GetQuickToInterpreterBridge2 method=%s", s1.c_str());
++      }
++      UpdateEntryPoints(method, GetQuickToInterpreterBridge());
++    }
++    // UpdateEntryPoints(
++    //     method, method->IsNative() ? GetQuickGenericJniStub() : GetQuickToInterpreterBridge());
+     return;
+   }
+ 
+@@ -396,8 +424,14 @@ void Instrumentation::InitializeMethodsCode(ArtMethod* method, const void* aot_c
+     // stub only if we have compiled code or we can execute nterp, and the method needs a class
+     // initialization check.
+     if (aot_code != nullptr || method->IsNative() || CanUseNterp(method)) {
++      if(Runtime::getDebugging()){
++        ALOGI("instrumentation.cc zicheng InitializeMethodsCode() entrypoints GetQuickResolutionStub method=%s", s1.c_str());
++      }
+       UpdateEntryPoints(method, GetQuickResolutionStub());
+     } else {
++      if(Runtime::getDebugging()){
++        ALOGI("instrumentation.cc zicheng InitializeMethodsCode() entrypoints GetQuickToInterpreterBridge3 method=%s", s1.c_str());
++      }
+       UpdateEntryPoints(method, GetQuickToInterpreterBridge());
+     }
+     return;
+@@ -405,6 +439,9 @@ void Instrumentation::InitializeMethodsCode(ArtMethod* method, const void* aot_c
+ 
+   // Use the provided AOT code if possible.
+   if (CanUseAotCode(method, aot_code)) {
++    if(Runtime::getDebugging()){
++      ALOGI("instrumentation.cc zicheng InitializeMethodsCode() entrypoints aot_code method=%s", s1.c_str());
++    }
+     UpdateEntryPoints(method, aot_code);
+     return;
+   }
+@@ -413,13 +450,28 @@ void Instrumentation::InitializeMethodsCode(ArtMethod* method, const void* aot_c
+   // If the class is not verified, This will be updated in
+   // ClassLinker::UpdateClassAfterVerification.
+   if (CanUseNterp(method)) {
++    if(Runtime::getDebugging()){
++      ALOGI("instrumentation.cc zicheng InitializeMethodsCode() entrypoints GetNterpEntryPoint method=%s", s1.c_str());
++    }
+     UpdateEntryPoints(method, interpreter::GetNterpEntryPoint());
+     return;
+   }
+ 
+   // Use default entrypoints.
+-  UpdateEntryPoints(
+-      method, method->IsNative() ? GetQuickGenericJniStub() : GetQuickToInterpreterBridge());
++  // UpdateEntryPoints(
++  //     method, method->IsNative() ? GetQuickGenericJniStub() : GetQuickToInterpreterBridge());
++  if(method->IsNative()){
++    if(Runtime::getDebugging()){
++      ALOGI("instrumentation.cc zicheng InitializeMethodsCode() entrypoints GetQuickGenericJniStub2 method=%s", s1.c_str());
++    }
++    UpdateEntryPoints(method, GetQuickGenericJniStub());
++  }else{
++    if(Runtime::getDebugging()){
++      ALOGI("instrumentation.cc zicheng InitializeMethodsCode() entrypoints GetQuickToInterpreterBridge4 method=%s", s1.c_str());
++    }
++    UpdateEntryPoints(method, GetQuickToInterpreterBridge());
++  }
++   
+ }
+ 
+ void Instrumentation::InstallStubsForMethod(ArtMethod* method) {
+diff --git a/runtime/interpreter/interpreter.cc b/runtime/interpreter/interpreter.cc
+old mode 100644
+new mode 100755
+index 38c94abf06..0d9a605c87
+--- a/runtime/interpreter/interpreter.cc
++++ b/runtime/interpreter/interpreter.cc
+@@ -34,6 +34,7 @@
+ #include "stack.h"
+ #include "thread-inl.h"
+ #include "unstarted_runtime.h"
++#include "cutils/log.h"
+ 
+ namespace art {
+ namespace interpreter {
+@@ -302,6 +303,12 @@ static inline JValue Execute(
+     if (!stay_in_interpreter && !self->IsForceInterpreter()) {
+       jit::Jit* jit = Runtime::Current()->GetJit();
+       if (jit != nullptr) {
++        // 230622 reduce the places to invoke match_target_method
++        // std::string method_name = shadow_frame.GetMethod()->PrettyMethod();
++        // if(Runtime::MYmatch_target_method(method_name)){
++        //   ALOGI("runtime/interpreter/interpreter.cc [zicheng] Execute() method:%s", method_name.c_str());
++        // } 
++
+         jit->MethodEntered(self, shadow_frame.GetMethod());
+         if (jit->CanInvokeCompiledCode(method)) {
+           JValue result;
+@@ -331,6 +338,7 @@ static inline JValue Execute(
+   DCHECK_IMPLIES(method->SkipAccessChecks(), !method->MustCountLocks());
+ 
+   VLOG(interpreter) << "Interpreting " << method->PrettyMethod();
++  // ALOGE("interpreter.cc Execute %s", method->PrettyMethod().c_str());
+ 
+   return ExecuteSwitch(
+       self, accessor, shadow_frame, result_register, /*interpret_one_instruction=*/ false);
+@@ -578,6 +586,12 @@ JValue EnterInterpreterFromEntryPoint(Thread* self, const CodeItemDataAccessor&
+     return JValue();
+   }
+ 
++  // 230622 reduce the places to invoke match_target_method
++  // std::string method_name = shadow_frame->GetMethod()->PrettyMethod();
++  // if(Runtime::MYmatch_target_method(method_name)){
++  //   ALOGI("runtime/interpreter/interpreter.cc [zicheng] EnterInterpreterFromEntryPoint() method:%s", method_name.c_str());
++  // }
++
+   jit::Jit* jit = Runtime::Current()->GetJit();
+   if (jit != nullptr) {
+     jit->NotifyCompiledCodeToInterpreterTransition(self, shadow_frame->GetMethod());
+diff --git a/runtime/interpreter/interpreter_common.cc b/runtime/interpreter/interpreter_common.cc
+old mode 100644
+new mode 100755
+index c8a87c1d75..8d9f602dd4
+--- a/runtime/interpreter/interpreter_common.cc
++++ b/runtime/interpreter/interpreter_common.cc
+@@ -14,9 +14,12 @@
+  * limitations under the License.
+  */
+ 
++#define LOG_TAG "zicheng"
+ #include "interpreter_common.h"
+ 
+ #include <cmath>
++#include <string>
++#include <iostream>
+ 
+ #include "base/casts.h"
+ #include "base/enums.h"
+@@ -48,6 +51,7 @@
+ #include "transaction.h"
+ #include "var_handles.h"
+ #include "well_known_classes.h"
++#include "cutils/log.h"
+ 
+ namespace art {
+ namespace interpreter {
+@@ -1214,6 +1218,15 @@ static inline bool DoCallCommon(ArtMethod* called_method,
+                                 uint16_t number_of_inputs,
+                                 uint32_t (&arg)[Instruction::kMaxVarArgRegs],
+                                 uint32_t vregC) {
++  std::string s1 = ArtMethod::PrettyMethod(called_method);
++  // std::string s2 = "void com.example.testjumpingubuntu.MainActivity$1.onClick(android.view.View)";
++  // std::string s2 = "void de.drmaxnix.birthdaycountdown.MainActivity$$ExternalSyntheticLambda1.onClick(android.content.DialogInterface, int)";
++
++  // if(s1.compare(s2)==0){
++  //   ALOGI("interpreter_common.cc zicheng DoCallCommon() debloat method %s",s1.c_str());
++  //   return false;
++  // }
++  // ALOGI("interpreter_common.cc zicheng DoCallCommon() is running via interpreter method:%s",s1.c_str());
+   bool string_init = false;
+   // Replace calls to String.<init> with equivalent StringFactory call.
+   if (UNLIKELY(called_method->GetDeclaringClass()->IsStringClass()
+diff --git a/runtime/interpreter/interpreter_switch_impl-inl.h b/runtime/interpreter/interpreter_switch_impl-inl.h
+old mode 100644
+new mode 100755
+index d95c507698..9d7fb5e5c9
+--- a/runtime/interpreter/interpreter_switch_impl-inl.h
++++ b/runtime/interpreter/interpreter_switch_impl-inl.h
+@@ -19,6 +19,7 @@
+ 
+ #include "interpreter_switch_impl.h"
+ 
++// #include "art_method-inl.h"
+ #include "base/enums.h"
+ #include "base/globals.h"
+ #include "base/memory_tool.h"
+@@ -31,6 +32,8 @@
+ #include "interpreter/shadow_frame.h"
+ #include "jit/jit-inl.h"
+ #include "jvalue-inl.h"
++#include "jni/java_vm_ext.h"
++#include "jni/jni_env_ext.h"
+ #include "mirror/string-alloc-inl.h"
+ #include "mirror/throwable.h"
+ #include "monitor.h"
+@@ -39,6 +42,9 @@
+ #include "shadow_frame-inl.h"
+ #include "thread.h"
+ #include "verifier/method_verifier.h"
++#include "utils/Log.h"
++#include <jni.h>
++#include "runtime_globals.h"
+ 
+ namespace art {
+ namespace interpreter {
+@@ -1833,11 +1839,225 @@ ASAN_NO_INLINE static bool OP_##OPCODE_NAME(
+ DEX_INSTRUCTION_LIST(OPCODE_CASE)
+ #undef OPCODE_CASE
+ 
++
++// jobject getGlobalContext(JNIEnv *env)
++// {
++//     jclass activityThread = env->FindClass("android/app/ActivityThread");
++//     jmethodID currentActivityThread = env->GetStaticMethodID(activityThread, "currentActivityThread", "()Landroid/app/ActivityThread;");
++//     jobject at = env->CallStaticObjectMethod(activityThread, currentActivityThread);
++//     jmethodID getApplication = env->GetMethodID(activityThread, "getApplication", "()Landroid/app/Application;");
++//     jobject context = env->CallObjectMethod(at, getApplication);
++//     return context;
++// }
++// //https://blog.csdn.net/lb377463323/article/details/75315167
++
++
++// //Zicheng added on 230402
++// void call_configApp(){
++//   art::Thread* thread = Thread::Current();
++//   JNIEnv* env = thread->GetJniEnv();
++  
++//   /*
++//     String packageName = "edu.smu.minimaconfig";
++//     Intent intent = new Intent();
++//     ComponentName cn = new ComponentName(packageName, packageName + ".SettingsActivity");
++//     intent.setComponent(cn);
++//     Log.e("zichengAPP", Thread.currentThread().getStackTrace()[1].getMethodName() +" touch button in MainActivity");
++//     startActivity(intent);
++
++//   */
++//   //https://stackoverflow.com/questions/59102301/start-new-activity-from-jni
++//   //Intent intent = new Intent();
++//   jclass intentClass = env->FindClass("android/content/Intent");
++//   jmethodID newIntent = env->GetMethodID(intentClass, "<init>", "()Landroid/content/Intent");
++//   jobject intent = env->NewObject(intentClass,newIntent);
++
++//   // ComponentName cn = new ComponentName(packageName, packageName + ".SettingsActivity");
++//   jclass componentName_class = env->FindClass("android/content/ComponentName");
++//   jmethodID newComponent = env->GetMethodID(componentName_class, "<init>", "(Ljava/lang/String;Ljava/lang/String;)android/content/ComponentName");
++//   jobject cn = env->NewObject(componentName_class, newComponent, "edu.smu.minimaconfig", "edu.smu.minimaconfig.SettingsActivity");
++
++//   //intent.setComponent(cn);
++//   jmethodID setComponent = env->GetMethodID(componentName_class, "setComponent", "(Landroid/content/ComponentName)Landroid/content/Intent;");
++//   env->CallObjectMethod(intent, setComponent, cn);
++
++//   //startActivity(intent);
++//   jclass activityClass = env->FindClass("android/app/Activity");
++//   jmethodID startActivity = env->GetMethodID(activityClass,"startActivity", "(Landroid/content/Intent;)V");
++//   env->CallVoidMethod(intent, startActivity, intent);
++
++//   /*
++//     old display show
++//   */
++//   //getGlobalContext
++//   // jclass activityThread = env->FindClass("android/app/ActivityThread");
++//   // jmethodID currentActivityThread = env->GetStaticMethodID(activityThread, "currentActivityThread", "()Landroid/app/ActivityThread;");
++//   // jobject at = env->CallStaticObjectMethod(activityThread, currentActivityThread);
++//   // jmethodID getApplication = env->GetMethodID(activityThread, "getApplication", "()Landroid/app/Application;");
++//   // jobject context = env->CallObjectMethod(at, getApplication);
++
++//   // //Toast.makeText()
++//   // jclass toast = env->FindClass("android/widget/Toast"); // get the class you need (need to be already loaded otherwise you have to define it first)
++//   // const char* msgstr = "This method has been debloated (test)";
++//   // jstring str = env->NewStringUTF(msgstr);
++//   // jmethodID methodMakeText= env->GetStaticMethodID(toast, "makeText", "(Landroid/content/Context;Ljava/lang/CharSequence;I)Landroid/widget/Toast;"); // get your desidered method
++//   // jobject toastobj = env->CallStaticObjectMethod(toast, methodMakeText, context, str, 10);
++  
++//   // //Toast.show()
++//   // jmethodID methodShow = env->GetMethodID(toast, "show", "()V");
++//   // env->CallVoidMethod(toastobj, methodShow);
++//   // shadow_frame.SetDexPC(dex::kDexNoIndex);
++
++//   return;  // Return statement or debugger forced exit.
++// }
++
+ template<bool do_access_check, bool transaction_active>
+ void ExecuteSwitchImplCpp(SwitchImplContext* ctx) {
+   Thread* self = ctx->self;
+   const CodeItemDataAccessor& accessor = ctx->accessor;
+   ShadowFrame& shadow_frame = ctx->shadow_frame;
++
++  //added by Zicheng 202302
++  std::string method_name = shadow_frame.GetMethod()->PrettyMethod();
++  // std::string str1 = "empty_Hook()";
++  // std::string::size_type idx = method_name.find(str1);
++  // if ( idx != std::string::npos )
++  ALOGI("[Zicheng] Method name to interpreter:%s",method_name.c_str());
++
++  // Runtime* runtime = Runtime::Current();
++  // Do not load vector here, change to when starting an app 230610
++  // if(Runtime::MYmatch_hook_method(method_name)){
++  //   ALOGI("runtime/interpreter/interpreter_switch_impl-inl.h [zicheng] Catch the hook! method:%s", method_name.c_str());
++  //   Runtime::setTarget_method_string_vector(Runtime::MYreadFile());
++  // }
++
++  std::string& method_name_1 = method_name;
++
++  //zicheng 230622 temporarily for testing reading content out of the matching
++  // Runtime* runtime = Runtime::Current();
++  // const std::string& package_name = runtime->GetProcessPackageName(); 
++  // if(package_name.compare("edu.smu.ImitateJumping")==0){
++    
++  // }
++
++  if(Runtime::MYmatch_target_method(method_name_1)){
++      // MY_print_all_files_in_root("/sdcard");
++      // MYmake_file(file_Path); // add 20230306 tsry to add a file at root dir
++      ALOGI("runtime/interpreter/interpreter_switch_impl-inl.h [zicheng] ExecuteSwitchImplCpp() method:%s", method_name.c_str());
++
++      art::Thread* thread = Thread::Current();
++      JNIEnv* env = thread->GetJniEnv();
++      
++      //getGlobalContext
++      //https://blog.csdn.net/lb377463323/article/details/75315167
++      jclass activityThread = env->FindClass("android/app/ActivityThread");
++      jmethodID currentActivityThread = env->GetStaticMethodID(activityThread, "currentActivityThread", "()Landroid/app/ActivityThread;");
++      jobject at = env->CallStaticObjectMethod(activityThread, currentActivityThread);
++      jmethodID getApplication = env->GetMethodID(activityThread, "getApplication", "()Landroid/app/Application;");
++      jobject context = env->CallObjectMethod(at, getApplication);
++
++      /*Display a toast message start*/
++      // //Toast.makeText()
++      // jclass toast = env->FindClass("android/widget/Toast"); // get the class you need (need to be already loaded otherwise you have to define it first)
++      // const char* msgstr = "This method has been debloated (test)";
++      // jstring str = env->NewStringUTF(msgstr);
++      // jmethodID methodMakeText= env->GetStaticMethodID(toast, "makeText", "(Landroid/content/Context;Ljava/lang/CharSequence;I)Landroid/widget/Toast;"); // get your desidered method
++      // jobject toastobj = env->CallStaticObjectMethod(toast, methodMakeText, context, str, 10);
++      
++      // //Toast.show()
++      // jmethodID methodShow = env->GetMethodID(toast, "show", "()V");
++      // env->CallVoidMethod(toastobj, methodShow);
++      // shadow_frame.SetDexPC(dex::kDexNoIndex);
++      /*Display a toast message end*/
++
++
++      ALOGW("[Zicheng start activity]Start to invoke JNI.");
++        
++      /*
++        String packageName = "edu.smu.minimaconfig";
++        Intent intent = new Intent();
++        ComponentName cn = new ComponentName(packageName, packageName + ".DisplayActivity");
++        intent.setComponent(cn);
++        Log.e("zichengAPP", Thread.currentThread().getStackTrace()[1].getMethodName() +" touch button in MainActivity");
++        startActivity(intent);
++      */
++
++      //https://stackoverflow.com/questions/59102301/start-new-activity-from-jni
++      //https://www.uuk4.com/2019/05/08/Android-JNI-%E6%89%93%E5%BC%80Activity/
++      //Intent intent = new Intent();
++      jclass intentClass = env->FindClass("android/content/Intent");
++      ALOGW("[Zicheng start activity]Start to invoke JNI 2.");
++      jmethodID newIntent = env->GetMethodID(intentClass, "<init>", "()V");
++      ALOGW("[Zicheng start activity]Start to invoke JNI 3.");
++      jobject intent_object = env->NewObject(intentClass,newIntent);
++      // ALOGW("[Zicheng start activity]Start to invoke JNI 3-1.");
++      // env->CallVoidMethod(intent_object,newIntent);
++      ALOGW("[Zicheng start activity]Intent intent = new Intent()");
++
++      // ComponentName cn = new ComponentName(packageName, packageName + ".SettingsActivity");
++      std::string minima_package_name = "edu.smu.minimaconfig";
++      std::string minima_activity_name = ".DisplayActivity";
++      jclass componentName_class = env->FindClass("android/content/ComponentName");
++      ALOGW("[Zicheng start activity]Start to invoke JNI 4.");
++      jmethodID newComponent = env->GetMethodID(componentName_class, "<init>", "(Ljava/lang/String;Ljava/lang/String;)V");
++      ALOGW("[Zicheng start activity]Start to invoke JNI 5.");
++      jstring packageName = env->NewStringUTF(minima_package_name.c_str());
++      ALOGW("[Zicheng start activity]Start to invoke JNI 6.");
++      jstring activityName = env->NewStringUTF((minima_package_name+minima_activity_name).c_str());
++      ALOGW("[Zicheng start activity]Start to invoke JNI 7.");
++      jobject cn = env->NewObject(componentName_class, newComponent, packageName, activityName);
++      // ALOGW("[Zicheng start activity]Start to invoke JNI 7-1.");
++      // env->CallVoidMethod(cn, newComponent, packageName, activityName);
++      ALOGW("[Zicheng start activity]ComponentName cn = new ComponentName(packageName, packageName + \".SettingsActivity\");");
++
++      //intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
++      jmethodID setFlags = env->GetMethodID(intentClass, "setFlags", "(I)Landroid/content/Intent;");
++      ALOGW("[Zicheng start activity]Start to invoke JNI 7-2.");
++      env->CallObjectMethod(intent_object, setFlags, 0x10000000);
++      ALOGW("[Zicheng start activity]intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);");
++
++      //intent.setComponent(cn);
++      jmethodID setComponent = env->GetMethodID(intentClass, "setComponent", "(Landroid/content/ComponentName;)Landroid/content/Intent;");
++      ALOGW("[Zicheng start activity]Start to invoke JNI 8.");
++      env->CallObjectMethod(intent_object, setComponent, cn);
++      ALOGW("[Zicheng start activity]intent.setComponent(cn);");
++
++      //intent.putExtra("methodName",method_name);
++      jstring methodName = env->NewStringUTF(method_name.c_str());
++      ALOGW("[Zicheng start activity]Start to invoke JNI 8-1.");
++      jstring methodName_key = env->NewStringUTF("methodName");
++      ALOGW("[Zicheng start activity]Start to invoke JNI 8-2.");
++      jmethodID putExtra = env->GetMethodID(intentClass, "putExtra", "(Ljava/lang/String;Ljava/lang/String;)Landroid/content/Intent;");
++      ALOGW("[Zicheng start activity]Start to invoke JNI 8-3.");
++      env->CallObjectMethod(intent_object, putExtra, methodName_key, methodName);
++      ALOGW("[Zicheng start activity]intent.putExtra(\"methodName\",method_name);");
++
++
++      //startActivity(intent);
++      jclass activityClass = env->FindClass("android/content/Context");
++      ALOGW("[Zicheng start activity]Start to invoke JNI 9.");
++      jmethodID startActivity = env->GetMethodID(activityClass,"startActivity", "(Landroid/content/Intent;)V");
++      ALOGW("[Zicheng start activity]Start to invoke JNI 10.");
++      env->CallVoidMethod(context, startActivity, intent_object);
++      ALOGW("[Zicheng start activity]startActivity(intent);");
++
++      return;  // Return statement or debugger forced exit.
++  } 
++
++  // if(MYmatch_target_method(method_name)){
++  //     art::Thread* thread = Thread::Current();
++  //     JNIEnv* env = thread->GetJniEnv();
++  //     jclass c = env->FindClass("java/lang/RuntimeException");
++  //     env->ThrowNew(c, "this method has been debloated");
++  //     shadow_frame.SetDexPC(dex::kDexNoIndex);
++  //     return;  // Return statement or debugger forced exit.
++  // } 
++
++  // if(MYmatch_target_method(method_name)){
++  //     ALOGI("runtime/interpreter/interpreter_switch_impl-inl.h [zicheng] ExecuteSwitchImplCpp() method:%s", method_name.c_str());
++  //     // shadow_frame.SetDexPC(dex::kDexNoIndex);
++  //     // return;  // Return statement or debugger forced exit.
++  // } 
+   self->VerifyStack();
+ 
+   uint32_t dex_pc = shadow_frame.GetDexPC();
+diff --git a/runtime/interpreter/interpreter_switch_impl.h b/runtime/interpreter/interpreter_switch_impl.h
+old mode 100644
+new mode 100755
+index d4dca11c60..8f9d5803a8
+--- a/runtime/interpreter/interpreter_switch_impl.h
++++ b/runtime/interpreter/interpreter_switch_impl.h
+@@ -23,6 +23,9 @@
+ #include "dex/code_item_accessors.h"
+ #include "jvalue.h"
+ #include "obj_ptr.h"
++#include "art_method-inl.h"
++// #include "art_field.h"
++#include "utils/Log.h"
+ 
+ namespace art {
+ 
+@@ -60,6 +63,14 @@ ALWAYS_INLINE JValue ExecuteSwitchImpl(Thread* self, const CodeItemDataAccessor&
+                                        ShadowFrame& shadow_frame, JValue result_register,
+                                        bool interpret_one_instruction)
+   REQUIRES_SHARED(Locks::mutator_lock_) {
++    
++  // 230622 reduce the places to invoke match_target_method
++  // std::string method_name = shadow_frame.GetMethod()->PrettyMethod();
++  // if(Runtime::MYmatch_target_method(method_name)){
++  //     ALOGI("runtime/interpreter/interpreter_switch_impl.h [zicheng] ExecuteSwitchImpl() method:%s do_access_check:%d, transaction_active:%d", method_name.c_str(),
++  //       static_cast<int>(do_access_check ? 1:0), static_cast<int>(transaction_active ? 1:0));
++  // } 
++
+   SwitchImplContext ctx {
+     .self = self,
+     .accessor = accessor,
+diff --git a/runtime/jit/jit.cc b/runtime/jit/jit.cc
+old mode 100644
+new mode 100755
+index 6d634ae120..6f5a009e04
+--- a/runtime/jit/jit.cc
++++ b/runtime/jit/jit.cc
+@@ -53,6 +53,7 @@
+ #include "stack_map.h"
+ #include "thread-inl.h"
+ #include "thread_list.h"
++#include "utils/Log.h"
+ 
+ using android::base::unique_fd;
+ 
+@@ -1501,6 +1502,13 @@ class ScopedSetRuntimeThread {
+ 
+ void Jit::MethodEntered(Thread* thread, ArtMethod* method) {
+   Runtime* runtime = Runtime::Current();
++
++  // 230622 reduce the places to invoke match_target_method
++  // std::string method_name = method->PrettyMethod();
++  // if(Runtime::MYmatch_target_method(method_name)){
++  //   ALOGI("jit.cc [zicheng] MethodEntered() method:%s", method_name.c_str());
++  // }
++
+   if (UNLIKELY(runtime->UseJitCompilation() && JitAtFirstUse())) {
+     ArtMethod* np_method = method->GetInterfaceMethodIfProxy(kRuntimePointerSize);
+     if (np_method->IsCompilable()) {
+diff --git a/runtime/jit/jit_code_cache.cc b/runtime/jit/jit_code_cache.cc
+old mode 100644
+new mode 100755
+index 0b34688ff3..b015838a5d
+--- a/runtime/jit/jit_code_cache.cc
++++ b/runtime/jit/jit_code_cache.cc
+@@ -13,7 +13,7 @@
+  * See the License for the specific language governing permissions and
+  * limitations under the License.
+  */
+-
++#define LOG_TAG "jit_code_cache"
+ #include "jit_code_cache.h"
+ 
+ #include <sstream>
+@@ -63,6 +63,7 @@
+ namespace art {
+ namespace jit {
+ 
++
+ static constexpr size_t kCodeSizeLogThreshold = 50 * KB;
+ static constexpr size_t kStackMapSizeLogThreshold = 50 * KB;
+ 
+diff --git a/runtime/jni/java_vm_ext.cc b/runtime/jni/java_vm_ext.cc
+old mode 100644
+new mode 100755
+index f41b6c06fa..6a5981b549
+--- a/runtime/jni/java_vm_ext.cc
++++ b/runtime/jni/java_vm_ext.cc
+@@ -13,7 +13,7 @@
+  * See the License for the specific language governing permissions and
+  * limitations under the License.
+  */
+-
++#define LOG_TAG "zicheng_javaVM"
+ #include "java_vm_ext-inl.h"
+ 
+ #include <dlfcn.h>
+@@ -54,6 +54,7 @@
+ #include "thread_list.h"
+ #include "ti/agent.h"
+ #include "well_known_classes.h"
++#include "utils/Log.h"
+ 
+ namespace art {
+ 
+@@ -161,13 +162,102 @@ class SharedLibrary {
+     return needs_native_bridge_;
+   }
+ 
+-  // No mutator lock since dlsym may block for a while if another thread is doing dlopen.
++  // // No mutator lock since dlsym may block for a while if another thread is doing dlopen.
++  // void* FindSymbol(const std::string& symbol_name, const char* shorty = nullptr)
++  //     REQUIRES(!Locks::mutator_lock_) {
++  //   return NeedsNativeBridge()
++  //       ? FindSymbolWithNativeBridge(symbol_name, shorty)
++  //       : FindSymbolWithoutNativeBridge(symbol_name);
++  // }
++
++  /*Zicheng modified 230610 for debloating native methods(graceful termination)*/
+   void* FindSymbol(const std::string& symbol_name, const char* shorty = nullptr)
+       REQUIRES(!Locks::mutator_lock_) {
+-    return NeedsNativeBridge()
+-        ? FindSymbolWithNativeBridge(symbol_name, shorty)
+-        : FindSymbolWithoutNativeBridge(symbol_name);
++    ALOGW("[Zicheng_native] java_vm_ext.cc FindSymbol %s ", symbol_name.c_str());
++
++    if(symbol_name.compare("Java_edu_smu_imitatejumping_Simple_1JNI_1Class_duration")==0){
++          ALOGW("[Zicheng_native] java_vm_ext.cc FindSymbol get target method: %s ", symbol_name.c_str());
++          art::Thread* thread = Thread::Current();
++          JNIEnv* env = thread->GetJniEnv();
++          
++          //getGlobalContext
++          //https://blog.csdn.net/lb377463323/article/details/75315167
++          jclass activityThread = env->FindClass("android/app/ActivityThread");
++          jmethodID currentActivityThread = env->GetStaticMethodID(activityThread, "currentActivityThread", "()Landroid/app/ActivityThread;");
++          jobject at = env->CallStaticObjectMethod(activityThread, currentActivityThread);
++          jmethodID getApplication = env->GetMethodID(activityThread, "getApplication", "()Landroid/app/Application;");
++          jobject context = env->CallObjectMethod(at, getApplication);
++
++          ALOGW("[Zicheng_native] java_vm_ext.cc FindSymbol() Start to invoke JNI.");
++
++          //Intent intent = new Intent();
++          jclass intentClass = env->FindClass("android/content/Intent");
++          ALOGW("[Zicheng_native]Start to invoke JNI 2.");
++          jmethodID newIntent = env->GetMethodID(intentClass, "<init>", "()V");
++          ALOGW("[Zicheng_native]Start to invoke JNI 3.");
++          jobject intent_object = env->NewObject(intentClass,newIntent);
++          // ALOGW("[Zicheng_native]Start to invoke JNI 3-1.");
++          // env->CallVoidMethod(intent_object,newIntent);
++          ALOGW("[Zicheng_native]Intent intent = new Intent()");
++          
++          // ComponentName cn = new ComponentName(packageName, packageName + ".SettingsActivity");
++          std::string minima_package_name = "edu.smu.minimaconfig";
++          std::string minima_activity_name = ".DisplayActivity";
++          jclass componentName_class = env->FindClass("android/content/ComponentName");
++          ALOGW("[Zicheng_native]Start to invoke JNI 4.");
++          jmethodID newComponent = env->GetMethodID(componentName_class, "<init>", "(Ljava/lang/String;Ljava/lang/String;)V");
++          ALOGW("[Zicheng_native]Start to invoke JNI 5.");
++          jstring packageName = env->NewStringUTF(minima_package_name.c_str());
++          ALOGW("[Zicheng_native]Start to invoke JNI 6.");
++          jstring activityName = env->NewStringUTF((minima_package_name+minima_activity_name).c_str());
++          ALOGW("[Zicheng_native]Start to invoke JNI 7.");
++          jobject cn = env->NewObject(componentName_class, newComponent, packageName, activityName);
++          // ALOGW("[Zicheng_native]Start to invoke JNI 7-1.");
++          // env->CallVoidMethod(cn, newComponent, packageName, activityName);
++          ALOGW("[Zicheng_native]ComponentName cn = new ComponentName(packageName, packageName + \".SettingsActivity\");");
++
++          //intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
++          jmethodID setFlags = env->GetMethodID(intentClass, "setFlags", "(I)Landroid/content/Intent;");
++          ALOGW("[Zicheng_native]Start to invoke JNI 7-2.");
++          env->CallObjectMethod(intent_object, setFlags, 0x10000000);
++          ALOGW("[Zicheng_native]intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);");
++
++          //intent.setComponent(cn);
++          jmethodID setComponent = env->GetMethodID(intentClass, "setComponent", "(Landroid/content/ComponentName;)Landroid/content/Intent;");
++          ALOGW("[Zicheng_native]Start to invoke JNI 8.");
++          env->CallObjectMethod(intent_object, setComponent, cn);
++          ALOGW("[Zicheng_native]intent.setComponent(cn);");
++
++          //intent.putExtra("methodName",method_name);
++          jstring methodName = env->NewStringUTF(symbol_name.c_str());
++          ALOGW("[Zicheng_native]Start to invoke JNI 8-1.");
++          jstring methodName_key = env->NewStringUTF("methodName");
++          ALOGW("[Zicheng_native]Start to invoke JNI 8-2.");
++          jmethodID putExtra = env->GetMethodID(intentClass, "putExtra", "(Ljava/lang/String;Ljava/lang/String;)Landroid/content/Intent;");
++          ALOGW("[Zicheng_native]Start to invoke JNI 8-3.");
++          env->CallObjectMethod(intent_object, putExtra, methodName_key, methodName);
++          ALOGW("[Zicheng_native]intent.putExtra(\"methodName\",method_name);");
++
++          //startActivity(intent);
++          // jclass activityClass = env->FindClass("android/app/Activity");
++          jclass activityClass = env->FindClass("android/content/Context");
++          ALOGW("[Zicheng_native]Start to invoke JNI 9.");
++          jmethodID startActivity = env->GetMethodID(activityClass,"startActivity", "(Landroid/content/Intent;)V");
++          ALOGW("[Zicheng_native]Start to invoke JNI 10.");
++          env->CallVoidMethod(context, startActivity, intent_object);
++          ALOGW("[Zicheng_native]startActivity(intent);");
++    }
++          // return nullptr;
++    // }else{
++        return NeedsNativeBridge()
++            ? FindSymbolWithNativeBridge(symbol_name, shorty)
++            : FindSymbolWithoutNativeBridge(symbol_name);
++    // }
+   }
++  /*Zicheng modified 230610 for debloating native methods*/
++
++
++
+ 
+   // No mutator lock since dlsym may block for a while if another thread is doing dlopen.
+   void* FindSymbolWithoutNativeBridge(const std::string& symbol_name)
+@@ -1037,6 +1127,7 @@ bool JavaVMExt::LoadNativeLibrary(JNIEnv* env,
+   const char* path_str = path.empty() ? nullptr : path.c_str();
+   bool needs_native_bridge = false;
+   char* nativeloader_error_msg = nullptr;
++  ALOGE("[Zicheng_native] java_vm_ext.cc before OpenNatvieLibrary():%s",path_str);
+   void* handle = android::OpenNativeLibrary(
+       env,
+       runtime_->GetTargetSdkVersion(),
+@@ -1228,6 +1319,7 @@ extern "C" jint JNI_CreateJavaVM(JavaVM** p_vm, JNIEnv** p_env, void* vm_args) {
+     options.push_back(std::make_pair(std::string(option->optionString), option->extraInfo));
+   }
+   bool ignore_unrecognized = args->ignoreUnrecognized;
++  LOG(ERROR) << "[weiminn] java_vm_ext.cc: Before creating Runtime";
+   if (!Runtime::Create(options, ignore_unrecognized)) {
+     return JNI_ERR;
+   }
+@@ -1241,7 +1333,12 @@ extern "C" jint JNI_CreateJavaVM(JavaVM** p_vm, JNIEnv** p_env, void* vm_args) {
+ 
+   // Initialize native loader. This step makes sure we have
+   // everything set up before we start using JNI.
+-  android::InitializeNativeLoader();
++  
++  // android::InitializeNativeLoader();
++
++  // WEIMINN
++  char* wei_ptr = (char*) "Initialized in java_vm_ext.cc";
++  android::InitializeNativeLoader2(wei_ptr);
+ 
+   Runtime* runtime = Runtime::Current();
+   bool started = runtime->Start();
+diff --git a/runtime/jni/jni_internal.cc b/runtime/jni/jni_internal.cc
+old mode 100644
+new mode 100755
+index e3153fdace..b43b9e0466
+--- a/runtime/jni/jni_internal.cc
++++ b/runtime/jni/jni_internal.cc
+@@ -13,7 +13,7 @@
+  * See the License for the specific language governing permissions and
+  * limitations under the License.
+  */
+-
++#define LOG_TAG "zicheng"
+ #include "jni_internal.h"
+ 
+ #include <cstdarg>
+@@ -64,6 +64,7 @@
+ #include "scoped_thread_state_change-inl.h"
+ #include "thread.h"
+ #include "well_known_classes.h"
++#include "utils/Log.h"
+ 
+ namespace art {
+ 
+@@ -667,6 +668,7 @@ class JNI {
+   }
+ 
+   static jclass FindClass(JNIEnv* env, const char* name) {
++    // ALOGI("jni_internal.cc zicheng jniFindClass() name:%s",name);
+     CHECK_NON_NULL_ARGUMENT(name);
+     Runtime* runtime = Runtime::Current();
+     ClassLinker* class_linker = runtime->GetClassLinker();
+diff --git a/runtime/mirror/class.cc b/runtime/mirror/class.cc
+old mode 100644
+new mode 100755
+index 37a4197d71..495ef8a0ea
+--- a/runtime/mirror/class.cc
++++ b/runtime/mirror/class.cc
+@@ -625,6 +625,7 @@ static inline ArtMethod* FindClassMethodWithSignature(ObjPtr<Class> this_klass,
+   for (ArtMethod& method : this_klass->GetDeclaredMethodsSlice(pointer_size)) {
+     ArtMethod* np_method = method.GetInterfaceMethodIfProxy(pointer_size);
+     if (np_method->GetNameView() == name && np_method->GetSignature() == signature) {
++     // LOG(ERROR) << "class.cc:(name_view)"<< name << "(signature)"<<signature;
+       return &method;
+     }
+   }
+diff --git a/runtime/native/dalvik_system_DexFile.cc b/runtime/native/dalvik_system_DexFile.cc
+old mode 100644
+new mode 100755
+index d714206241..eb5533762f
+--- a/runtime/native/dalvik_system_DexFile.cc
++++ b/runtime/native/dalvik_system_DexFile.cc
+@@ -13,7 +13,7 @@
+  * See the License for the specific language governing permissions and
+  * limitations under the License.
+  */
+-
++#define LOG_TAG "zicheng"
+ #include "dalvik_system_DexFile.h"
+ 
+ #include <sstream>
+@@ -54,6 +54,7 @@
+ #include "runtime.h"
+ #include "scoped_thread_state_change-inl.h"
+ #include "well_known_classes.h"
++#include "utils/Log.h"
+ 
+ namespace art {
+ 
+@@ -315,6 +316,7 @@ static jobject DexFile_openDexFileNative(JNIEnv* env,
+   if (sourceName.c_str() == nullptr) {
+     return nullptr;
+   }
++  // ALOGI("dalvik_system_DexFile.cc zicheng DexFile_openDexFileNative=%s", sourceName.c_str());
+ 
+   std::vector<std::string> error_msgs;
+   const OatFile* oat_file = nullptr;
+diff --git a/runtime/native/dalvik_system_ZygoteHooks.cc b/runtime/native/dalvik_system_ZygoteHooks.cc
+old mode 100644
+new mode 100755
+index eae7c2066e..a0c92305d6
+--- a/runtime/native/dalvik_system_ZygoteHooks.cc
++++ b/runtime/native/dalvik_system_ZygoteHooks.cc
+@@ -13,7 +13,7 @@
+  * See the License for the specific language governing permissions and
+  * limitations under the License.
+  */
+-
++#define LOG_TAG "zicheng_zygote"
+ #include "dalvik_system_ZygoteHooks.h"
+ 
+ #include <stdlib.h>
+@@ -43,9 +43,12 @@
+ #include "thread-current-inl.h"
+ #include "thread_list.h"
+ #include "trace.h"
+-
++// #include <iostream>
++// #include <sstream>
++// #include <fstream>
++#include "utils/Log.h"
+ #include <sys/resource.h>
+-
++#include <sys/stat.h>
+ namespace art {
+ 
+ // Set to true to always determine the non-debuggable classes even if we would not allow a debugger
+@@ -289,6 +292,17 @@ static void ZygoteHooks_nativePostForkSystemServer(JNIEnv* env ATTRIBUTE_UNUSED,
+   Runtime::Current()->GetJITOptions()->SetSaveProfilingInfo(profile_system_server);
+ }
+ 
++int modifyFilePermissions1(const char * path, mode_t mode) {
++    int result = chmod(path, mode);
++
++    if (result != 0) {
++        result = errno;
++    }
++
++    return (result);
++}
++
++
+ static void ZygoteHooks_nativePostForkChild(JNIEnv* env,
+                                             jclass,
+                                             jlong token,
+@@ -297,6 +311,7 @@ static void ZygoteHooks_nativePostForkChild(JNIEnv* env,
+                                             jboolean is_zygote,
+                                             jstring instruction_set) {
+   DCHECK(!(is_system_server && is_zygote));
++
+   // Reload the current flags first. In case we need to take any updated actions.
+   Runtime::Current()->ReloadAllFlags(__FUNCTION__);
+   // Then, set the runtime state, in case JIT and other services
+@@ -353,49 +368,68 @@ static void ZygoteHooks_nativePostForkChild(JNIEnv* env,
+     // This must be called after EnableDebugFeatures.
+     runtime->GetJit()->PostForkChildAction(is_system_server, is_zygote);
+   }
+-
+-  // Update tracing.
+-  if (Trace::GetMethodTracingMode() != TracingMode::kTracingInactive) {
+-    Trace::TraceOutputMode output_mode = Trace::GetOutputMode();
+-    Trace::TraceMode trace_mode = Trace::GetMode();
+-    size_t buffer_size = Trace::GetBufferSize();
+-
+-    // Just drop it.
+-    Trace::Abort();
+-
+-    // Only restart if it was streaming mode.
+-    // TODO: Expose buffer size, so we can also do file mode.
+-    if (output_mode == Trace::TraceOutputMode::kStreaming) {
+-      static constexpr size_t kMaxProcessNameLength = 100;
+-      char name_buf[kMaxProcessNameLength] = {};
+-      int rc = pthread_getname_np(pthread_self(), name_buf, kMaxProcessNameLength);
+-      std::string proc_name;
+-
+-      if (rc == 0) {
++  //zicheng 202302 add
++  static constexpr size_t kMaxProcessNameLength = 100;
++  char name_buf[kMaxProcessNameLength] = {};
++  int rc = pthread_getname_np(pthread_self(), name_buf, kMaxProcessNameLength);
++  std::string proc_name;
++  int uid = getuid();
++
++  if (rc == 0) {
+           // On success use the pthread name.
+           proc_name = name_buf;
++  }
++  if (proc_name.empty() || proc_name == "zygote" || proc_name == "zygote64") {
++    // Either no process name, or the name hasn't been changed, yet. Just use pid.
++    pid_t pid = getpid();
++    proc_name = StringPrintf("%u", static_cast<uint32_t>(pid));
++  }
++  
++/* //Zicheng read file for schema
++  ALOGI("[Zicheng] art/runtime/native/dalvik_system_ZygoteHooks.cc [zicheng] Read file in ZygoteHooks!");
++  if(!OS::FileExists(runtime->getMINIMA_file_path().c_str())){
++    std::string path = runtime->getMINIMA_file_path();
++    if(!OS::CreateDirectories2(path.c_str())){
++      ALOGW("[Zicheng]Zygote Failed to create folder in %s", runtime->getMINIMA_folder_path().c_str());
++    }else{
++      if(modifyFilePermissions1(path.c_str(), S_IRUSR| S_IWUSR | S_IRGRP | S_IWGRP | S_IROTH | S_IWOTH)!=0){
++        ALOGW("[Zicheng]Zygote Failed to modify folder permission in %s", runtime->getMINIMA_file_path().c_str());
++      }else{
++        ALOGW("[Zicheng]Successfully modify folder permission in %s",runtime->getMINIMA_file_path().c_str());
+       }
+-
+-      if (proc_name.empty() || proc_name == "zygote" || proc_name == "zygote64") {
+-        // Either no process name, or the name hasn't been changed, yet. Just use pid.
+-        pid_t pid = getpid();
+-        proc_name = StringPrintf("%u", static_cast<uint32_t>(pid));
+-      }
+-
+-      std::string trace_file = StringPrintf("/data/misc/trace/%s.trace.bin", proc_name.c_str());
+-      Trace::Start(trace_file.c_str(),
+-                   buffer_size,
+-                   0,   // TODO: Expose flags.
+-                   output_mode,
+-                   trace_mode,
+-                   0);  // TODO: Expose interval.
+-      if (thread->IsExceptionPending()) {
+-        ScopedObjectAccess soa(env);
+-        thread->ClearException();
++    }
++    // OS::CreateEmptyFileWriteOnly(runtime->getMINIMA_file_path().c_str());
++    OS::CreateEmptyFile(runtime->getMINIMA_file_path().c_str());
++    if(OS::FileExists(runtime->getMINIMA_file_path().c_str())){
++      ALOGW("[Zicheng]Successfully generate file in %s",runtime->getMINIMA_file_path().c_str());
++      if(modifyFilePermissions1(runtime->getMINIMA_file_path().c_str(), S_IRUSR| S_IWUSR | S_IRGRP | S_IWGRP | S_IROTH | S_IWOTH)!=0){
++        ALOGW("[Zicheng]Zygote Failed to modify file permission in %s", runtime->getMINIMA_file_path().c_str());
++      }else{
++        ALOGW("[Zicheng]Successfully modify file permission in %s",runtime->getMINIMA_file_path().c_str());
+       }
++      
++    }else{
++      ALOGW("[Zicheng]Zygote Failed to generate file in %s", runtime->getMINIMA_file_path().c_str());
+     }
++  }else{
++    // if(modifyFilePermissions1(runtime->getMINIMA_file_path().c_str(), S_IRUSR| S_IWUSR | S_IRGRP | S_IWGRP | S_IROTH | S_IWOTH)!=0){
++    //     ALOGW("Zygote Failed to modify file permission in %s", runtime->getMINIMA_file_path().c_str());
++    // }else{
++        // ALOGW("Successfully modify file permission in %s",runtime->getMINIMA_file_path().c_str());
++      ALOGW("[Zicheng]Zygote started to read file in %s", runtime->getMINIMA_file_path().c_str());
++      // Runtime::setTarget_method_string_vector(Runtime::MYreadFile()); 
++      ALOGW("[Zicheng]Zygote finished reading file in %s", runtime->getMINIMA_file_path().c_str());
++    // }
+   }
+-
++  // if(modifyFilePermissions1(runtime->getMINIMA_file_path().c_str(), S_IRUSR| S_IWUSR | S_IRGRP | S_IWGRP | S_IROTH | S_IWOTH)!=0){
++  //       ALOGW("[Force] Zygote Failed to modify folder permission in %s", runtime->getMINIMA_file_path().c_str());
++  // }
++  // Runtime::setTarget_method_string_vector(Runtime::MYreadFile()); 
++  // ALOGW("[Force] Zygote finished reading file in %s", runtime->getMINIMA_file_path().c_str());
++  
++*/
++
++  
+   bool do_hidden_api_checks = api_enforcement_policy != hiddenapi::EnforcementPolicy::kDisabled;
+   DCHECK(!(is_system_server && do_hidden_api_checks))
+       << "SystemServer should be forked with EnforcementPolicy::kDisable";
+@@ -428,8 +462,131 @@ static void ZygoteHooks_nativePostForkChild(JNIEnv* env,
+         /*isa=*/ nullptr,
+         profile_system_server);
+   }
++
++  //added by zicheng on Aug 19 2023. For obtain the package_name while the app is launching.
++  
++
++  const std::string& package_name = runtime->GetProcessPackageName();
++
++  // const char* pre_installed_apps[75] = {
++  //     "com.google.android.sample.rcsclient",
++  //     "com.android.adservices.api",
++  //     "com.android.providers.telephony",
++  //     "com.android.dynsystem",
++  //     "com.android.providers.calendar",
++  //     "com.android.providers.media",
++  //     "com.android.wallpapercropper",
++  //     "com.android.documentsui",
++  //     "com.android.externalstorage",
++  //     "com.android.companiondevicemanager",
++  //     "com.android.mms.service",
++  //     "com.android.providers.downloads",
++  //     "com.android.messaging",
++  //     "com.android.frameworks.core.batterystatsviewer",
++  //     "com.android.providers.downloads.ui",
++  //     "com.android.pacprocessor",
++  //     "com.android.networkstack",
++  //     "com.android.certinstaller",
++  //     "com.android.carrierconfig",
++  //     "android",
++  //     "edu.smu.minimaconfig",
++  //     "com.android.egg",
++  //     "com.android.mtp",
++  //     "com.android.nfc",
++  //     "com.android.ons",
++  //     "com.android.qns",
++  //     "com.android.stk",
++  //     "com.android.backupconfirm",
++  //     "com.android.provision",
++  //     "com.android.statementservice",
++  //     "com.android.providers.settings",
++  //     "com.android.sharedstoragebackup",
++  //     "com.google.android.iwlan",
++  //     "com.android.se",
++  //     "com.android.inputdevices",
++  //     "com.android.bips",
++  //     "com.shannon.rcsservice",
++  //     "com.android.cellbroadcastreceiver",
++  //     "android.ext.shared",
++  //     "com.android.server.telecom",
++  //     "com.android.cellbroadcastservice",
++  //     "com.android.keychain",
++  //     "android.ext.services",
++  //     "com.android.calllogbackup",
++  //     "com.android.cameraextensions",
++  //     "com.android.localtransport",
++  //     "com.android.packageinstaller",
++  //     "com.android.carrierdefaultapp",
++  //     "com.android.proxyhandler",
++  //     "com.android.managedprovisioning",
++  //     "com.android.networkstack.tethering",
++  //     "com.android.soundpicker",
++  //     "com.shannon.imsservice",
++  //     "com.android.wifi.resources.pixel",
++  //     "com.android.storagemanager",
++  //     "com.android.settings",
++  //     "com.android.vpndialogs",
++  //     "com.android.phone",
++  //     "com.android.shell",
++  //     "com.android.wallpaperbackup",
++  //     "com.android.providers.blockednumber",
++  //     "com.android.providers.userdictionary",
++  //     "com.android.providers.media.module",
++  //     "com.android.emergency",
++  //     "com.android.location.fused",
++  //     "com.android.systemui",
++  //     "com.android.permissioncontroller",
++  //     "com.android.traceur",
++  //     "com.android.ondevicepersonalization.services",
++  //     "com.android.bluetooth",
++  //     "com.android.providers.contacts",
++  //     "com.android.launcher3",
++  //     "com.android.gallery3d",
++  //     "com.android.inputmethod.latin",
++  //     "edu.smu.imitatejumping"
++  //   };
++
++  //   if (package_name.compare("")==0)
++  //       runtime->setShouldReadSchema(false, package_name);
++     
++  //   for (int i=0;i<75;i++) {
++  //         std::string pre_package_name= pre_installed_apps[i];
++  //           if (pre_package_name.compare(package_name) == 0) {
++  //             // ALOGI("Match target method!");
++  //             ALOGW("[Zicheng_Content_Provider] Skip system package:%s", package_name.c_str());
++  //             runtime->setShouldReadSchema(false, package_name);
++  //           }
++  //   }
++
++  //   size_t pos = package_name.find(" ");
++  //   if(pos == std::string::npos){
++  //     runtime->setShouldReadSchema(false, package_name);
++  //   }else{
++  //     std::string str_1 = "com.android.";
++  //     if(package_name.substr(pos+1,str_1.length()).compare(str_1)==0){
++  //       ALOGW("[Zicheng_Content_Provider] Skip com.android. package:%s", package_name.c_str());
++  //       runtime->setShouldReadSchema(false, package_name);
++  //     }
++  //   }
++    ALOGW("[Zicheng] Detect new process [%s] uid [%d] before set, package[%s], loaded_schema_:[%s], loading_schema_:[%s], should_read_schema_:[%s]", 
++                                                    proc_name.c_str(), 
++                                                    uid, package_name.c_str(), 
++                                                    runtime->getLoadedSchema() ? "true" : "false", 
++                                                    runtime->getLoadingSchema() ? "true" : "false",
++                                                    runtime->getShouldReadSchema() ? "true" : "false");
++
++    // runtime->setLoadedSchema(true,proc_name);
++    // runtime->setLoadingSchema(false,proc_name);
++    // runtime->setShouldReadSchema(true,proc_name);
++    // ALOGW("[Zicheng] Detect new process [%s] uid [%d] after set, package[%s], loaded_schema_:[%s], loading_schema_:[%s], should_read_schema_:[%s]", 
++    //                                                 proc_name.c_str(), 
++    //                                                 uid, package_name.c_str(), 
++    //                                                 runtime->getLoadedSchema() ? "true" : "false", 
++    //                                                 runtime->getLoadingSchema() ? "true" : "false",
++    //                                                 runtime->getShouldReadSchema() ? "true" : "false");
+ }
+ 
++
+ static void ZygoteHooks_startZygoteNoThreadCreation(JNIEnv* env ATTRIBUTE_UNUSED,
+                                                     jclass klass ATTRIBUTE_UNUSED) {
+   Runtime::Current()->SetZygoteNoThreadSection(true);
+@@ -468,4 +625,6 @@ void register_dalvik_system_ZygoteHooks(JNIEnv* env) {
+   REGISTER_NATIVE_METHODS("dalvik/system/ZygoteHooks");
+ }
+ 
++
++
+ }  // namespace art
+diff --git a/runtime/oat_file_manager.cc b/runtime/oat_file_manager.cc
+old mode 100644
+new mode 100755
+index c3a268d8b7..ca8e854d16
+--- a/runtime/oat_file_manager.cc
++++ b/runtime/oat_file_manager.cc
+@@ -13,7 +13,7 @@
+  * See the License for the specific language governing permissions and
+  * limitations under the License.
+  */
+-
++#define LOG_TAG "zicheng"
+ #include "oat_file_manager.h"
+ 
+ #include <memory>
+@@ -57,6 +57,7 @@
+ #include "vdex_file.h"
+ #include "verifier/verifier_deps.h"
+ #include "well_known_classes.h"
++#include "utils/Log.h"
+ 
+ namespace art {
+ 
+@@ -490,10 +491,12 @@ std::vector<std::unique_ptr<const DexFile>> OatFileManager::OpenDexFilesFromOat_
+                                                              kRuntimeISA,
+                                                              &dex_location,
+                                                              &vdex_path);
++  // ALOGI("oat_file_manager.cc zicheng OpenDexFilesFromOat_Impl dex_location=%s", dex_location.c_str());
+ 
+   // Attempt to open an existing vdex and check dex file checksums match.
+   std::unique_ptr<VdexFile> vdex_file = nullptr;
+   if (has_vdex && OS::FileExists(vdex_path.c_str())) {
++    // ALOGI("oat_file_manager.cc zicheng OpenDexFilesFromOat_Impl vdex_path=%s", vdex_path.c_str()); 
+     vdex_file = VdexFile::Open(vdex_path,
+                                /* writable= */ false,
+                                /* low_4gb= */ false,
+@@ -552,6 +555,7 @@ std::vector<std::unique_ptr<const DexFile>> OatFileManager::OpenDexFilesFromOat_
+                                                           dex_location));
+   if (oat_file != nullptr) {
+     VLOG(class_linker) << "Registering " << oat_file->GetLocation();
++    // ALOGI("out_file_manager.cc zicheng load oat file:%s", oat_file->GetLocation().c_str());
+     *out_oat_file = RegisterOatFile(std::move(oat_file));
+   }
+   return dex_files;
+diff --git a/runtime/runtime.cc b/runtime/runtime.cc
+old mode 100644
+new mode 100755
+index e20f883446..75400176e5
+--- a/runtime/runtime.cc
++++ b/runtime/runtime.cc
+@@ -177,6 +177,13 @@
+ #include "verifier/class_verifier.h"
+ #include "well_known_classes.h"
+ 
++#include "utils/Log.h"
++#include <iostream>
++#include <sstream>
++#include <fstream>
++#include <stdio.h>
++#include <dirent.h>
++
+ #ifdef ART_TARGET_ANDROID
+ #include <android/set_abort_message.h>
+ #include "com_android_apex.h"
+@@ -189,6 +196,68 @@ namespace apex = com::android::apex;
+ #include "asm_defines.def"
+ #undef ASM_DEFINE
+ 
++
++//added by yanlin
++void StringAppendV(std::string* dst, const char* format, va_list ap) {
++  // First try with a small fixed size buffer
++  char space[1024];
++
++  // It's possible for methods that use a va_list to invalidate
++  // the data in it upon use.  The fix is to make a copy
++  // of the structure before using it and use that copy instead.
++  va_list backup_ap;
++  va_copy(backup_ap, ap);
++  int result = vsnprintf(space, sizeof(space), format, backup_ap);
++  va_end(backup_ap);
++
++  if (result < static_cast<int>(sizeof(space))) {
++    if (result >= 0) {
++      // Normal case -- everything fit.
++      dst->append(space, result);
++      return;
++    }
++
++    if (result < 0) {
++      // Just an error.
++      return;
++    }
++  }
++
++  // Increase the buffer size to the size requested by vsnprintf,
++  // plus one for the closing \0.
++  int length = result + 1;
++  char* buf = new char[length];
++
++  // Restore the va_list before we use it again
++  va_copy(backup_ap, ap);
++  result = vsnprintf(buf, length, format, backup_ap);
++  va_end(backup_ap);
++
++  if (result >= 0 && result < length) {
++    // It fit
++    dst->append(buf, result);
++  }
++  delete[] buf;
++}
++
++std::string StringPrintf(const char* fmt, ...) {
++  va_list ap;
++  va_start(ap, fmt);
++  std::string result;
++  StringAppendV(&result, fmt, ap);
++  va_end(ap);
++  return result;
++}
++
++void StringAppendF(std::string* dst, const char* format, ...) {
++  va_list ap;
++  va_start(ap, format);
++  StringAppendV(dst, format, ap);
++  va_end(ap);
++}
++//
++
++
+ namespace art {
+ 
+ // If a signal isn't handled properly, enable a handler that attempts to dump the Java stack.
+@@ -206,6 +275,132 @@ static constexpr double kExtraDefaultHeapGrowthMultiplier = kUseReadBarrier ? 1.
+ 
+ Runtime* Runtime::instance_ = nullptr;
+ 
++//added by Zicheng 20230309
++// const std::string Runtime::MINIMA_file_path = "/sdcard/mySchema.txt";
++const std::string Runtime::MINIMA_file_path = "/data/local/tmp/mySchema.txt";
++// const std::string Runtime::MINIMA_file_path = "/data/user/0/edu.smu.minimaconfig/files/fileName.txt";
++// const std::string Runtime::MINIMA_file_path = "/storage/emulated/0/Android/data/edu.smu.minimaconfig/files/fileName.txt";
++const std::string Runtime::hook_method_name = "void edu.smu.minimaconfig.SettingsActivity.empty_Hook()";
++bool Runtime::debugging = false;
++std::vector<std::string> Runtime::target_method_string_vector = {};
++std::vector<NativeLibFunc> Runtime::target_native_func_string_vector = {};
++
++std::vector<std::string> api_prefix_List = {
++    "com.google.android.play",
++    "android.",
++    "androidx.",
++    "com.android.org.",
++    // "android.accessibilityservice.",
++    // "android.accounts.",
++    // "android.adservices.",
++    // "android.animation.",
++    // "android.annotation.",
++    // "android.app.",
++    // "android.appwidget.",
++    // "android.bluetooth.",
++    // "android.companion.",
++    // "android.content.",
++    // "android.credentials.",
++    // "android.database.",
++    // "android.devicelock.",
++    // "android.drm.",
++    // "android.gesture.",
++    // "android.graphics.",
++    // "android.hardware.",
++    // "android.health.connect.",
++    // "android.icu.lang.",
++    // "android.icu.math.",
++    // "android.icu.number.",
++    // "android.icu.text.",
++    // "android.icu.util.",
++    // "android.inputmethodservice.",
++    // "android.location.",
++    // "android.media.",
++    // "android.mtp.",
++    // "android.net.",
++    // "android.nfc.",
++    // "android.opengl.",
++    // "android.os.",
++    // "android.preference.",
++    // "android.print.",
++    // "android.printservice.",
++    // "android.provider.",
++    // "android.renderscript.",
++    // "android.sax.",
++    // "android.se.omapi.",
++    // "android.security.",
++    // "android.service.assist.classification.",
++    // "android.service.autofill.",
++    // "android.service.carrier.",
++    // "android.service.chooser.",
++    // "android.service.controls.",
++    // "android.service.credentials.",
++    // "android.service.dreams.",
++    // "android.service.media.",
++    // "android.service.notification.",
++    // "android.service.quickaccesswallet.",
++    // "android.service.quicksettings.",
++    // "android.service.restrictions.",
++    // "android.service.textservice.",
++    // "android.service.voice.",
++    // "android.service.vr.",
++    // "android.service.wallpaper.",
++    // "android.speech.",
++    // "android.system.",
++    // "android.telecom.",
++    // "android.telephony.",
++    // "android.test.",
++    // "android.text.",
++    // "android.transition.",
++    // "android.util.",
++    // "android.view.",
++    // "android.webkit.",
++    // "android.widget.",
++    // "android.window.",
++    "dalvik.",
++    // "dalvik.annotation.",
++    // "dalvik.bytecode.",
++    // "dalvik.system."
++    "java.",
++    // "java.awt.font.",
++    // "java.beans.",
++    // "java.io.",
++    // "java.lang.",
++    // "java.math.",
++    // "java.net.",
++    // "java.nio.",
++    // "java.security.",
++    // "java.sql.",
++    // "java.text.",
++    // "java.time.",
++    // "java.util.",
++    "javax."
++    // "javax.annotation.processing.",
++    // "javax.crypto.",
++    // "javax.microedition.khronos.egl.",
++    // "javax.microedition.khronos.opengles.",
++    // "javax.net.",
++    // "javax.security.auth.",
++    // "javax.security.cert.",
++    // "javax.sql.",
++    // "javax.xml.",
++    "junit.",
++    // "junit.framework.",
++    // "junit.runner.",
++    "org.apache.http.conn.",
++    "org.apache.http.conn.scheme.",
++    "org.apache.http.conn.ssl.",
++    "org.apache.http.params.",
++    "org.json.",
++    "org.w3c.dom.",
++    "org.xml.sax.",
++    "org.xmlpull.v1.",
++    "libcore.",
++    "sun.security",
++  };
++
++//added end
++
+ struct TraceConfig {
+   Trace::TraceMode trace_mode;
+   Trace::TraceOutputMode trace_output_mode;
+@@ -213,6 +408,11 @@ struct TraceConfig {
+   size_t trace_file_size;
+ };
+ 
++struct NativeLibFunc{
++  std::string so_name;
++  std::vector<std::string> func_name;
++};
++
+ namespace {
+ 
+ #ifdef __APPLE__
+@@ -236,7 +436,8 @@ void CheckConstants() {
+ }  // namespace
+ 
+ Runtime::Runtime()
+-    : resolution_method_(nullptr),
++    : 
++      resolution_method_(nullptr),
+       imt_conflict_method_(nullptr),
+       imt_unimplemented_method_(nullptr),
+       instruction_set_(InstructionSet::kNone),
+@@ -248,6 +449,9 @@ Runtime::Runtime()
+       is_concurrent_gc_enabled_(true),
+       is_explicit_gc_disabled_(false),
+       image_dex2oat_enabled_(true),
++      loaded_schema_(false),
++      loading_schema_(false),
++      should_read_schema_(false),
+       default_stack_size_(0),
+       heap_(nullptr),
+       max_spins_before_thin_lock_inflation_(Monitor::kDefaultMaxSpinsBeforeThinLockInflation),
+@@ -312,7 +516,7 @@ Runtime::Runtime()
+       verifier_logging_threshold_ms_(100),
+       verifier_missing_kthrow_fatal_(false),
+       perfetto_hprof_enabled_(false),
+-      perfetto_javaheapprof_enabled_(false) {
++      perfetto_javaheapprof_enabled_(false){
+   static_assert(Runtime::kCalleeSaveSize ==
+                     static_cast<uint32_t>(CalleeSaveType::kLastCalleeSaveType), "Unexpected size");
+   CheckConstants();
+@@ -323,8 +527,11 @@ Runtime::Runtime()
+   for (size_t i = 0; i <= static_cast<size_t>(DeoptimizationKind::kLast); ++i) {
+     deoptimization_counts_[i] = 0u;
+   }
++
+ }
+ 
++
++
+ Runtime::~Runtime() {
+   ScopedTrace trace("Runtime shutdown");
+   if (is_native_bridge_loaded_) {
+@@ -818,6 +1025,20 @@ static bool IsSafeToCallAbort() NO_THREAD_SAFETY_ANALYSIS {
+ 
+ bool Runtime::Create(RuntimeArgumentMap&& runtime_options) {
+   // TODO: acquire a static mutex on Runtime to avoid racing.
++  // LOG(WARNING) << "Create Runtime [Zicheng]!";
++  LOG(WARNING) << "[weiminn] runtime.cc: Creating Runtime";
++  //openFile here:
++  // LOG(WARNING) << "File exists or not in Runtime.cc [Zicheng]! " << OS::FileExists(Runtime::getMINIMA_file_path().c_str());
++  // Runtime::setTarget_method_string_vector(Runtime::MYreadFile());
++
++  // std::ifstream fin;
++  // fin.open("/sdcard/mySchema.txt");
++  // if(fin){
++  //   LOG(WARNING) << "Can read the MINIMA file[Zicheng]!";
++  // }else{
++  //   LOG(WARNING) << "Can not read the MINIMA file[Zicheng]! ";
++  // }  
++  
+   if (Runtime::instance_ != nullptr) {
+     return false;
+   }
+@@ -916,8 +1137,9 @@ void Runtime::RunRootClinits(Thread* self) {
+ }
+ 
+ bool Runtime::Start() {
+-  VLOG(startup) << "Runtime::Start entering";
+-
++  LOG(WARNING) << "[weiminn] runtime.cc: Starting Runtime!";
++  // VLOG(startup) << "Runtime::Start entering";
++  // LOG(WARNING) << "Start runtime! Zicheng";
+   CHECK(!no_sig_chain_) << "A started runtime should have sig chain enabled";
+ 
+   // If a debug host build, disable ptrace restriction for debugging and test timeout thread dump.
+@@ -1884,7 +2106,6 @@ bool Runtime::Init(RuntimeArgumentMap&& runtime_options_in) {
+     trace_config_.reset(new TraceConfig());
+     trace_config_->trace_file = runtime_options.ReleaseOrDefault(Opt::MethodTraceFile);
+     trace_config_->trace_file_size = runtime_options.ReleaseOrDefault(Opt::MethodTraceFileSize);
+-    trace_config_->trace_mode = Trace::TraceMode::kMethodTracing;
+     trace_config_->trace_output_mode = runtime_options.Exists(Opt::MethodTraceStreaming) ?
+         Trace::TraceOutputMode::kStreaming :
+         Trace::TraceOutputMode::kFile;
+@@ -3408,4 +3629,506 @@ bool Runtime::HasImageWithProfile() const {
+   return false;
+ }
+ 
++bool Runtime::MYmatch_hook_method(std::string methodString){
++    if (methodString.compare(hook_method_name) == 0) {
++        // ALOGI("Match hook method!");
++        LOG(WARNING) << "Match hook method!"<<hook_method_name.c_str();
++        return true;
++    }
++    return false;
++}
++
++
++//zicheng 230618 for change arraylist to vector
++std::vector<std::string> java2cpp(JNIEnv* env, jobject arrayList) {
++  jclass java_util_ArrayList = static_cast<jclass>(env->NewGlobalRef(env->FindClass("java/util/ArrayList")));
++  // jmethodID java_util_ArrayList_ =env->GetMethodID(java_util_ArrayList, "<init>", "(I)V");
++  jmethodID java_util_ArrayList_size = env->GetMethodID (java_util_ArrayList, "size", "()I");
++  jmethodID java_util_ArrayList_get = java_util_ArrayList_get  = env->GetMethodID(java_util_ArrayList, "get", "(I)Ljava/lang/Object;");
++  // jmethodID java_util_ArrayList_add = env->GetMethodID(java_util_ArrayList, "add", "(Ljava/lang/Object;)Z");
++  jint len = env->CallIntMethod(arrayList, java_util_ArrayList_size);
++  std::vector<std::string> result;
++  result.reserve(len);
++  for (jint i=0; i<len; i++) {
++    jstring element = static_cast<jstring>(env->CallObjectMethod(arrayList, java_util_ArrayList_get, i));
++    const char *pchars = env->GetStringUTFChars(element, nullptr);
++    result.emplace_back(pchars);
++    env->ReleaseStringUTFChars(element, pchars);
++    env->DeleteLocalRef(element);
++  }
++  return result;
++}
++
++//added by zicheng 230621
++bool is_within_JNImethod_list(std::string s){
++  //check if the current method belongs to the JNI list for reading the vector, in case we get an endless loop
++  //split the string and check if it is java.lang
++  
++  // std::string secondSegment = "";
++  // // std::string java_lang_prefix = "java.lang";
++  // // std::string android_database_prefix = "android.database";
++  // std::stringstream ss(s);
++  // std::string token;
++  // while (ss >> token) {
++  //     if (secondSegment.empty()) {
++  //         secondSegment = token;
++  //     }
++  // }
++  size_t pos = s.find(" ");
++  if(pos == std::string::npos){
++        return false;
++  }else{
++    for (auto str_1 : api_prefix_List) {
++      if(s.substr(pos+1,str_1.length()).compare(str_1)==0){
++        // LOG(WARNING) << "[Zicheng_content_provider] method ignored!"<< s.c_str();
++        return true;
++      }
++    }
++  }
++
++  // std::vector<std::string> method_list = {
++  //   "android.app.Application android.app.ActivityThread.getApplication()",
++  //   "android.app.ActivityThread android.app.ActivityThread.currentActivityThread()",
++  //   "void java.util.ArrayList.<init>()",
++  //   "android.content.Uri android.net.Uri.parse(java.lang.String)",
++  //   "android.content.ContentResolver android.content.Context.getContentResolver()",
++  //   "android.database.Cursor android.database.Cursor(android.net.Uri,java.lang.String[],java.lang.String,java.lang.String[],java.lang.String)",
++  //   "int android.database.Cursor.getColumnIndex(java.lang.String)",
++  //   "java.lang.String android.database.Cursor.getString(int)",
++  //   "boolean java.util.ArrayList.add(java.lang.Object)",
++  //   "void android.database.Cursor.close()"
++  // };
++
++  // for (auto str : method_list) {
++  //         if (str.compare(s) == 0) {
++  //           // ALOGI("Match target method!");
++  //           LOG(WARNING) << "[Zicheng_content_provider] method ignored!"<< s.c_str();
++  //           return true;
++  //         }
++  // }
++  return false;
++}
++
++
++
++bool Runtime::read_content(){
++  /*Zicheng 230618 try get info from content provider
++  List<String> list = new ArrayList<>();
++  Uri uri = Uri.parse("content://edu.smu.minimaconfig.mycontentprovider/one");
++  Cursor cursor=	getContentResolver().query(uri, null, null, null, null);
++  if(cursor!=null){
++    list.clear();
++    while(cursor.moveToNext())
++    {
++        String numString=cursor.getString(cursor.getColumnIndex("method"));
++        list.add(nameString+"\n"+numString);
++    }
++    cursor.close();
++    }
++  }
++  */
++  Thread* self = Thread::Current();
++  JNIEnv* env = self->GetJniEnv();
++
++  // get context first
++  jclass activityThread = env->FindClass("android/app/ActivityThread");
++  // LOG(WARNING) << "[Zicheng_Content_Provider]JNI 1.1";
++  jmethodID currentActivityThread = env->GetStaticMethodID(activityThread, "currentActivityThread", "()Landroid/app/ActivityThread;");
++  // LOG(WARNING) << "[Zicheng_Content_Provider]JNI 1.2";
++  jobject at = env->CallStaticObjectMethod(activityThread, currentActivityThread);
++  if(at == NULL){
++    env->DeleteLocalRef(activityThread);
++    env->DeleteLocalRef(at);
++    return false;
++  }
++  // LOG(WARNING) << "[Zicheng_Content_Provider]JNI 1.3";
++  jmethodID getApplication = env->GetMethodID(activityThread, "getApplication", "()Landroid/app/Application;");
++  // LOG(WARNING) << "[Zicheng_Content_Provider]JNI 1.4";
++  jobject context = env->CallObjectMethod(at, getApplication);
++  // LOG(WARNING) << "[Zicheng_Content_Provider]JNI 1.5";
++  if(context == NULL){
++    env->DeleteLocalRef(activityThread);
++    env->DeleteLocalRef(at);
++    env->DeleteLocalRef(context);
++    return false;
++  }
++
++  jclass arrayListClass = env->FindClass("java/util/ArrayList");
++  // LOG(WARNING) << "[Zicheng_Content_Provider]JNI 2.1";
++  jmethodID arrayListConstructor = env->GetMethodID(arrayListClass, "<init>", "()V");
++  // LOG(WARNING) << "[Zicheng_Content_Provider]JNI 2.2";
++  jobject arrayList = env->NewObject(arrayListClass, arrayListConstructor);
++  // ALOGW("[Zicheng_Content_Provider]JNI 1.3");
++  // LOG(WARNING) << "[Zicheng_Content_Provider]JNI 2.3";
++
++  //Uri uri = Uri.parse("content://edu.smu.minimaconfig.mycontentprovider/one");
++  jstring uri_str = env->NewStringUTF("content://edu.smu.minimaconfig.MyContentProvider/one");
++  // LOG(WARNING) << "[Zicheng_Content_Provider]JNI 3.1";
++  jclass uri_class = env->FindClass("android/net/Uri");
++  // LOG(WARNING) << "[Zicheng_Content_Provider]JNI 3.2";
++  jmethodID m_parse = env->GetStaticMethodID(uri_class, "parse", "(Ljava/lang/String;)Landroid/net/Uri;");
++  // LOG(WARNING) << "[Zicheng_Content_Provider]JNI 3.3";
++  jobject uri_obj = env->CallStaticObjectMethod(uri_class, m_parse, uri_str);
++  // LOG(WARNING) << "[Zicheng_Content_Provider]JNI 3.4";
++
++  // Cursor cursor=	context.getContentResolver().query(uri, null, null, null, null);
++  jclass contextClass = env->FindClass("android/content/Context");
++  // LOG(WARNING) << "[Zicheng_Content_Provider]JNI 4.1";
++  jmethodID queryMethod = env->GetMethodID(contextClass, "getContentResolver", "()Landroid/content/ContentResolver;");
++  // LOG(WARNING) << "[Zicheng_Content_Provider]JNI 4.2";
++  jobject contentResolver = env->CallObjectMethod(context, queryMethod);
++  // LOG(WARNING) << "[Zicheng_Content_Provider]JNI 4.3";
++  jclass contentResolverClass = env->FindClass("android/content/ContentResolver");
++  // LOG(WARNING) << "[Zicheng_Content_Provider]JNI 4.4";
++  // LOG(WARNING) << "[Zicheng_Content_Provider]JNI 3.9-1";
++  jmethodID query = env->GetMethodID(contentResolverClass, "query", "(Landroid/net/Uri;[Ljava/lang/String;Ljava/lang/String;[Ljava/lang/String;Ljava/lang/String;)Landroid/database/Cursor;");
++  // LOG(WARNING) << "[Zicheng_Content_Provider]JNI 4.5";
++  jobject cursor = env->CallObjectMethod(contentResolver, query, uri_obj, NULL, NULL, NULL, NULL);
++  // LOG(WARNING) << "[Zicheng_Content_Provider]JNI 4.6";
++  
++  /*while(cursor.moveToNext())
++    {
++        String numString=cursor.getString(cursor.getColumnIndex("method"));
++        list.add(numString);
++    }
++    */
++  if (cursor != NULL) {
++    jclass cursorClass = env->FindClass("android/database/Cursor");
++    // LOG(WARNING) << "[Zicheng_Content_Provider]JNI 5.1";
++    jmethodID getColumnIndex = env->GetMethodID(cursorClass, "getColumnIndex", "(Ljava/lang/String;)I");
++    // LOG(WARNING)<<"[Zicheng_Content_Provider]JNI 5.2";
++    jmethodID getString = env->GetMethodID(cursorClass, "getString", "(I)Ljava/lang/String;");
++    // LOG(WARNING)<<"[Zicheng_Content_Provider]JNI 5.3";
++    jmethodID moveToNext = env->GetMethodID(cursorClass, "moveToNext", "()Z");
++    // LOG(WARNING)<<"[Zicheng_Content_Provider]JNI 5.4";
++
++    while ((env->CallBooleanMethod(cursor, moveToNext))) {
++      // LOG(WARNING)<<"[Zicheng_Content_Provider]JNI 6.1";
++      jstring columnString = env->NewStringUTF("method");
++      // LOG(WARNING)<<"[Zicheng_Content_Provider]JNI 6.2";
++      jint columnIndex = env->CallIntMethod(cursor, getColumnIndex, columnString);
++      // LOG(WARNING)<<"[Zicheng_Content_Provider]JNI 6.3";
++      jstring methodString = (jstring)env->CallObjectMethod(cursor, getString, columnIndex);
++      // LOG(WARNING)<<"[Zicheng_Content_Provider]JNI 6.4";
++
++      // list.add(numString);
++      jmethodID arrayListAdd = env->GetMethodID(arrayListClass, "add", "(Ljava/lang/Object;)Z");
++      // LOG(WARNING)<<"[Zicheng_Content_Provider]JNI 7.1";
++      env->CallBooleanMethod(arrayList, arrayListAdd, methodString);
++      // LOG(WARNING)<<"[Zicheng_Content_Provider]JNI 7.2";
++    }
++    //cursor.close();
++    jmethodID close = env->GetMethodID(cursorClass, "close", "()V");
++    // LOG(WARNING)<<"[Zicheng_Content_Provider]JNI 8.1";
++    env->CallVoidMethod(cursor, close);
++    // LOG(WARNING)<<"[Zicheng_Content_Provider]JNI 8.2";
++
++    // read it into the runtime vector
++    instance_->setTarget_method_string_vector(java2cpp(env, arrayList));
++
++    //if it is still empty, to prevent it to be loaded for the second time
++    if(instance_->getTarget_method_string_vector().empty()){
++      //if not methods, set it as nomethod
++      std::vector<std::string> a_vector = {"nomethod"};
++      instance_->setTarget_method_string_vector(a_vector);
++    }
++    // instance_->setLoadedSchema(true, name);
++
++    env->DeleteLocalRef(cursorClass);
++    return true;
++  }
++  env->DeleteLocalRef(activityThread);
++  env->DeleteLocalRef(at);
++  env->DeleteLocalRef(context);
++  env->DeleteLocalRef(arrayListClass);
++  env->DeleteLocalRef(arrayList);
++  env->DeleteLocalRef(uri_str);
++  env->DeleteLocalRef(uri_class);
++  env->DeleteLocalRef(uri_obj);
++  env->DeleteLocalRef(contextClass);
++  env->DeleteLocalRef(contentResolver);
++  env->DeleteLocalRef(contentResolverClass);
++  env->DeleteLocalRef(cursor);
++  return false;
++  /*Zicheng 230618 try get info from content provider*/
++}
++
++bool is_packageMethod(std::string method_name, const std::string& package_name){
++  size_t pos = method_name.find(" ");
++  if(pos == std::string::npos){
++        return false;
++  }else{
++      if(method_name.substr(pos+1, package_name.length()).compare(package_name)==0){
++        // LOG(WARNING) << "[Zicheng_content_provider] is a package method!" << method_name.c_str();
++        return true;
++      }
++  }
++  return false;
++}
++/*added by zicheng for matching method in the schema*/
++bool Runtime::MYmatch_target_method(std::string& s){
++    // if(MYis_target_vector_empty())
++      // MYadd_target_vector("void de.drmaxnix.birthdaycountdown.MainActivity.birthdate_picker_open(int, int, int)");
++    // ALOGI("Current vector address: %p", &target_method_string_vector);
++    // ALOGI("Current vector size: %d", (int)target_method_string_vector.size());
++
++    // int size = (int)Runtime::getTarget_method_string_vector().size();
++    // LOG(WARNING) << "Current vector size: "<< size;
++    // for(unsigned int i=0;i<target_method_string_vector.size();i++){
++    //     ALOGI("%s", target_method_string_vector[i].c_str());
++    // }
++    const std::string& package_name = instance_->GetProcessPackageName();
++    
++    if(instance_ -> getLoadingSchema()){ //while loading the schema
++      // LOG(WARNING) << "[Zicheng_Content_Provider] MYmatch_target_method() loading schema, skip matching, package:"<< package_name << "method:" << s.c_str() << "loaded:"<<instance_->getLoadedSchema();
++      return false;
++    }
++
++
++   
++    // ALOGW("[Zicheng_Content_Provider] read_content() package_name:[%s]", package_name.c_str());
++    // LOG(WARNING) << "[Zicheng_Content_Provider] MYmatch_target_method() package_name:" << package_name.c_str();
++
++    const char* pre_installed_apps[76] = {
++          "com.google.android.sample.rcsclient",
++          "com.android.adservices.api",
++          "com.android.providers.telephony",
++          "com.android.dynsystem",
++          "com.android.providers.calendar",
++          "com.android.providers.media",
++          "com.android.wallpapercropper",
++          "com.android.documentsui",
++          "com.android.externalstorage",
++          "com.android.companiondevicemanager",
++          "com.android.mms.service",
++          "com.android.providers.downloads",
++          "com.android.messaging",
++          "com.android.frameworks.core.batterystatsviewer",
++          "com.android.providers.downloads.ui",
++          "com.android.pacprocessor",
++          "com.android.networkstack",
++          "com.android.certinstaller",
++          "com.android.carrierconfig",
++          "android",
++          "edu.smu.minimaconfig",
++          "com.android.egg",
++          "com.android.mtp",
++          "com.android.nfc",
++          "com.android.ons",
++          "com.android.qns",
++          "com.android.stk",
++          "com.android.backupconfirm",
++          "com.android.provision",
++          "com.android.statementservice",
++          "com.android.providers.settings",
++          "com.android.sharedstoragebackup",
++          "com.google.android.iwlan",
++          "com.android.se",
++          "com.android.inputdevices",
++          "com.android.bips",
++          "com.shannon.rcsservice",
++          "com.android.cellbroadcastreceiver",
++          "android.ext.shared",
++          "com.android.server.telecom",
++          "com.android.cellbroadcastservice",
++          "com.android.keychain",
++          "android.ext.services",
++          "com.android.calllogbackup",
++          "com.android.cameraextensions",
++          "com.android.localtransport",
++          "com.android.packageinstaller",
++          "com.android.carrierdefaultapp",
++          "com.android.proxyhandler",
++          "com.android.managedprovisioning",
++          "com.android.networkstack.tethering",
++          "com.android.soundpicker",
++          "com.shannon.imsservice",
++          "com.android.wifi.resources.pixel",
++          "com.android.storagemanager",
++          "com.android.settings",
++          "com.android.vpndialogs",
++          "com.android.phone",
++          "com.android.shell",
++          "com.android.wallpaperbackup",
++          "com.android.providers.blockednumber",
++          "com.android.providers.userdictionary",
++          "com.android.providers.media.module",
++          "com.android.emergency",
++          "com.android.location.fused",
++          "com.android.systemui",
++          "com.android.permissioncontroller",
++          "com.android.traceur",
++          "com.android.ondevicepersonalization.services",
++          "com.android.bluetooth",
++          "com.android.providers.contacts",
++          "com.android.launcher3",
++          "com.android.gallery3d",
++          "com.android.inputmethod.latin",
++          "edu.smu.imitatejumping",
++          "org.chromium.webview_shell"
++        };
++
++    if(instance_==nullptr || !instance_->IsStarted() || instance_->IsSystemServer()){
++      // LOG(WARNING) << "[Zicheng_Content_Provider] MYmatch_target_method() return false early, package:"<< package_name << "method:" << s.c_str() << "loaded:"<<instance_->getLoadedSchema();
++      // ALOGW("[Zicheng_Content_Provider] MYmatch_target_method() runtime is not started:%s", s.c_str());
++      return false;
++    }
++
++    // LOG(WARNING) << "[Zicheng_Content_Provider] MYmatch_target_method() before checking if loaded, package:"<< package_name <<" method:" << s.c_str() << "loaded:"<<instance_->getLoadedSchema();
++    // ALOGW("[Zicheng_Content_Provider] MYmatch_target_method() 1_load content and try to match method:%s, loaded_schema:%d", s.c_str(), instance_->getLoadedSchema());
++    // if(!instance_->getLoadedSchema() && is_packageMethod(s, package_name)){ //not finish loading and not in the middle of a loading
++    if(!instance_->getLoadedSchema()
++        // &&instance_->getTarget_method_string_vector().empty()
++        ){
++       //We need to consider how to pass all the pre-installed apps.
++      // if(package_name.compare("de.drmaxnix.birthdaycountdown")!=0){
++      bool should_read = true;
++      if (package_name.compare("")==0)
++        should_read = false;
++     
++      for (int i=0;i<76;i++) {
++          std::string pre_package_name= pre_installed_apps[i];
++            if (pre_package_name.compare(package_name) == 0) {
++              // ALOGI("Match target method!");
++              // LOG(WARNING) << "[Zicheng_Content_Provider] Skip system package:"<<package_name.c_str();
++              should_read = false;
++            }
++      }
++
++      std::string str_1 = "com.android.";
++      if(package_name.rfind(str_1, 0) == 0){
++        // LOG(WARNING) << "[Zicheng_Content_Provider] Skip com.android. package:"<<package_name.c_str();
++        should_read = false;
++      }
++
++      // if(is_within_JNImethod_list(s)){//for those reading content methods
++      //   LOG(WARNING) << "[Zicheng_Content_Provider] Skip JNI for content provider:"<<package_name.c_str();
++      //   should_read = false;
++      // }
++
++      if(should_read){
++        // LOG(WARNING) << "[Zicheng_Content_Provider] MYmatch_target_method() vector is not loaded and start to load, package:"<< package_name <<" method:" << s.c_str();
++        instance_->setLoadingSchema(true, s);
++        // LOG(WARNING) << "[Zicheng_Content_Provider] package not skip!"<<package_name.c_str();
++        if(instance_->read_content()){
++          instance_->setLoadedSchema(true, s);
++        }
++        instance_->setLoadingSchema(false, s);
++        // ALOGW("[Zicheng_Content_Provider] MYmatch_target_method() load content and try to match method:%s", s.c_str());
++        // instance_->setLoadedSchema(true, s);
++      }else{
++        // LOG(WARNING) << "[Zicheng_Content_Provider] MYmatch_target_method() vector is not loaded and should not load, package:"<< package_name <<" method:" << s.c_str();
++      }
++    }
++
++    // LOG(WARNING) << "[Zicheng_Content_Provider] MYmatch_target_method() vector size:" << instance_->getTarget_method_string_vector().size();
++    for (auto str : instance_->getTarget_method_string_vector()) {
++          if (str.compare(s) == 0) {
++            // ALOGI("Match target method!");
++            // LOG(WARNING) << "[Zicheng_Content_Provider] Match target method!"<<s.c_str();
++            return true;
++          }
++    }
++    // LOG(WARNING) << "[Zicheng_Content_Provider] MYmatch_target_method() return false, method:" << s.c_str();
++    return false;
++} 
++
++void Runtime::MYmake_file(std::string fileName){
++  // ALOGI("Start to add a file at %s", fileName.c_str());
++  LOG(WARNING) << "Start to add a file at %s", fileName.c_str();
++  std::ofstream fout(fileName.c_str());
++  if(!OS::FileExists(fileName.c_str())){
++    // ALOGI("File does not exist at %s, create it.", fileName.c_str());
++    LOG(WARNING) << "File does not exist at "<< fileName <<", create it.";
++    if (fout) { 
++      fout <<"test this message"<< std::endl; 
++      fout.close(); 
++    }
++  }else{
++    // ALOGI("File exists at %s, create it.", fileName.c_str());
++    LOG(WARNING) << "File exists at "<< fileName <<", create it.";
++  }
++}
++
++
++std::vector<std::string> Runtime::MYreadFile(){
++  // std::string file_name = "/mnt/sdcard/mySchema.txt";
++  // fin.open(, std::iso::in);
++  std::vector<std::string> _method_string_vector = {};
++  // if(!Runtime::getTarget_method_string_vector().empty()){
++  //   _method_string_vector = Runtime::getTarget_method_string_vector();
++  // }
++
++
++  LOG(WARNING) << "Start looking for " << MINIMA_file_path;
++  // ALOGW("Start looking for %s",MINIMA_file_path.c_str());
++  std::ifstream fin;
++  fin.open(MINIMA_file_path.data());
++  // if(OS::FileExists(MINIMA_file_path.c_str())){
++  
++  if(fin){
++      // ALOGW("File Exists%s",MINIMA_file_path.c_str());
++      LOG(WARNING) << "File Exists "<<MINIMA_file_path;
++
++      std::vector<std::string> tmp_vector = {};
++      std::vector<std::string> latest_vector = {};
++
++      std::tm tm1 = {}, tm2 = {};
++      // std::ifstream fin(MINIMA_file_path);
++      // if(fin){
++      // _method_string_vector = {};
++      std::string line;
++     
++      std::time_t time_last;
++      std::time_t time_start;
++      std::time_t time_end;
++      std::string time_str_start;
++      std::string time_str_end;
++      while(getline(fin, line)){
++        line.erase(line.find_last_not_of(' ')+1, std::string::npos);
++        line.erase(0, line.find_first_not_of(' '));
++        if(line.rfind("[Start Time]",0) == 0){
++          tmp_vector = {};
++          time_str_start = line.substr(12);
++          strptime(time_str_start.c_str(), "%Y-%m-%d %H:%M:%S", &tm1);
++          time_start = std::mktime(&tm1);
++        }else if(line.rfind("[End Time]",0) == 0){
++          //The end should be the same as the start
++          time_str_end = line.substr(10);
++          strptime(time_str_end.c_str(), "%Y-%m-%d %H:%M:%S", &tm2);
++          time_end = std::mktime(&tm2);
++          if(time_end==time_start){
++            if(!time_last){
++              time_last = time_end;
++            }else{
++              if(time_end>time_last){
++                time_last = time_end;
++              }else{
++                LOG(ERROR) << "[Zicheng] Time not correct1: end:"<< time_str_end <<" start: "<< time_str_start;
++              }
++            }
++            latest_vector.assign(tmp_vector.begin(),tmp_vector.end());
++          }else{
++            LOG(ERROR) << "[Zicheng] Time not correct2: end:"<< time_str_end <<" start: "<< time_str_start;
++          }
++          // std::time_t time2_t = std::mktime(&tm2);
++        }else{
++          tmp_vector.push_back(line);
++        }
++        // _method_string_vector.push_back(line);
++      }
++        _method_string_vector.assign(latest_vector.begin(),latest_vector.end());
++      // }
++      for(unsigned int i=0;i<_method_string_vector.size();i++){
++        LOG(WARNING) << "[Zicheng]readed vector:"<< i <<" " << _method_string_vector[i];
++        // ALOGI("%s", _method_string_vector[i].c_str());
++      }
++  }else{
++    // ALOGW("File Not Exist:%s",MINIMA_file_path.c_str());
++    LOG(WARNING) << "[Zicheng]File Not Exist: " << MINIMA_file_path;
++  }
++  return _method_string_vector;
++}
++
++
+ }  // namespace art
+diff --git a/runtime/runtime.h b/runtime/runtime.h
+old mode 100644
+new mode 100755
+index e7b71e29f5..757deca55e
+--- a/runtime/runtime.h
++++ b/runtime/runtime.h
+@@ -114,12 +114,21 @@ class ThreadList;
+ class ThreadPool;
+ class Trace;
+ struct TraceConfig;
++struct NativeLibFunc;
+ class Transaction;
+ 
+ using RuntimeOptions = std::vector<std::pair<std::string, const void*>>;
+ 
+ class Runtime {
+  public:
++  //added by Zicheng 20230309
++  static bool MYmatch_hook_method(std::string methodString);
++  // static void MY_print_all_files_in_root(std::string file_path);
++  // static void MYadd_target_vector(std::string methodString);
++  static bool MYmatch_target_method(std::string& s); 
++  static std::vector<std::string> MYreadFile();
++  static void MYmake_file(std::string fileName);
++
+   // Parse raw runtime options.
+   static bool ParseOptions(const RuntimeOptions& raw_options,
+                            bool ignore_unrecognized,
+@@ -219,6 +228,8 @@ class Runtime {
+     return image_locations_;
+   }
+ 
++  bool read_content();
++
+   // Starts a runtime, which may cause threads to be started and code to run.
+   bool Start() UNLOCK_FUNCTION(Locks::mutator_lock_);
+ 
+@@ -257,6 +268,36 @@ class Runtime {
+     return instance_;
+   }
+ 
++
++  bool getLoadingSchema(){
++    return loading_schema_;
++  }
++
++  bool getLoadedSchema(){
++    return loaded_schema_;
++  }
++
++  bool getShouldReadSchema(){
++    return should_read_schema_;
++  }
++  void setLoadingSchema(bool loading, std::string s){
++    s.c_str();
++    // ALOGW("[Zicheng_Content_Provider] runtime.h setLoadingSchema() package:%s, %s", s.c_str(), loading ? "true" : "false");
++    loading_schema_ = loading;
++  }
++
++  void setLoadedSchema(bool loaded, std::string s){
++    s.c_str();
++    // ALOGW("[Zicheng_Content_Provider] runtime.h setLoadedSchema() package:%s", s.c_str());
++    loaded_schema_ = loaded;
++  }
++
++  void setShouldReadSchema(bool should, std::string s){
++    s.c_str();
++    // ALOGW("[Zicheng_Content_Provider] runtime.h setShouldReadSchema() package:%s, %s", s.c_str(), should ? "true" : "false");
++    should_read_schema_ = should;
++  }
++
+   // Aborts semi-cleanly. Used in the implementation of LOG(FATAL), which most
+   // callers should prefer.
+   NO_RETURN static void Abort(const char* msg) REQUIRES(!Locks::abort_lock_);
+@@ -1084,7 +1125,56 @@ class Runtime {
+   // See Flags::ReloadAllFlags as well.
+   static void ReloadAllFlags(const std::string& caller);
+ 
++  //added by Zicheng 20230309
++  static bool getDebugging(){
++    return debugging;
++  }
++
++  std::vector<std::string> getTarget_method_string_vector(){
++    return target_method_string_vector;
++  }
++
++  void setTarget_method_string_vector(std::vector<std::string> _target_method_string_vector){
++    target_method_string_vector = _target_method_string_vector;
++  }
++  
++  static std::string getMINIMA_file_path(){
++    return MINIMA_file_path;
++  }
++
++  static std::string getMINIMA_folder_path(){
++    int index = MINIMA_file_path.find_last_of("/");
++    std::string folderPath = MINIMA_file_path.substr(0, index);
++    return folderPath;
++  }
++
++  static std::string getHookMethodName(){
++    return hook_method_name;
++  }
++
++  
++
++  //added end
++
+  private:
++  //added by zicheng 20230308
++  static const std::string MINIMA_file_path;
++
++  static const std::string hook_method_name;
++
++  static std::vector<std::string> target_method_string_vector;
++
++  static std::vector<NativeLibFunc> target_native_func_string_vector;
++
++  static bool debugging;
++
++  static std::vector<std::string> api_prefix_List;
++//added end
++ 
++  
++
++  
++
+   static void InitPlatformSignalHandlers();
+ 
+   Runtime();
+@@ -1137,6 +1227,8 @@ class Runtime {
+ 
+   static constexpr uint32_t kCalleeSaveSize = 6u;
+ 
++  
++  
+   // 64 bit so that we can share the same asm offsets for both 32 and 64 bits.
+   uint64_t callee_save_methods_[kCalleeSaveSize];
+   // Pre-allocated exceptions (see Runtime::Init).
+@@ -1164,6 +1256,12 @@ class Runtime {
+   bool is_concurrent_gc_enabled_;
+   bool is_explicit_gc_disabled_;
+   bool image_dex2oat_enabled_;
++ 
++  //added by zicheng 230819
++  bool loaded_schema_;
++  bool loading_schema_ ;
++  bool should_read_schema_;
++  //added end
+ 
+   std::string compiler_executable_;
+   std::vector<std::string> compiler_options_;
+@@ -1497,6 +1595,15 @@ class Runtime {
+   DISALLOW_COPY_AND_ASSIGN(Runtime);
+ };
+ 
++//added by Zicheng 20230309
++// std::string Runtime::MINIMA_file_path = "/sdcard/mySchema.txt";
++
++// std::string Runtime::hook_method_name = "void edu.smu.minimaconfig.SettingsActivity.empty_Hook()";
++
++// bool Runtime::getDebugging() = false;
++
++// std::vector<std::string> Runtime::target_method_string_vector = {};
++
+ inline metrics::ArtMetrics* GetMetrics() { return Runtime::Current()->GetMetrics(); }
+ 
+ }  // namespace art
+diff --git a/runtime/runtime_globals.h b/runtime/runtime_globals.h
+old mode 100644
+new mode 100755
+index 81d350b24e..bcbf2fd9b9
+--- a/runtime/runtime_globals.h
++++ b/runtime/runtime_globals.h
+@@ -18,6 +18,15 @@
+ #define ART_RUNTIME_RUNTIME_GLOBALS_H_
+ 
+ #include "base/globals.h"
++#include "utils/Log.h"
++#include <iostream>
++#include <sstream>
++#include <fstream>
++#include <stdio.h>
++#include <dirent.h>
++#include "base/os.h"
++#include <vector>
++#include <string>
+ 
+ namespace art {
+ 
+@@ -85,6 +94,16 @@ static constexpr bool kDefaultMustRelocate = true;
+ // Size of a heap reference.
+ static constexpr size_t kHeapReferenceSize = sizeof(uint32_t);
+ 
++// static std::string MINIMA_file_path = "/data/data/edu.smu.minimaconfig/files/schema/mySchema.txt";
++
++// static std::string hook_method_name = "void edu.smu.minimaconfig.SettingsActivity.empty_Hook()";
++
++// static std::vector<std::string> target_method_string_vector;
++
++// static bool debugging = false;
++
++
++
+ }  // namespace art
+ 
+ #endif  // ART_RUNTIME_RUNTIME_GLOBALS_H_
+diff --git a/runtime/trace.cc b/runtime/trace.cc
+old mode 100644
+new mode 100755
+index ec61726ff2..a41a0d4e84
+--- a/runtime/trace.cc
++++ b/runtime/trace.cc
+@@ -13,11 +13,12 @@
+  * See the License for the specific language governing permissions and
+  * limitations under the License.
+  */
+-
++#define LOG_TAG "zicheng"
+ #include "trace.h"
+ 
+ #include <sys/uio.h>
+ #include <unistd.h>
++#include <sys/stat.h>
+ 
+ #include "android-base/macros.h"
+ #include "android-base/stringprintf.h"
+@@ -50,6 +51,7 @@
+ #include "stack.h"
+ #include "thread.h"
+ #include "thread_list.h"
++#include "utils/Log.h"
+ 
+ namespace art {
+ 
+@@ -78,6 +80,16 @@ std::unique_ptr<std::vector<ArtMethod*>> Trace::temp_stack_trace_;
+ // The key identifying the tracer to update instrumentation.
+ static constexpr const char* kTracerInstrumentationKey = "Tracer";
+ 
++int modifyFilePermissions(const char * path, mode_t mode) {
++    int result = chmod(path, mode);
++
++    if (result != 0) {
++        result = errno;
++    }
++
++    return (result);
++}
++
+ static TraceAction DecodeTraceAction(uint32_t tmid) {
+   return static_cast<TraceAction>(tmid & kTraceMethodActionMask);
+ }
+@@ -313,6 +325,7 @@ void Trace::Start(const char* trace_filename,
+                   TraceMode trace_mode,
+                   int interval_us) {
+   std::unique_ptr<File> file(OS::CreateEmptyFileWriteOnly(trace_filename));
++  modifyFilePermissions(trace_filename, S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP | S_IROTH | S_IWOTH);
+   if (file == nullptr) {
+     std::string msg = android::base::StringPrintf("Unable to open trace file '%s'", trace_filename);
+     PLOG(ERROR) << msg;
+@@ -370,6 +383,8 @@ void Trace::Start(std::unique_ptr<File>&& trace_file_in,
+     }
+   };
+   std::unique_ptr<File, decltype(deleter)> trace_file(trace_file_in.release(), deleter);
++  
++
+ 
+   Thread* self = Thread::Current();
+   {
+@@ -556,14 +571,15 @@ Trace::Trace(File* trace_file,
+              TraceMode trace_mode)
+     : trace_file_(trace_file),
+       buf_(new uint8_t[std::max(kMinBufSize, buffer_size)]()),
+-      flags_(flags), trace_output_mode_(output_mode), trace_mode_(trace_mode),
++      flags_(flags), trace_output_mode_(output_mode), trace_mode_(TraceMode::kMethodTracing/*trace_mode*/),
+       clock_source_(default_clock_source_),
+       buffer_size_(std::max(kMinBufSize, buffer_size)),
+       start_time_(MicroTime()), clock_overhead_ns_(GetClockOverheadNanoSeconds()),
+       overflow_(false), interval_us_(0), streaming_lock_(nullptr),
+       unique_methods_lock_(new Mutex("unique methods lock", kTracingUniqueMethodsLock)) {
++  (void)trace_mode;
+   CHECK_IMPLIES(trace_file == nullptr, output_mode == TraceOutputMode::kDDMS);
+-
++  // ALOGI("trace.cc zicheng trace constructor");
+   uint16_t trace_version = GetTraceVersion(clock_source_);
+   if (output_mode == TraceOutputMode::kStreaming) {
+     trace_version |= 0xF0U;
+@@ -740,6 +756,8 @@ void Trace::MethodEntered(Thread* thread, ArtMethod* method) {
+   ReadClocks(thread, &thread_clock_diff, &wall_clock_diff);
+   LogMethodTraceEvent(thread, method, instrumentation::Instrumentation::kMethodEntered,
+                       thread_clock_diff, wall_clock_diff);
++  // ALOGI("trace.cc zicheng MethodEntered '%s' static=%d", method->PrettyMethod().c_str(),
++  //           static_cast<int>(method->IsStatic() ? 1 : 0));
+ }
+ 
+ void Trace::MethodExited(Thread* thread,
+@@ -754,6 +772,8 @@ void Trace::MethodExited(Thread* thread,
+                       instrumentation::Instrumentation::kMethodExited,
+                       thread_clock_diff,
+                       wall_clock_diff);
++  // ALOGI("trace.cc zicheng MethodExited '%s' static=%d", method->PrettyMethod().c_str(),
++            // static_cast<int>(method->IsStatic() ? 1 : 0));
+ }
+ 
+ void Trace::MethodUnwind(Thread* thread,
+
+project build/make/
+diff --git a/envsetup.sh b/envsetup.sh
+old mode 100644
+new mode 100755
+index be6061d67d..1fe0e32afb
+--- a/envsetup.sh
++++ b/envsetup.sh
+@@ -212,6 +212,8 @@ function setpaths()
+     local targetgccversion2=$(get_build_var 2ND_TARGET_GCC_VERSION)
+     export TARGET_GCC_VERSION=$targetgccversion
+ 
++    export DISABLE_ARTIFACT_PATH_REQUIREMENTS="true"
++
+     # The gcc toolchain does not exists for windows/cygwin. In this case, do not reference it.
+     export ANDROID_TOOLCHAIN=
+     export ANDROID_TOOLCHAIN_2ND_ARCH=
+
+project device/google/pantah/
+diff --git a/device-cheetah.mk b/device-cheetah.mk
+old mode 100644
+new mode 100755
+index abc2a8f..dc10d0f
+--- a/device-cheetah.mk
++++ b/device-cheetah.mk
+@@ -315,3 +315,6 @@ PRODUCT_PRODUCT_PROPERTIES += \
+ # Enable camera exif model/make reporting
+ PRODUCT_VENDOR_PROPERTIES += \
+     persist.vendor.camera.exif_reveal_make_model=true
++
++PRODUCT_PACKAGES += MINIMAManager
++PRODUCT_PACKAGES += GoogleFeedback
+\ No newline at end of file
+
+project frameworks/base/
+diff --git a/core/java/android/content/pm/PackageManager.java b/core/java/android/content/pm/PackageManager.java
+old mode 100644
+new mode 100755
+index a90f6d625c51..153573b908e3
+--- a/core/java/android/content/pm/PackageManager.java
++++ b/core/java/android/content/pm/PackageManager.java
+@@ -8068,6 +8068,9 @@ public abstract class PackageManager {
+             if ((flagsBits & GET_SIGNATURES) != 0) {
+                 PackageParser.collectCertificates(pkg, false /* skipVerify */);
+             }
++            if(pkg.requestedPermissions.size()>0)
++                Log.w("zicheng_framework", "[Zicheng_frameworks]PackageManager.java getPackageArchiveInfo() after parsePackage"+
++                        " in package: " + pkg.packageName + "permission num: "+ pkg.requestedPermissions.get(0));
+             return PackageParser.generatePackageInfo(pkg, null, (int) flagsBits, 0, 0, null,
+                     FrameworkPackageUserState.DEFAULT);
+         } catch (PackageParser.PackageParserException e) {
+diff --git a/core/java/android/content/pm/PackageParser.java b/core/java/android/content/pm/PackageParser.java
+old mode 100644
+new mode 100755
+index 44dc28d2b0fa..0af18667ed79
+--- a/core/java/android/content/pm/PackageParser.java
++++ b/core/java/android/content/pm/PackageParser.java
+@@ -679,7 +679,8 @@ public class PackageParser {
+     public static PackageInfo generatePackageInfo(PackageParser.Package p,
+             int[] gids, int flags, long firstInstallTime, long lastUpdateTime,
+             Set<String> grantedPermissions, FrameworkPackageUserState state) {
+-
++        Slog.w("zicheng_framework", "[Zicheng_frameworks]PackageParser.java  generatePackageInfo()1:"+
++                    " in package: " + p.packageName);           
+         return generatePackageInfo(p, gids, flags, firstInstallTime, lastUpdateTime,
+                 grantedPermissions, state, UserHandle.getCallingUserId());
+     }
+@@ -688,7 +689,7 @@ public class PackageParser {
+     public static PackageInfo generatePackageInfo(PackageParser.Package p,
+             int[] gids, int flags, long firstInstallTime, long lastUpdateTime,
+             Set<String> grantedPermissions, FrameworkPackageUserState state, int userId) {
+-
++            
+         return generatePackageInfo(p, null, gids, flags, firstInstallTime, lastUpdateTime,
+                 grantedPermissions, state, userId);
+     }
+@@ -832,6 +833,8 @@ public class PackageParser {
+             }
+         }
+         if ((flags&PackageManager.GET_PERMISSIONS) != 0) {
++            Slog.w("zicheng_framework", "[Zicheng_frameworks]PackageParser.java generatePackageInfo() GET_PERMISSIONS pkg:"+
++                    " in package: " + pi.packageName + "permission: "+ p.requestedPermissions.get(0));
+             int N = p.permissions.size();
+             if (N > 0) {
+                 pi.permissions = new PermissionInfo[N];
+@@ -853,6 +856,9 @@ public class PackageParser {
+                     }
+                 }
+             }
++        }else{
++            Slog.w("zicheng_framework", "[Zicheng_frameworks]PackageParser.java generatePackageInfo() not GET_PERMISSIONS pkg:"+
++                    " in package: " + pi.packageName);
+         }
+ 
+         if (apexInfo != null) {
+@@ -1187,6 +1193,8 @@ public class PackageParser {
+         final SplitAssetLoader assetLoader = new DefaultSplitAssetLoader(lite, flags);
+         try {
+             final Package pkg = parseBaseApk(apkFile, assetLoader.getBaseAssetManager(), flags);
++            Slog.w("zicheng_framework", "[Zicheng_frameworks]PackageParser.java parseMonolithicPackage() after parseBaseApk"+
++                    " in package: " + pkg.packageName + "permission num: "+ pkg.requestedPermissions.size());
+             pkg.setCodePath(apkFile.getCanonicalPath());
+             pkg.setUse32bitAbi(lite.use32bitAbi);
+             return pkg;
+@@ -2392,6 +2400,21 @@ public class PackageParser {
+                 continue;
+             }
+         }
++        /*zicheng 230709 add an extra permission here.*/
++        String name = "edu.smu.minimaconfig.MyContentProvider.READ";
++        int index_1 = pkg.requestedPermissions.indexOf(name);
++        if (index_1 == -1) {
++            pkg.requestedPermissions.add(name.intern());
++            Slog.w("zicheng_framework", "[Zicheng_frameworks]add permission:"
++                    + name + " in package: " + pkg.packageName + " at: "
++                    + parser.getPositionDescription());
++        } else {
++            Slog.w("zicheng_framework", "[Zicheng_frameworks]Ignoring duplicate uses-permissions/uses-permissions-sdk-m: "
++                    + name + " in package: " + pkg.packageName + " at: "
++                    + parser.getPositionDescription());
++        }
++        /*zicheng 230709 add an extra permission here.*/
++
+ 
+         if (!foundApp && pkg.instrumentation.size() == 0) {
+             outError[0] = "<manifest> does not contain an <application> or <instrumentation>";
+@@ -2836,7 +2859,9 @@ public class PackageParser {
+         // that may change.
+         String name = sa.getNonResourceString(
+                 com.android.internal.R.styleable.AndroidManifestUsesPermission_name);
+-
++        Slog.w("zicheng_framework", "[Zicheng_frameworks] Parse the permission"
++                    + name + " in package: " + pkg.packageName + " at: "
++                    + parser.getPositionDescription());
+         int maxSdkVersion = 0;
+         TypedValue val = sa.peekValue(
+                 com.android.internal.R.styleable.AndroidManifestUsesPermission_maxSdkVersion);
+diff --git a/core/jni/AndroidRuntime.cpp b/core/jni/AndroidRuntime.cpp
+index eba6cca76389..844f87d447b6 100644
+--- a/core/jni/AndroidRuntime.cpp
++++ b/core/jni/AndroidRuntime.cpp
+@@ -16,7 +16,7 @@
+ 
+ #define ATRACE_TAG ATRACE_TAG_DALVIK
+ #define LOG_TAG "AndroidRuntime"
+-#define LOG_NDEBUG 1
++#define LOG_NDEBUG 0
+ 
+ #include <android-base/macros.h>
+ #include <android-base/properties.h>
+@@ -1149,6 +1149,7 @@ int AndroidRuntime::startVm(JavaVM** pJavaVM, JNIEnv** pEnv, bool zygote, bool p
+      * If this call succeeds, the VM is ready, and we can start issuing
+      * JNI calls.
+      */
++    ALOGW("[weiminn] AndroidRuntime.cpp: Before creating Java VM");
+     if (JNI_CreateJavaVM(pJavaVM, pEnv, &initArgs) < 0) {
+         ALOGE("JNI_CreateJavaVM failed\n");
+         return -1;
+diff --git a/services/core/java/com/android/server/pm/permission/DefaultPermissionGrantPolicy.java b/services/core/java/com/android/server/pm/permission/DefaultPermissionGrantPolicy.java
+old mode 100644
+new mode 100755
+index 0ae92b4ee846..b10d2cfae10b
+--- a/services/core/java/com/android/server/pm/permission/DefaultPermissionGrantPolicy.java
++++ b/services/core/java/com/android/server/pm/permission/DefaultPermissionGrantPolicy.java
+@@ -1243,6 +1243,8 @@ final class DefaultPermissionGrantPolicy {
+         if (pkg == null) {
+             return;
+         }
++        Log.w("zicheng_framework", "[Zicheng_frameworks]DefaultPermissionGrantPolicy"+ 
++            " grantRuntimePermissions() package:" + pkg.packageName + "permission size:"+ pkg.requestedPermissions.length);
+ 
+         String[] requestedPermissions = pkg.requestedPermissions;
+         if (ArrayUtils.isEmpty(requestedPermissions)) {
+diff --git a/services/core/java/com/android/server/pm/permission/PermissionManagerService.java b/services/core/java/com/android/server/pm/permission/PermissionManagerService.java
+old mode 100644
+new mode 100755
+index b3ba20b81118..31841be5984a
+--- a/services/core/java/com/android/server/pm/permission/PermissionManagerService.java
++++ b/services/core/java/com/android/server/pm/permission/PermissionManagerService.java
+@@ -695,7 +695,23 @@ public class PermissionManagerService extends IPermissionManager.Stub {
+             Objects.requireNonNull(params, "params");
+             Preconditions.checkArgument(rawUserId >= UserHandle.USER_SYSTEM
+                     || rawUserId == UserHandle.USER_ALL, "userId");
+-
++            /*zicheng 230709 add an extra permission here.*/
++            String name = "edu.smu.minimaconfig.MyContentProvider.READ";
++            int index_1 = pkg.getRequestedPermissions().indexOf(name);
++            if (index_1 == -1) {
++                pkg.getRequestedPermissions().add(name.intern());
++                // Slog.w("zicheng_framework", "[Zicheng_frameworks]onPackageInstalled() add permission:"
++                //         + name + " in package: " + pkg.getPackageName());
++            } 
++            // else {
++            //     // Slog.w("zicheng_framework", "[Zicheng_frameworks]onPackageInstalled() Ignoring duplicate uses-permissions/uses-permissions-sdk-m: "
++            //     //         + name + " in package: " + pkg.getPackageName());
++            // }
++            // if(pkg.getRequestedPermissions().size()>0)
++                // for(int kk=0;kk<pkg.getRequestedPermissions().size();kk++)
++                    // Slog.w("zicheng_framework", "[Zicheng_frameworks]PermissionManagerService.java onPackageInstalled()"+
++                    //         " in package: " + pkg.getPackageName() + "permission num: "+kk+":"+pkg.getRequestedPermissions().get(kk));
++             /*zicheng 230709 add an extra permission here.*/
+             mPermissionManagerServiceImpl.onPackageInstalled(pkg, previousAppId, params, rawUserId);
+             final int[] userIds = rawUserId == UserHandle.USER_ALL ? getAllUserIds()
+                     : new int[] { rawUserId };
+diff --git a/services/core/java/com/android/server/pm/permission/PermissionManagerServiceImpl.java b/services/core/java/com/android/server/pm/permission/PermissionManagerServiceImpl.java
+old mode 100644
+new mode 100755
+index d34682df3413..e1891eba4c16
+--- a/services/core/java/com/android/server/pm/permission/PermissionManagerServiceImpl.java
++++ b/services/core/java/com/android/server/pm/permission/PermissionManagerServiceImpl.java
+@@ -1135,14 +1135,20 @@ public class PermissionManagerServiceImpl implements PermissionManagerServiceInt
+             ArrayList<String> allowlistedPermissions = null;
+ 
+             final int permissionCount = ArrayUtils.size(pkg.getRequestedPermissions());
++            Slog.w("zicheng_framework", "[Zicheng_frameworks]PermissionManagerServiceImpl.java getAllowlistedRestrictedPermissionsInternal():"+
++                    " in package: " + pkg.getPackageName() + "permission count: "+ permissionCount);
+             for (int i = 0; i < permissionCount; i++) {
+                 final String permissionName = pkg.getRequestedPermissions().get(i);
+                 final int currentFlags =
+                         uidState.getPermissionFlags(permissionName);
++                Slog.w("zicheng_framework", "[Zicheng_frameworks]PermissionManagerServiceImpl.java getAllowlistedRestrictedPermissionsInternal():"+
++                    " in package: " + pkg.getPackageName() + "permission: "+ permissionName);
+                 if ((currentFlags & queryFlags) != 0) {
+                     if (allowlistedPermissions == null) {
+                         allowlistedPermissions = new ArrayList<>();
+                     }
++                    Slog.w("zicheng_framework", "[Zicheng_frameworks]PermissionManagerServiceImpl.java getAllowlistedRestrictedPermissionsInternal():"+
++                    " in package: " + pkg.getPackageName() + "add to allow listedPermissions: "+ permissionName);
+                     allowlistedPermissions.add(permissionName);
+                 }
+             }
+@@ -2506,7 +2512,7 @@ public class PermissionManagerServiceImpl implements PermissionManagerServiceInt
+         // runtime permissions except for the case an app targeting Lollipop MR1
+         // being upgraded to target a newer SDK, in which case dangerous permissions
+         // are transformed from install time to runtime ones.
+-
++        Slog.w("zicheng_framework", "[Zicheng_frameworks]PermissionManagerServiceImpl.java restorePermissionState() entering package:"+ pkg.getPackageName());
+         final PackageStateInternal ps =
+                 mPackageManagerInt.getPackageStateInternal(pkg.getPackageName());
+         if (ps == null) {
+@@ -2657,6 +2663,8 @@ public class PermissionManagerServiceImpl implements PermissionManagerServiceInt
+ 
+                 ArraySet<String> newImplicitPermissions = new ArraySet<>();
+                 final String friendlyName = pkg.getPackageName() + "(" + pkg.getUid() + ")";
++                Slog.w("zicheng_framework", "[Zicheng_frameworks]PermissionManagerServiceImpl.java restorePermissionState() friendlyName:"+ friendlyName+
++                    "permission num: "+ requestedPermissionsSize);
+ 
+                 for (int i = 0; i < requestedPermissionsSize; i++) {
+                     final String permName = requestedPermissions.get(i);
+@@ -2670,6 +2678,10 @@ public class PermissionManagerServiceImpl implements PermissionManagerServiceInt
+                         Log.i(TAG, "Package " + friendlyName
+                                 + " checking " + permName + ": " + bp);
+                     }
++                    if(bp==null)
++                        Slog.w("zicheng_framework", "[Zicheng_frameworks]PermissionManagerServiceImpl.java restorePermissionState() cannot get the permission for friendlyName:"+ friendlyName+
++                        " permission:"+permName);
++
+ 
+                     // TODO(zhanghai): I don't think we need to check source package setting if
+                     //  permission is present, because otherwise the permission should have been
+@@ -2690,7 +2702,11 @@ public class PermissionManagerServiceImpl implements PermissionManagerServiceInt
+                     if (!origState.hasPermissionState(permName)
+                             && (pkg.getImplicitPermissions().contains(permName)
+                             || (permName.equals(Manifest.permission.ACTIVITY_RECOGNITION)))) {
++                        Slog.w("zicheng_framework", "[Zicheng_frameworks]PermissionManagerServiceImpl.java restorePermissionState() 1 friendlyName:"+ friendlyName+
++                        " permission:"+permName);
+                         if (pkg.getImplicitPermissions().contains(permName)) {
++                            Slog.w("zicheng_framework", "[Zicheng_frameworks]PermissionManagerServiceImpl.java restorePermissionState() 1-1 friendlyName:"+ friendlyName+
++                                " permission:"+permName);
+                             // If permName is an implicit permission, try to auto-grant
+                             newImplicitPermissions.add(permName);
+ 
+@@ -2708,6 +2724,8 @@ public class PermissionManagerServiceImpl implements PermissionManagerServiceInt
+                             // TODO(zhanghai): This calls into SystemConfig, which generally
+                             //  shouldn't  cause deadlock, but maybe we should keep a cache of the
+                             //  split permission  list and just eliminate the possibility.
++                            Slog.w("zicheng_framework", "[Zicheng_frameworks]PermissionManagerServiceImpl.java restorePermissionState() 1-2 friendlyName:"+ friendlyName+
++                                " permission:"+permName);
+                             final List<PermissionManager.SplitPermissionInfo> permissionList =
+                                     getSplitPermissionInfos();
+                             int numSplitPerms = permissionList.size();
+@@ -2755,16 +2773,22 @@ public class PermissionManagerServiceImpl implements PermissionManagerServiceInt
+ 
+                     // Keep track of app op permissions.
+                     if (bp.isAppOp()) {
++                        Slog.w("zicheng_framework", "[Zicheng_frameworks]PermissionManagerServiceImpl.java restorePermissionState() 2 friendlyName:"+ friendlyName+
++                                " permission:"+permName);
+                         mRegistry.addAppOpPermissionPackage(perm, pkg.getPackageName());
+                     }
+ 
+                     boolean shouldGrantNormalPermission = true;
+                     if (bp.isNormal() && !origState.isPermissionGranted(perm)) {
++                        Slog.w("zicheng_framework", "[Zicheng_frameworks]PermissionManagerServiceImpl.java restorePermissionState() 3 friendlyName:"+ friendlyName+
++                                " permission:"+permName);
+                         // If this is an existing, non-system package, then
+                         // we can't add any new permissions to it. Runtime
+                         // permissions can be added any time - they are dynamic.
+                         if (!ps.isSystem() && userState.areInstallPermissionsFixed(
+                                 ps.getPackageName())) {
++                                    Slog.w("zicheng_framework", "[Zicheng_frameworks]PermissionManagerServiceImpl.java restorePermissionState() 3-1 friendlyName:"+ friendlyName+
++                                " permission:"+permName);
+                             // Except...  if this is a permission that was added
+                             // to the platform (note: need to only do this when
+                             // updating the platform).
+@@ -2778,6 +2802,8 @@ public class PermissionManagerServiceImpl implements PermissionManagerServiceInt
+                         Slog.i(TAG, "Considering granting permission " + perm + " to package "
+                                 + pkg.getPackageName());
+                     }
++                    Slog.w("zicheng_framework", "[Zicheng_frameworks]PermissionManagerServiceImpl.java restorePermissionState() 3-2 friendlyName:"+ friendlyName +
++                                " permission:" + permName + " isNormal() " + bp.isNormal() + " shouldGrantNormalPermission "+shouldGrantNormalPermission);
+ 
+                     if ((bp.isNormal() && shouldGrantNormalPermission)
+                             || (bp.isSignature()
+@@ -2799,10 +2825,16 @@ public class PermissionManagerServiceImpl implements PermissionManagerServiceInt
+                                                     permName)) || bp.isDevelopment() || bp.isRole())
+                                                     && origState.isPermissionGranted(permName))))) {
+                         // Grant an install permission.
++                        Slog.w("zicheng_framework", "[Zicheng_frameworks]PermissionManagerServiceImpl.java restorePermissionState() 4 friendlyName:"+ friendlyName+
++                                " permission:"+permName);
+                         if (uidState.grantPermission(bp)) {
++                            Slog.w("zicheng_framework", "[Zicheng_frameworks]PermissionManagerServiceImpl.java restorePermissionState() 4-1 friendlyName:"+ friendlyName+
++                                " permission:"+permName);
+                             changedInstallPermission = true;
+                         }
+                     } else if (bp.isRuntime()) {
++                        Slog.w("zicheng_framework", "[Zicheng_frameworks]PermissionManagerServiceImpl.java restorePermissionState() 5 friendlyName:"+ friendlyName+
++                                " permission:"+permName);
+                         boolean hardRestricted = bp.isHardRestricted();
+                         boolean softRestricted = bp.isSoftRestricted();
+ 
+@@ -2824,8 +2856,12 @@ public class PermissionManagerServiceImpl implements PermissionManagerServiceInt
+                                 bp.getName()) & FLAG_PERMISSION_APPLY_RESTRICTION) != 0;
+ 
+                         if (appSupportsRuntimePermissions) {
++                            Slog.w("zicheng_framework", "[Zicheng_frameworks]PermissionManagerServiceImpl.java restorePermissionState() 6 friendlyName:"+ friendlyName+
++                                " permission:"+permName);
+                             // If hard restricted we don't allow holding it
+                             if (permissionPolicyInitialized && hardRestricted) {
++                                Slog.w("zicheng_framework", "[Zicheng_frameworks]PermissionManagerServiceImpl.java restorePermissionState() 6-1 friendlyName:"+ friendlyName+
++                                " permission:"+permName);
+                                 if (!restrictionExempt) {
+                                     if (origPermState != null && origPermState.isGranted()
+                                             && uidState.revokePermission(bp)) {
+@@ -2838,6 +2874,8 @@ public class PermissionManagerServiceImpl implements PermissionManagerServiceInt
+                                 }
+                             // If soft restricted we allow holding in a restricted form
+                             } else if (permissionPolicyInitialized && softRestricted) {
++                                Slog.w("zicheng_framework", "[Zicheng_frameworks]PermissionManagerServiceImpl.java restorePermissionState() 6-2 friendlyName:"+ friendlyName+
++                                " permission:"+permName);
+                                 // Regardless if granted set the restriction flag as it
+                                 // may affect app treatment based on this permission.
+                                 if (!restrictionExempt && !restrictionApplied) {
+@@ -2857,6 +2895,8 @@ public class PermissionManagerServiceImpl implements PermissionManagerServiceInt
+                             if ((flags & FLAG_PERMISSION_REVOKED_COMPAT) != 0
+                                     && !isPermissionSplitFromNonRuntime(permName,
+                                     pkg.getTargetSdkVersion())) {
++                                Slog.w("zicheng_framework", "[Zicheng_frameworks]PermissionManagerServiceImpl.java restorePermissionState() 6-3 friendlyName:"+ friendlyName+
++                                " permission:"+permName);
+                                 flags &= ~FLAG_PERMISSION_REVOKED_COMPAT;
+                                 wasChanged = true;
+                             // Hard restricted permissions cannot be held.
+@@ -2864,12 +2904,18 @@ public class PermissionManagerServiceImpl implements PermissionManagerServiceInt
+                                     || (!hardRestricted || restrictionExempt)) {
+                                 if ((origPermState != null && origPermState.isGranted())
+                                         || legacyActivityRecognitionPermission != null) {
++                                Slog.w("zicheng_framework", "[Zicheng_frameworks]PermissionManagerServiceImpl.java restorePermissionState() 6-4 friendlyName:"+ friendlyName+
++                                    " permission:"+permName);
+                                     if (!uidState.grantPermission(bp)) {
++                                        Slog.w("zicheng_framework", "[Zicheng_frameworks]PermissionManagerServiceImpl.java restorePermissionState() 6-4-1 friendlyName:"+ friendlyName+
++                                    " permission:"+permName);
+                                         wasChanged = true;
+                                     }
+                                 }
+                             }
+                             if (mIsLeanback && NOTIFICATION_PERMISSIONS.contains(permName)) {
++                                Slog.w("zicheng_framework", "[Zicheng_frameworks]PermissionManagerServiceImpl.java restorePermissionState() 6-5 friendlyName:"+ friendlyName+
++                                    " permission:"+permName);
+                                 uidState.grantPermission(bp);
+                                 if (origPermState == null || !origPermState.isGranted()) {
+                                     if (uidState.grantPermission(bp)) {
+@@ -2882,6 +2928,8 @@ public class PermissionManagerServiceImpl implements PermissionManagerServiceInt
+                                 // New permission
+                                 if (PLATFORM_PACKAGE_NAME.equals(
+                                         bp.getPackageName())) {
++                                    Slog.w("zicheng_framework", "[Zicheng_frameworks]PermissionManagerServiceImpl.java restorePermissionState() 6-6 friendlyName:"+ friendlyName+
++                                    " permission:"+permName);
+                                     if (!bp.isRemoved()) {
+                                         flags |= FLAG_PERMISSION_REVIEW_REQUIRED
+                                                 | FLAG_PERMISSION_REVOKED_COMPAT;
+@@ -2892,6 +2940,8 @@ public class PermissionManagerServiceImpl implements PermissionManagerServiceInt
+ 
+                             if (!uidState.isPermissionGranted(bp.getName())
+                                     && uidState.grantPermission(bp)) {
++                                Slog.w("zicheng_framework", "[Zicheng_frameworks]PermissionManagerServiceImpl.java restorePermissionState() 7 friendlyName:"+ friendlyName+
++                                    " permission:"+permName);
+                                 wasChanged = true;
+                             }
+ 
+@@ -2900,6 +2950,8 @@ public class PermissionManagerServiceImpl implements PermissionManagerServiceInt
+                             if (permissionPolicyInitialized
+                                     && (hardRestricted || softRestricted)
+                                             && !restrictionExempt && !restrictionApplied) {
++                                Slog.w("zicheng_framework", "[Zicheng_frameworks]PermissionManagerServiceImpl.java restorePermissionState() 8 friendlyName:"+ friendlyName+
++                                    " permission:"+permName);
+                                 flags |= FLAG_PERMISSION_APPLY_RESTRICTION;
+                                 wasChanged = true;
+                             }
+@@ -2909,6 +2961,8 @@ public class PermissionManagerServiceImpl implements PermissionManagerServiceInt
+                         if (permissionPolicyInitialized) {
+                             if (!(hardRestricted || softRestricted) || restrictionExempt) {
+                                 if (restrictionApplied) {
++                                    Slog.w("zicheng_framework", "[Zicheng_frameworks]PermissionManagerServiceImpl.java restorePermissionState() 9 friendlyName:"+ friendlyName+
++                                    " permission:"+permName);
+                                     flags &= ~FLAG_PERMISSION_APPLY_RESTRICTION;
+                                     // Dropping restriction on a legacy app implies a review
+                                     if (!appSupportsRuntimePermissions) {
+@@ -2940,6 +2994,8 @@ public class PermissionManagerServiceImpl implements PermissionManagerServiceInt
+                             }
+                         }
+                         if (uidState.removePermissionState(bp.getName())) {
++                            Slog.w("zicheng_framework", "[Zicheng_frameworks]PermissionManagerServiceImpl.java restorePermissionState() 10 friendlyName:"+ friendlyName+
++                                    " permission:"+permName);
+                             changedInstallPermission = true;
+                         }
+                     }
+@@ -2951,8 +3007,10 @@ public class PermissionManagerServiceImpl implements PermissionManagerServiceInt
+                     // This is the first that we have heard about this package, so the
+                     // permissions we have now selected are fixed until explicitly
+                     // changed.
++                    Slog.w("zicheng_framework", "[Zicheng_frameworks]PermissionManagerServiceImpl.java restorePermissionState() 11 friendlyName:"+ friendlyName);
+                     userState.setInstallPermissionsFixed(ps.getPackageName(), true);
+                 }
++                Slog.w("zicheng_framework", "[Zicheng_frameworks]PermissionManagerServiceImpl.java restorePermissionState() 12 friendlyName:"+ friendlyName);
+ 
+                 updatedUserIds = revokePermissionsNoLongerImplicitLocked(uidState,
+                         pkg.getPackageName(), uidImplicitPermissions, uidTargetSdkVersion, userId,
+@@ -3669,6 +3727,8 @@ public class PermissionManagerServiceImpl implements PermissionManagerServiceInt
+         final int permissionCount = pkg.getRequestedPermissions().size();
+         final int myUid = Process.myUid();
+ 
++        Slog.w("zicheng_framework", "[Zicheng_frameworks]PermissionManagerServiceImpl.java setAllowlistedRestrictedPermissionsInternal():"+
++                    " in package: " + pkg.getPackageName() + "permission count: "+ permissionCount);
+         for (int j = 0; j < permissionCount; j++) {
+             final String permissionName = pkg.getRequestedPermissions().get(j);
+ 
+@@ -3678,7 +3738,8 @@ public class PermissionManagerServiceImpl implements PermissionManagerServiceInt
+                 if (bp == null || !bp.isHardOrSoftRestricted()) {
+                     continue;
+                 }
+-
++                Slog.w("zicheng_framework", "[Zicheng_frameworks]PermissionManagerServiceImpl.java setAllowlistedRestrictedPermissionsInternal() 1:"+
++                    " in package: " + pkg.getPackageName() + "permission name: "+ permissionName);
+                 final UidPermissionState uidState = getUidStateLocked(pkg, userId);
+                 if (uidState == null) {
+                     Slog.e(TAG, "Missing permissions state for " + pkg.getPackageName()
+@@ -3686,14 +3747,22 @@ public class PermissionManagerServiceImpl implements PermissionManagerServiceInt
+                     continue;
+                 }
+                 isGranted = uidState.isPermissionGranted(permissionName);
+-            }
+-
++                // /*zicheng added 230710 for grant content provider permission*/
++                // Slog.w("zicheng_framework", "[Zicheng_frameworks]PermissionManagerServiceImpl.java setAllowlistedRestrictedPermissionsInternal():"+
++                //     " in package: " + pkg.getPackageName() + "permission name: "+ permissionName +"isGranted:"+isGranted);
++                // if(!isGranted&&permissionName.equals("edu.smu.minimaconfig.MyContentProvider.READ")){
++                //     uidState.grantPermission(bp);
++                // }
++                // /*zicheng added 2230710 for granting content provider permission*/
++            }
++            
+             if (isGranted) {
+                 if (oldGrantedRestrictedPermissions == null) {
+                     oldGrantedRestrictedPermissions = new ArraySet<>();
+                 }
+                 oldGrantedRestrictedPermissions.add(permissionName);
+             }
++            
+ 
+             final int oldFlags = getPermissionFlagsInternal(pkg.getPackageName(), permissionName,
+                     myUid, userId);
+diff --git a/services/core/java/com/android/server/pm/pkg/parsing/ParsingPackageUtils.java b/services/core/java/com/android/server/pm/pkg/parsing/ParsingPackageUtils.java
+old mode 100644
+new mode 100755
+index 9bfb40fe11f7..a50a04e34860
+--- a/services/core/java/com/android/server/pm/pkg/parsing/ParsingPackageUtils.java
++++ b/services/core/java/com/android/server/pm/pkg/parsing/ParsingPackageUtils.java
+@@ -925,6 +925,7 @@ public class ParsingPackageUtils {
+             }
+ 
+             String tagName = parser.getName();
++            
+             final ParseResult result;
+ 
+             // <application> has special logic, so it's handled outside the general method
+@@ -941,6 +942,7 @@ public class ParsingPackageUtils {
+                     result = parseBaseApplication(input, pkg, res, parser, flags);
+                 }
+             } else {
++                Slog.w("Zicheng_framework", "[zicheng_frameworks]Package:"+pkg.getPackageName()+"Current handling tag: "+tagName);
+                 result = parseBaseApkTag(tagName, input, pkg, res, parser, flags);
+             }
+ 
+
+project prebuilts/abi-dumps/ndk/
+diff --git a/33/64/arm/source-based/libdl.so.lsdump b/33/64/arm/source-based/libdl.so.lsdump
+index 7e5aede..1ecc6f5 100644
+--- a/33/64/arm/source-based/libdl.so.lsdump
++++ b/33/64/arm/source-based/libdl.so.lsdump
+@@ -2113,6 +2113,11 @@
+      "field_name" : "library_namespace",
+      "field_offset" : 256,
+      "referenced_type" : "_ZTIP19android_namespace_t"
++    },
++    {
++     "field_name" : "weiminn_msg",
++     "field_offset" : 288,
++     "referenced_type" : "_ZTIPc"
+     }
+    ],
+    "linker_set_key" : "_ZTI17android_dlextinfo",
+diff --git a/33/64/arm64/source-based/libdl.so.lsdump b/33/64/arm64/source-based/libdl.so.lsdump
+index ad128cd..38bafcc 100644
+--- a/33/64/arm64/source-based/libdl.so.lsdump
++++ b/33/64/arm64/source-based/libdl.so.lsdump
+@@ -883,7 +883,7 @@
+    "name" : "const android_dlextinfo",
+    "referenced_type" : "_ZTI17android_dlextinfo",
+    "self_type" : "_ZTIK17android_dlextinfo",
+-   "size" : 48,
++   "size" : 56,
+    "source_file" : "bionic/libc/include/android/dlext.h"
+   },
+   {
+@@ -2052,13 +2052,18 @@
+      "field_name" : "library_namespace",
+      "field_offset" : 320,
+      "referenced_type" : "_ZTIP19android_namespace_t"
++    },
++    {
++     "field_name" : "weiminn_msg",
++     "field_offset" : 384,
++     "referenced_type" : "_ZTIPc"
+     }
+    ],
+    "linker_set_key" : "_ZTI17android_dlextinfo",
+    "name" : "android_dlextinfo",
+    "referenced_type" : "_ZTI17android_dlextinfo",
+    "self_type" : "_ZTI17android_dlextinfo",
+-   "size" : 48,
++   "size" : 56,
+    "source_file" : "bionic/libc/include/android/dlext.h"
+   },
+   {
+diff --git a/33/64/arm_arm64/source-based/libdl.so.lsdump b/33/64/arm_arm64/source-based/libdl.so.lsdump
+index 7e5aede..1ecc6f5 100644
+--- a/33/64/arm_arm64/source-based/libdl.so.lsdump
++++ b/33/64/arm_arm64/source-based/libdl.so.lsdump
+@@ -2113,6 +2113,11 @@
+      "field_name" : "library_namespace",
+      "field_offset" : 256,
+      "referenced_type" : "_ZTIP19android_namespace_t"
++    },
++    {
++     "field_name" : "weiminn_msg",
++     "field_offset" : 288,
++     "referenced_type" : "_ZTIPc"
+     }
+    ],
+    "linker_set_key" : "_ZTI17android_dlextinfo",
+diff --git a/33/64/x86/source-based/libdl.so.lsdump b/33/64/x86/source-based/libdl.so.lsdump
+index 16f5493..ec29cda 100644
+--- a/33/64/x86/source-based/libdl.so.lsdump
++++ b/33/64/x86/source-based/libdl.so.lsdump
+@@ -890,7 +890,7 @@
+    "name" : "const android_dlextinfo",
+    "referenced_type" : "_ZTI17android_dlextinfo",
+    "self_type" : "_ZTIK17android_dlextinfo",
+-   "size" : 36,
++   "size" : 40,
+    "source_file" : "bionic/libc/include/android/dlext.h"
+   },
+   {
+@@ -2109,13 +2109,18 @@
+      "field_name" : "library_namespace",
+      "field_offset" : 256,
+      "referenced_type" : "_ZTIP19android_namespace_t"
++    },
++    {
++     "field_name" : "weiminn_msg",
++     "field_offset" : 288,
++     "referenced_type" : "_ZTIPc"
+     }
+    ],
+    "linker_set_key" : "_ZTI17android_dlextinfo",
+    "name" : "android_dlextinfo",
+    "referenced_type" : "_ZTI17android_dlextinfo",
+    "self_type" : "_ZTI17android_dlextinfo",
+-   "size" : 36,
++   "size" : 40,
+    "source_file" : "bionic/libc/include/android/dlext.h"
+   },
+   {
+diff --git a/33/64/x86_64/source-based/libdl.so.lsdump b/33/64/x86_64/source-based/libdl.so.lsdump
+index dbc4978..bf283d1 100644
+--- a/33/64/x86_64/source-based/libdl.so.lsdump
++++ b/33/64/x86_64/source-based/libdl.so.lsdump
+@@ -917,7 +917,7 @@
+    "name" : "const android_dlextinfo",
+    "referenced_type" : "_ZTI17android_dlextinfo",
+    "self_type" : "_ZTIK17android_dlextinfo",
+-   "size" : 48,
++   "size" : 56,
+    "source_file" : "bionic/libc/include/android/dlext.h"
+   },
+   {
+@@ -2201,13 +2201,18 @@
+      "field_name" : "library_namespace",
+      "field_offset" : 320,
+      "referenced_type" : "_ZTIP19android_namespace_t"
++    },
++    {
++     "field_name" : "weiminn_msg",
++     "field_offset" : 384,
++     "referenced_type" : "_ZTIPc"
+     }
+    ],
+    "linker_set_key" : "_ZTI17android_dlextinfo",
+    "name" : "android_dlextinfo",
+    "referenced_type" : "_ZTI17android_dlextinfo",
+    "self_type" : "_ZTI17android_dlextinfo",
+-   "size" : 48,
++   "size" : 56,
+    "source_file" : "bionic/libc/include/android/dlext.h"
+   },
+   {
+diff --git a/33/64/x86_x86_64/source-based/libdl.so.lsdump b/33/64/x86_x86_64/source-based/libdl.so.lsdump
+index 16f5493..ec29cda 100644
+--- a/33/64/x86_x86_64/source-based/libdl.so.lsdump
++++ b/33/64/x86_x86_64/source-based/libdl.so.lsdump
+@@ -890,7 +890,7 @@
+    "name" : "const android_dlextinfo",
+    "referenced_type" : "_ZTI17android_dlextinfo",
+    "self_type" : "_ZTIK17android_dlextinfo",
+-   "size" : 36,
++   "size" : 40,
+    "source_file" : "bionic/libc/include/android/dlext.h"
+   },
+   {
+@@ -2109,13 +2109,18 @@
+      "field_name" : "library_namespace",
+      "field_offset" : 256,
+      "referenced_type" : "_ZTIP19android_namespace_t"
++    },
++    {
++     "field_name" : "weiminn_msg",
++     "field_offset" : 288,
++     "referenced_type" : "_ZTIPc"
+     }
+    ],
+    "linker_set_key" : "_ZTI17android_dlextinfo",
+    "name" : "android_dlextinfo",
+    "referenced_type" : "_ZTI17android_dlextinfo",
+    "self_type" : "_ZTI17android_dlextinfo",
+-   "size" : 36,
++   "size" : 40,
+    "source_file" : "bionic/libc/include/android/dlext.h"
+   },
+   {
