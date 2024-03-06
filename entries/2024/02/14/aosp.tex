@@ -2,15 +2,26 @@
 \subsection{Figure out NatiDroid for AOSP14}
 \label{task:20240214_aosp}
 
-\subsubsection{}
+\subsubsection{Solved Java part of Natidroid}
 
-\begin{lstlisting}
+\begin{lstlisting}[language=bash]
 git clone https://github.com/Sable/soot.git
 git checkout develop
 sudo apt install maven
 sudo update-alternatives --config java
 mvn clean compile assembly:single
 rm -rf out && mkdir out && javac src/*.java src/javaLink/*.java src/cppLink/*.java src/util/*.java -cp "./libs/*" -d out && java -cp "./out:./soot/target/sootclasses-trunk-jar-with-dependencies.jar" findJavaLink
+\end{lstlisting}
+
+Workspace:
+
+\begin{lstlisting}[language=bash]
+# terminal 1
+rm -rf out && mkdir out && javac src/*.java src/javaLink/*.java src/cppLink/*.java src/util/*.java -cp "./soot/target/sootclasses-trunk-jar-with-dependencies.jar:./libs/fastjson-1.2.73.jar" -d out && java -cp "./out:./soot/target/sootclasses-trunk-jar-with-dependencies.jar" findJavaLink
+# terminal 2
+clear && find ./ \( -iname '*.java' -a ! -iname '*test*' \) | xargs grep --color -in 'internalTransform.*;'
+# terminal 3
+mvn clean compile assembly:single    
 \end{lstlisting}
 
 
