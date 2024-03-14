@@ -81,6 +81,211 @@ file & 13 to Debloated 13 & 13 to 14 \\
 \label{tab:aospdiff}
 \end{longtable}
 
+\subsubsection{Code differencer}
+
+\begin{lstlisting}[language=python]
+import os
+import shutil
+import difflib
+
+def html_prep(files, title, workspace, out):
+    html_output = """
+        <!DOCTYPE html>
+        <html>
+        <head>
+        <style>
+        table, th, td {{
+            border: 1px solid black;
+        }}
+        </style>
+        </head>
+        <body>
+        <h2>{}</h2>
+        <body>
+
+        <table>
+            <thead>
+            <tr>
+                <th>{}</th>
+            </tr>
+            </thead>
+            <tbody>
+        """.format(title, out)
+
+    for file in files:
+        html_output += """
+            <tr>
+                <td><a href="{}_diff.html">{}</a></td>
+            </tr>""".format(file, file[len(workspace+out):])
+
+    # Close HTML tags
+    html_output += "</table></body></html>"
+    return html_output
+
+def compare_files(file1, file2, workspace):
+
+    """
+    Compares two C++ source files using the difflib module.
+
+    Args:
+        file1: Path to the first C++ source file.
+        file2: Path to the second C++ source file.
+
+    Returns:
+        A string containing the differences between the two files,
+        or None if the files are identical.
+    """
+
+    if os.path.isdir(file1) or os.path.isdir(file2):
+        return
+
+    html_output = ""
+
+    try:
+
+        with open(file1, 'r') as f1, open(file2, 'r') as f2:
+            # Read content of files line by line
+            data1 = f1.readlines()
+            data2 = f2.readlines()
+
+        # Use difflib to compare the lines
+        diff = difflib.unified_diff(data1, data2, fromfile=file1, tofile=file2)
+
+        if not diff:
+            return None  # Files are identical
+
+        # Generate basic HTML structure
+        html_output = """
+    <!DOCTYPE html>
+    <html>
+    <head>
+    <style>
+    .added {{ background-color: lightgreen; }}
+    .removed {{ background-color: lightcoral; }}
+    </style>
+    </head>
+    <body>
+    <h2>Differences between {} vs. {}</h2>
+    <pre>""".format(file1[len(workspace):], file2[len(workspace):])
+
+        # Add each line with highlighting
+        for line in diff:
+            if line.startswith("+"):
+                html_output += "<span class='added'>{}</span>\n".format(line.strip())
+            elif line.startswith("-"):
+                html_output += "<span class='removed'>{}</span>\n".format(line.strip())
+            else:
+                html_output += "{}\n".format(line.strip())
+
+        # Close HTML tags
+        html_output += "</pre></body></html>"
+
+    except FileNotFoundError as e:
+        pass
+
+    return html_output
+
+def read_directory_contents(directory):
+    """
+    Reads the contents of a directory and its subdirectories recursively.
+
+    Args:
+        directory: Path to the directory to read.
+
+    Returns:
+        A list of full paths to all files within the directory and subdirectories.
+    """
+
+    all_files = []
+    for root, dirs, files in os.walk(directory):
+        for file in files:
+            # if file != '.git':
+            # Construct the full path to the file
+            full_path = os.path.join(root, file)
+            if not os.path.isdir(full_path):
+                all_files.append(full_path)
+    return all_files
+    
+def switch_project_path(path, dest_proj):
+    parsed_path = path.split('/')
+    parsed_path[4] = dest_proj
+    return '/'.join(parsed_path)
+
+def create_dir_for_path_to_file(path):
+    parsed_path = path.split('/')
+    dir_only_path = '/'.join(parsed_path[:-1])
+    try:
+        os.makedirs(dir_only_path)  # Create directory and any missing parent directories
+    except FileExistsError:
+        pass  # Ignore if the directory already exists
+
+def remove_outputs(workspace, out):
+    try:
+        # Use shutil.rmtree with the ignore_errors argument
+        shutil.rmtree(workspace + out, ignore_errors=True)
+        print(f"Directory deleted successfully: {workspace + out}")
+    except OSError as e:
+        raise OSError(f"Error deleting directory: {workspace + out}. Reason: {e}") from e
+    
+def compare_and_print(src, tgt, ref, workspace, out):
+    remove_outputs(workspace, out)
+    processed_files = []
+    for f in read_directory_contents(ref): # load list of customized aosp files
+        # create path/to/dir
+        if not os.path.isdir(f):
+            output_path = switch_project_path(f, 'diff/' + out)
+            create_dir_for_path_to_file(output_path)
+            diff = compare_files(switch_project_path(f, src.split('/')[4]), switch_project_path(f, tgt.split('/')[4]), out)
+            
+            with open(output_path+"_diff.html", "w") as f:
+                if diff:
+                    if diff is not "":
+                        f.write(diff)
+                    else:
+                        f.write("""
+                            <!DOCTYPE html>
+                            <html>
+                            <head>
+                            <style>
+                            .added {{ background-color: lightgreen; }}
+                            .removed {{ background-color: lightcoral; }}
+                            </style>
+                            </head>
+                            <body>
+                            <h2>No Differences between {} vs. {}</h2>
+                            </body></html>""".format(switch_project_path(f, src.split('/')[4]), switch_project_path(f, tgt.split('/')[4])))
+                    processed_files.append(output_path)
+
+    with open(workspace + out + "/index.html", "w") as f:
+        f.write(html_prep(processed_files, src.split('/')[4] + " vs. " + tgt.split('/')[4] + " Differenced", workspace, out))
+
+workspace = "/home/weiminn/Documents/diff/"
+
+# they must follow aosp dir structure
+aosp_de_dir = "/home/weiminn/Documents/customized_aosp" # used as reference on what to compare
+aosp_13_dir = "/home/weiminn/Documents/aosp13"
+aosp_14_dir = "/home/weiminn/Documents/aosp14"
+
+# compare aosp13 vs aosp13 debloated
+compare_and_print(aosp_13_dir, aosp_de_dir, aosp_de_dir, workspace, "13vs13debloat")
+# compare aosp13 vs aosp14
+compare_and_print(aosp_13_dir, aosp_14_dir, aosp_de_dir, workspace, "13vs14")
+
+\end{lstlisting}
+
+\subsubsection{Understand Customized AOSP}
+
+\url{art_quick_invoke_static_stub}footnote{\url{https://zhuanlan.zhihu.com/p/521498157}}
+
+\url{art_quick_generic_jni_trampoline}footnote{\url{https://juejin.cn/post/7249288285809524773}}
+
+\url{artQuickGenericJniTrampoline}\footnote{\url{https://blog.csdn.net/sinat_38172893/article/details/74612596}}
+
+ART Execution\footnote{\url{https://blog.csdn.net/sinat_38172893/article/details/72934122}}
+
+Forking process, binding application, launch activity \footnote{\url{https://medium.com/android-news/android-application-launch-explained-from-zygote-to-your-activity-oncreate-8a8f036864b}}
+
+
 
 % \includepdf[pages=-, scale=.95,pagecommand={}]{entries/2024/01/01/art.pdf}
 
@@ -92,9 +297,7 @@ file & 13 to Debloated 13 & 13 to 14 \\
 % \end{itemize}
 
 % SELinux rule syntax:
-% \begin{lstlisting}
-% allow <domain> <type>:<class> { <permissions> };
-% \end{lstlisting}
+
 
 % \subsubsection{Decoding Permission Denial Message}
 
