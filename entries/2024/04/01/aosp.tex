@@ -32,60 +32,42 @@ It is called by \texttt{ClientTransactionHandler}'s \texttt{handleLaunchActivity
 adb reboot bootloader
 
 echo "[WEIMINN] Wiping data"
-
 fastboot erase userdata
 
 echo "[WEIMINN] Building AOSP"
-
 cd /media/weiminn/Data/aosp14new
-
 source build/envsetup.sh
-
 lunch aosp_cheetah-userdebug
-
 make
 
 echo "[WEIMINN] Flashing ROM"
-
+flash_start=`date +%s`
 fastboot -w flashall
+flash_end=`date +%s`
+echo Flash time was `expr $flash_end - $flash_start` seconds.
 
+boot_start=`date +%s`
 adb wait-for-device
 
 echo "[WEIMINN] Waiting for boot completion"
-
 A=$(adb shell getprop sys.boot_completed | tr -d '\r')
-
 while [ "$A" != "1" ]; do
-        echo "[WEIMINN] Waiting for boot completion"
-        sleep .5
-        A=$(adb shell getprop sys.boot_completed | tr -d '\r')
+echo "[WEIMINN] Waiting for boot completion"
+sleep .5
+A=$(adb shell getprop sys.boot_completed | tr -d '\r')
 done
+boot_end=`date +%s`
+echo Boot time was `expr $boot_end - $boot_start` seconds.
 
 adb root
 
 echo "[WEIMINN] Enabling logging"
-
 adb shell setprop debug.ld.all dlerror,dlopen
 
 rm -f logcat.txt 
-
 echo "[WEIMINN] Logging with Logcat to logcat.txt"
-
-adb logcat >> logcat.txt    
+adb logcat >> logcat.txt
 \end{lstlisting}
-
-\subsection{Complete Events Execution Flow}
-\subsection{Instrument ART Native Execution Flow}
-\subsection{Instrument ART Interpreted Execution Flow}
-\subsection{Figure out Debloater Flow} 
-\subsection{Sequence Diagram Debloater Flow}
-\subsection{Instrument Debloater Flow}
-\subsection{Find Links on Permission Manager}
-\subsection{Find Links on Package Manager}
-\subsection{Explore Package Manager Service Source Codes}
-\subsection{Complete Package Manager Loading Flow}
-\subsection{Understand Zicheng's Changes to Package Manager}
-\subsection{Instrument Package Manager Process}
 
 % \includepdf[pages=-, scale=.95,pagecommand={}]{entries/2024/01/01/art.pdf}
 
