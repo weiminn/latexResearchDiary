@@ -1,0 +1,69 @@
+% % % % mainfile: ../../../../master.tex
+\subsection{Meeting with iSprint}
+\label{task:20240408_android}
+
+\subsubsection{Minutes}
+
+Attendees: Prof. Shar, Albert, Vikas, Phong Phan, Yan Naing, Wei Minn
+
+1. Albert's agenda: 1) Publication of research on this discovered malware, and 2) Discuss plans for the next iteration of Shieldcon this year.
+
+2. Albert would like to continue holding Shieldcon with SMU; he is eager to find a better venue than the previous time; the exact timing of the conference depends on the finding of the malware; he plans to leverage publicity of the conference. 
+
+3. Albert mentioned the preliminary survey conducted on the banks regarding measures for the vulnerabilities in their apps. Many banks did not respond to this malware attack.
+
+4. Phong presents FjordPhantom, virtualization-based malware. He demonstrated a container can run on any phone and requires no root no root required. It utilizes virtualization to run a container that wraps a malware that hooks the target app that looks identical to bank app
+
+5. This type of malware is very flexible and module; can easily repackage any android app.
+
+6. Albert Chings said they discoverd another similar malware a few weeks ago; but still conducting experiments to confirm.
+
+7. This malware relys on sideloading of APK into your Android phone.
+
+8. Phong's Demo of FjordPhantom on emulator:
+
+a. Install demo bank APK via sideloading
+
+b. Install screenreader app via sideloading
+
+c. Demo bank app warns of enabled accessibility, and do not allow you to proceed
+
+d. Inject container inside the app using a Python script and re-sideload the now tampered OCBC app
+
+e. With modified OCBC app, even with screenreader and accessibility turned on, there is no warning message, and the user can proceed.
+
+9. The container also contains Hooking framework which plays essential role in this atack.
+
+10. Albert asserted that more than 80\% of the bank apps are susceptible to this attack
+
+11. Albert blames this vulnerability on poorly written apps.
+
+12. Albert calls for more research and warn the public about this malware.
+
+13. Prof. Shar aims for ASE conference which will be around July.
+
+14. Vikas asked asked about the company that first detected this malware at the end of 23, and inquired about the differences between their release and i-Sprint's plans; Albert confirmed that they are partners with the company that discovered it.
+
+15: Albert said he is planning an extension to last year's paper, and asked Prof. Shar of any better way to proceed.
+
+16: Prof. Shar plans on focusing on this particular attack, rather than as a continuation of last year's work.
+
+17: Albert suggested two separate papers: 1) this attack, and 2) pregress of previous work one year later.
+
+18: Prof. Shar insists to focus on attack for the time being.
+
+19: Albert shares about the concerns that CSA and other agencies across the region have about this attack; he also talked about the potential for more publicity for i-Sprint and SMU regarding the release of this malware.
+
+20: Prof. Shar asked Albert on how much information can be disclose in the paper with regards to the banks, and the detials of the attacks?
+
+21: Albert replies that we cannot divulge the affected banks' names, and instead can follow the press releases of i-Sprint. He added that the banks have already been warned.
+
+22: Prof. Shar assigns Wei Minn to take the lead for this paper.
+
+23. After brief discussion about the Shieldcon date, we agreed to meet up again in person for more details like last time.
+
+24: Prof. Shar asked for 1 or 2 weeks to get back to i-Sprint.
+
+25: Albert, Phong and Vikas leaves Meeting
+
+26: Prof. Shar tasked Wei Minn with setting the skeleton for the paper (follow Vikas' example from last time) and get David involved only toward the end.
