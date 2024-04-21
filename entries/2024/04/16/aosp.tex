@@ -3,7 +3,9 @@
 
 \subsection{ART Loading Process of Classes and Methods}
 
-\subsubsection{Loading Classes and Methods}
+\subsubsection{Find the number of target DEX class in the DEX file}
+
+Need to get the corresponding OAT class in the OAT file using the number of target DEX class.
 
 \begin{longtable}{p{.30\linewidth}p{.60\linewidth}} 
 \toprule
@@ -11,14 +13,86 @@
 \midrule
 \endhead
 
+\multicolumn{2}{l}{\path{frameworks/base/core/jni/AndroidRuntime.cpp}}\\
+
+\path{AndroidRuntime::start}
+&
+\\
+\path{AndroidRuntime::startVm}
+&
+\\
+
+\midrule
+\multicolumn{2}{l}{\path{art/runtime/jni/java_vm_ext.cc}}\\
+
+\path{JNI_CreateJavaVM}
+&
+\\
+
+\midrule
 \multicolumn{2}{l}{\path{art/runtime/runtime.cc}}\\
 
 \path{Runtime::Create}
-&Create ART virtual machine, which will be used to start Zygote Process which runs System Server and Android Apps.
+&Before starting ART, you have to first create ART virtual machine, which will be used to start Zygote Process which runs System Server and Android Apps.
 \\
 \path{Runtime::Init}
 &Parses and parameters for the startup of ART (if image file (an OAT file contianing multiple DEX files) is not specified, \path{/system/framework/boot.art} will be prepared in advance in the system partition to be used as ART virtual machine); create an ART Heap based on the parameters
 \\
+
+\midrule
+\multicolumn{2}{l}{\path{art/runtime/thread.h}}\\
+
+\path{GetJniEnv}
+&Get APIs to ART Java VM of current running thread. The APIs are wrapped in \texttt{struct JNIEnvExt} which is an extension of \texttt{JNIEnv}, and stores \texttt{JNINativeInterface}.
+\\
+
+\midrule
+\multicolumn{2}{l}{\path{libnativehelper/include_jni/jni.h}}\\
+
+\path{JNIEnv}
+&Wraps functions to call ART Java VM to execute Java classes and methods.
+\\
+\path{JNINativeInterface}
+&Wraps functions to call ART Java VM to execute Java classes and methods. Among them is \texttt{JNI::FindClass} which is defined in \path{art/runtime/jni/jni_internal.cc}.
+\\
+
+\midrule
+\multicolumn{2}{l}{\path{art/runtime/jni/jni_internal.cc}}\\
+
+\path{FindClass}
+&Check if runtime instance has started, and then calls \texttt{ClassLinker}'s \texttt{FindClass}. If not started, calls \texttt{ClassLinker}'s \texttt{FindSystemClass} (which also calls \texttt{ClassLinker}) instead.
+\\
+
+\midrule
+\multicolumn{2}{l}{\path{art/runtime/class_linker.cc}}\\
+
+\path{ClassLinker::FindClass}
+&
+\\
+\path{ClassLinker::LookupClass}
+&Check whether the class has already been loaded. If so, just return the corresponding class object.
+\\
+\path{ClassLinker::FindInClassPath}
+&Find the class in DexFile, if \path{class_loader} is null. Then call \texttt{ClassLinker::DefineClass} to load the class from the loaded DEX.
+\\
+\path{ClassLinker::DefineClass}
+&Use the \path{class_loader} object (of \texttt{java.lang.ClassLoader} type) to load the specified class. For system classes
+\\
+
+\midrule
+\multicolumn{2}{l}{\path{art/runtime/jni/jni_env_ext.cc}}\\
+
+\path{GetJniEnv}
+&Get APIs to ART Java VM of current running thread. The APIs are wrapped in \texttt{struct JNIEnv}.
+\\
+
+\midrule
+\multicolumn{2}{l}{\path{art/runtime/thread.h}}\\
+
+\path{GetJniEnv}
+&Called by \path{JNI_CreateJavaVM}
+\\
+
 \path{Thread::Attach}
 &Parses and parameters for the startup of ART (if image file (an OAT file contianing multiple DEX files) is not specified, \path{/system/framework/boot.art} will be prepared in advance in the system partition to be used as ART virtual machine); create an ART Heap based on the parameters
 \\
@@ -28,11 +102,23 @@
 \label{tab:classloadingprocess}
 \end{longtable}
 
+\subsubsection{Repeat the same steps for DEX Method}
+
+\subsubsection{Calculate local machine instructions for the methods}
+
 \subsection{ART Execution Process of Classes and Methods}
 
 \subsection{ART Java VM}
 
-\subsection{Intersection between ART and Debloater Procedures}
+\subsubsection{Which components are involved in Framework for Debloation?}
+\subsection{Find Links on Permission Manager}
+\subsection{Find Links on Package Manager}
+\subsection{Explore Package Manager Service Source Codes}
+\subsection{Complete Package Manager Loading Flow}
+\subsection{Instrument Package Manager Process}
+\subsection{Understand Zicheng's Changes to Package Manager}
+
+\subsection{Intersection between ART/Bionic/Framework and Debloater Procedures}
 
 \subsection{Debloater Procedures not included in OAT/Classes Loading and Execution Flow}
 
@@ -43,14 +129,6 @@
 \subsection{Instrument ART Native Execution Flow}
 
 \subsection{Instrument ART Interpreted Execution Flow}
-
-\subsubsection{Which components are involved in Framework?}
-\subsection{Find Links on Permission Manager}
-\subsection{Find Links on Package Manager}
-\subsection{Explore Package Manager Service Source Codes}
-\subsection{Complete Package Manager Loading Flow}
-\subsection{Instrument Package Manager Process}
-\subsection{Understand Zicheng's Changes to Package Manager}
 
 \subsection{Implement Rudimentary Hardcoded Debloater in AOSP 13}
 
