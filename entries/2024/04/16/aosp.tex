@@ -3,8 +3,6 @@
 
 \subsection{ART Loading Process of Classes and Methods}
 
-\subsubsection{Find the number of target DEX class in the DEX file}
-
 Need to get the corresponding OAT class in the OAT file using the number of target DEX class.
 
 \begin{longtable}{p{.30\linewidth}p{.60\linewidth}} 
@@ -76,8 +74,60 @@ Need to get the corresponding OAT class in the OAT file using the number of targ
 &Find the class in DexFile, if \path{class_loader} is null. Then call \texttt{ClassLinker::DefineClass} to load the class from the loaded DEX.
 \\
 \path{ClassLinker::DefineClass}
-&Use the \path{class_loader} object (of \texttt{java.lang.ClassLoader} type) to load the specified class. For system classes
+&Use the \path{class_loader} object (of \texttt{java.lang.ClassLoader} type) to load the specified class. 
 \\
+\path{ClassLinker::LoadClass}
+&Load the specified class from specified DEX file, and add it to the loaded class list of ClassLinker using \texttt{InsertClass}. Get the class index number of the loading class in the DEX file using \texttt{GetIndexForClassDef} to obtain OatCLass structure in the corresponding OAT file through the class index number. Each member functions of the class being loaded will be instantiated as \texttt{ArtMethod} objects.
+\\
+\path{LinkCode}
+&Determine  if the loaded classes and methods are executed though the interpreter, or with local machine instructions.
+\\
+
+\midrule
+\multicolumn{2}{l}{\path{art/runtime/instrumentation.cc}}\\
+
+\path{Instrumentation::InitializeMethodsCode}
+&
+\\
+\path{Instrumentation::UpdateMethodsCode}
+&
+\\
+\path{Instrumentation::UpdateMethodsCodeImpl}
+&
+\\
+\path{UpdateEntryPoints}
+&
+\\
+
+\midrule
+\multicolumn{2}{l}{\path{art/runtime/art_method.h}}\\
+
+\path{SetEntryPointFromQuickCompiledCode}
+&
+\\
+\path{SetEntryPointFromQuickCompiledCodePtrSize}
+&
+\\
+\path{SetNativePointer}
+&
+\\
+
+\midrule
+\multicolumn{2}{l}{\path{art/runtime/jit/jit.cc}}\\
+
+\path{EntryPointFromQuickCompiledCodeOffset}
+&
+\\
+
+% \midrule
+% \multicolumn{2}{l}{\path{art/runtime/jni/jni_internal.cc}}\\
+
+% \path{GetStaticMethodID}
+% &
+% \\
+% \path{FindMethodID}
+% &
+% \\
 
 \midrule
 \multicolumn{2}{l}{\path{art/runtime/jni/jni_env_ext.cc}}\\
@@ -93,22 +143,57 @@ Need to get the corresponding OAT class in the OAT file using the number of targ
 &Called by \path{JNI_CreateJavaVM}
 \\
 
-\path{Thread::Attach}
-&Parses and parameters for the startup of ART (if image file (an OAT file contianing multiple DEX files) is not specified, \path{/system/framework/boot.art} will be prepared in advance in the system partition to be used as ART virtual machine); create an ART Heap based on the parameters
-\\
-
 \midrule
 \caption{Class Loading Process} 
 \label{tab:classloadingprocess}
 \end{longtable}
 
-\subsubsection{Repeat the same steps for DEX Method}
-
-\subsubsection{Calculate local machine instructions for the methods}
-
 \subsection{ART Execution Process of Classes and Methods}
 
-\subsection{ART Java VM}
+\begin{longtable}{p{.30\linewidth}p{.60\linewidth}} 
+\toprule
+ Procedure & Description \\
+\midrule
+\endhead
+
+\multicolumn{2}{l}{\path{art/runtime/runtime.cc}}\\
+
+\path{Runtime::Init}
+&
+\\
+\\
+
+\midrule
+\multicolumn{2}{l}{\path{art/runtime/thread..cc}}\\
+
+\path{Thread::Attach}
+&
+\\
+\path{Thread::Init}
+&
+\\
+\path{Thread::InitTlsEntryPoints}
+&
+\\
+
+\midrule
+\multicolumn{2}{l}{\path{art/runtime/arch/arm64/entrypoints_init_arm64.cc}}\\
+
+\path{InitEntryPoints}
+&
+\\
+
+\midrule
+\multicolumn{2}{l}{\path{art/runtime/entrypoints/quick/quick_default_init_entrypoints.h}}\\
+
+\path{InitEntryPoints}
+&
+\\
+
+\midrule
+\caption{ART Execution Process} 
+\label{tab:artexecutionprocess}
+\end{longtable}
 
 \subsubsection{Which components are involved in Framework for Debloation?}
 \subsection{Find Links on Permission Manager}
