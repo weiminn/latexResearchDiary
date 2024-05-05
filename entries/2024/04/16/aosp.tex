@@ -148,6 +148,8 @@ Need to get the corresponding OAT class in the OAT file using the number of targ
 \label{tab:classloadingprocess}
 \end{longtable}
 
+Imagespace\footnote{\url{https://www.jianshu.com/p/f45ce55c088c}}\footnote{\url{https://www.jianshu.com/p/4310756f590e}}, and Heap \footnote{\url{https://www.dalvik.work/2021/05/28/dalvik-art-heap-gc/}}
+
 \subsection{ART Execution Process of Classes and Methods}
 
 \begin{longtable}{p{.30\linewidth}p{.60\linewidth}} 
@@ -186,7 +188,110 @@ Need to get the corresponding OAT class in the OAT file using the number of targ
 \midrule
 \multicolumn{2}{l}{\path{art/runtime/entrypoints/quick/quick_default_init_entrypoints.h}}\\
 
-\path{InitEntryPoints}
+\path{DefaultInitEntryPoints}
+&
+\\
+
+\midrule
+\multicolumn{2}{l}{\path{art/runtime/class_linker.cc}}\\
+
+\path{LinkCode}
+&In AOSP 13 it doesn't call \texttt{artInterpreterToCompiledCodeBridge} directly for \path{setEntryPointFromInterpreter} but only \path{setEntryPointFromJni}
+\\
+
+\midrule
+\multicolumn{2}{l}{\path{art/runtime/instrumentation.cc}}\\
+
+\path{Instrumentation::InitializeMethodsCode}
+&
+\\
+\path{UpdateEntrypoints}
+&Called multiple times for \path{GetQuickToInterpreterBridge}, \path{GetQuickInstrumentationEntryPoint}, \path{GetQuickGenericJniStub}, \path{GetQuickToInterpreterBridge}, \path{GetQuickResolutionStub}, \path{interpreter::GetNterpEntryPoint}, \path{GetQuickGenericJniStub}, \path{GetQuickInstrumentationEntryPoint}, \path{GetOptimizedCodeFor}
+\\
+
+\midrule
+\multicolumn{2}{l}{\path{art/runtime/entrypoints/runtime_asm_entrypoints.h}}\\
+
+\path{GetQuickToInterpreterBridge}
+&
+\\
+
+\midrule
+\multicolumn{2}{l}{\path{art/runtime/arch/arm64/quick_entrypoints_arm64.S}}\\
+
+\path{art_quick_to_interpreter_bridge}
+&
+\\
+
+\midrule
+\multicolumn{2}{l}{\path{art/runtime/interpreter/interpreter.cc}}\\
+
+\path{ArtInterpreterToInterpreterBridge}
+&
+\\
+
+\midrule
+\multicolumn{2}{l}{\path{art/runtime/arch/arm64/quick_entrypoints_arm64.S}}\\
+
+\path{art_quick_resolution_trampoline}
+&
+\\
+
+\midrule
+\multicolumn{2}{l}{\path{art/runtime/entrypoints/quick/quick_trampoline_entrypoints.cc}}\\
+
+\path{artQuickResolutionTrampoline}
+&
+\\
+
+\midrule
+\multicolumn{2}{l}{\path{art/runtime/oat.cc}}\\
+
+\path{OatHeader::GetQuickResolutionTrampoline}
+&Should be defined in the \path{class_linker.cc}, but in AOSP13, it's in \path{oat.cc}. Supposed to return \path{quick_resolution_trampoline_} is now defined in both \path{oat_writer.h} and \path{class_linker.h}.
+\\
+
+\midrule
+\multicolumn{2}{l}{\path{art/runtime/native/dalvik_system_DexFile.cc}}\\
+
+\path{DexFile_defineClassNative}
+&
+\\
+
+\midrule
+\multicolumn{2}{l}{\path{art/runtime/class_linker.cc}}\\
+
+\path{ClassLinker::RegisterDexFileLocked}
+&
+\\
+\path{ClassLinker::RegisterDexFile}
+&
+\\
+\path{ClassLinker::AllocDexCache}
+&
+\\
+
+\midrule
+\multicolumn{2}{l}{\path{art/runtime/mirror/dex_cache.cc}}\\
+
+\path{Dex::RegisterDexFileLocked}
+&
+\\
+
+\midrule
+\multicolumn{2}{l}{\path{art/runtime/class_linker-inl.h}}\\
+
+\path{ClassLinker::ResolveMethod}
+&
+\\
+
+\midrule
+\multicolumn{2}{l}{\path{art/runtime/class_linker.cc}}\\
+
+\path{ClassLinker::DefineClass}
+&
+\\
+\path{ClassLinker::LoadMethod}
 &
 \\
 
@@ -194,31 +299,6 @@ Need to get the corresponding OAT class in the OAT file using the number of targ
 \caption{ART Execution Process} 
 \label{tab:artexecutionprocess}
 \end{longtable}
-
-\subsubsection{Which components are involved in Framework for Debloation?}
-\subsection{Find Links on Permission Manager}
-\subsection{Find Links on Package Manager}
-\subsection{Explore Package Manager Service Source Codes}
-\subsection{Complete Package Manager Loading Flow}
-\subsection{Instrument Package Manager Process}
-\subsection{Understand Zicheng's Changes to Package Manager}
-
-\subsection{Intersection between ART/Bionic/Framework and Debloater Procedures}
-
-\subsection{Debloater Procedures not included in OAT/Classes Loading and Execution Flow}
-
-\subsection{Sequence Diagram Debloater Flow}
-
-\subsection{Instrument Debloater Flow}
-
-\subsection{Instrument ART Native Execution Flow}
-
-\subsection{Instrument ART Interpreted Execution Flow}
-
-\subsection{Implement Rudimentary Hardcoded Debloater in AOSP 13}
-
-\subsection{Implement Rudimentary Hardcoded Debloater in AOSP 14}
-
 
 % \includepdf[pages=-, scale=.95,pagecommand={}]{entries/2024/01/01/art.pdf}
 

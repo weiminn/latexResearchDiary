@@ -1,0 +1,797 @@
+% % % % mainfile: ../../../../master.tex
+\subsection{Run Zicheng's code without the weird text files}
+\label{task:20240505_android}
+
+The logcat is still showing old logic even though I swapped files back. So I changed log output from "WEIMINN" to "WEIMINN2" but I got this error:
+\begin{lstlisting}
+[  8% 85/1028] //art/build/boot:art-bootclasspath-fragment dexpreopt art j
+FAILED: out/soong/cheetah/dex_artjars/android/apex/art_boot_images/javalib
+/arm64/boot-apache-xml.art out/soong/cheetah/dex_artjars/android/apex/art_
+boot_images/javalib/arm64/boot-apache-xml.oat out/soong/cheetah/dex_artjar
+s/android/apex/art_boot_images/javalib/arm64/boot-apache-xml.vdex out/soon
+g/cheetah/dex_artjars/android/apex/art_boot_images/javalib/arm64/boot-boun
+cycastle.art out/soong/cheetah/dex_artjars/android/apex/art_boot_images/ja
+valib/arm64/boot-bouncycastle.oat out/soong/cheetah/dex_artjars/android/ap
+ex/art_boot_images/javalib/arm64/boot-bouncycastle.vdex out/soong/cheetah/
+dex_artjars/android/apex/art_boot_images/javalib/arm64/boot-core-libart.ar
+t out/soong/cheetah/dex_artjars/android/apex/art_boot_images/javalib/arm64
+/boot-core-libart.oat out/soong/cheetah/dex_artjars/android/apex/art_boot_
+images/javalib/arm64/boot-core-libart.vdex out/soong/cheetah/dex_artjars/a
+ndroid/apex/art_boot_images/javalib/arm64/boot-okhttp.art out/soong/cheeta
+h/dex_artjars/android/apex/art_boot_images/javalib/arm64/boot-okhttp.oat o
+ut/soong/cheetah/dex_artjars/android/apex/art_boot_images/javalib/arm64/bo
+ot-okhttp.vdex out/soong/cheetah/dex_artjars/android/apex/art_boot_images/
+javalib/arm64/boot.art out/soong/cheetah/dex_artjars/android/apex/art_boot
+_images/javalib/arm64/boot.invocation out/soong/cheetah/dex_artjars/androi
+d/apex/art_boot_images/javalib/arm64/boot.oat out/soong/cheetah/dex_artjar
+s/android/apex/art_boot_images/javalib/arm64/boot.vdex out/soong/cheetah/d
+ex_artjars_unstripped/android/apex/art_boot_images/javalib/arm64/boot-apac
+he-xml.oat out/soong/cheetah/dex_artjars_unstripped/android/apex/art_boot_
+images/javalib/arm64/boot-bouncycastle.oat out/soong/cheetah/dex_artjars_u
+nstripped/android/apex/art_boot_images/javalib/arm64/boot-core-libart.oat 
+out/soong/cheetah/dex_artjars_unstripped/android/apex/art_boot_images/java
+lib/arm64/boot-okhttp.oat out/soong/cheetah/dex_artjars_unstripped/android
+/apex/art_boot_images/javalib/arm64/boot.oat
+mkdir -p out/soong/cheetah/dex_artjars_unstripped/android/apex/art_boot_im
+ages/javalib/arm64 && rm -f out/soong/cheetah/dex_artjars_unstripped/andro
+id/apex/art_boot_images/javalib/arm64/*.art out/soong/cheetah/dex_artjars_
+unstripped/android/apex/art_boot_images/javalib/arm64/*.oat out/soong/chee
+tah/dex_artjars_unstripped/android/apex/art_boot_images/javalib/arm64/*.in
+vocation && rm -f out/soong/cheetah/dex_artjars/android/apex/art_boot_imag
+es/javalib/arm64/*.art out/soong/cheetah/dex_artjars/android/apex/art_boot
+_images/javalib/arm64/*.oat out/soong/cheetah/dex_artjars/android/apex/art
+_boot_images/javalib/arm64/*.invocation && ANDROID_LOG_TAGS="*:e" out/host
+/linux-x86/bin/dex2oatd --avoid-storing-invocation --write-invocation-to=o
+ut/soong/cheetah/dex_artjars/android/apex/art_boot_images/javalib/arm64/bo
+ot.invocation --runtime-arg -Xms64m --runtime-arg -Xmx64m --profile-file=o
+ut/soong/cheetah/dex_artjars/boot.prof --dirty-image-objects=frameworks/ba
+se/config/dirty-image-objects --base=0x70000000 --preloaded-classes=art/bu
+ild/boot/preloaded-classes --dex-file=out/soong/cheetah/dex_artjars_input/
+core-oj.jar --dex-file=out/soong/cheetah/dex_artjars_input/core-libart.jar
+    --dex-file=out/soong/cheetah/dex_artjars_input/okhttp.jar --dex-file=out/
+soong/cheetah/dex_artjars_input/bouncycastle.jar --dex-file=out/soong/chee
+tah/dex_artjars_input/apache-xml.jar --dex-location=/apex/com.android.art/
+javalib/core-oj.jar --dex-location=/apex/com.android.art/javalib/core-liba
+rt.jar --dex-location=/apex/com.android.art/javalib/okhttp.jar --dex-locat
+ion=/apex/com.android.art/javalib/bouncycastle.jar --dex-location=/apex/co
+m.android.art/javalib/apache-xml.jar --generate-debug-info --generate-buil
+d-id --image-format=lz4hc --oat-symbols=out/soong/cheetah/dex_artjars_unst
+ripped/android/apex/art_boot_images/javalib/arm64/boot.oat --strip --oat-f
+ile=out/soong/cheetah/dex_artjars/android/apex/art_boot_images/javalib/arm
+64/boot.oat --oat-location=out/soong/cheetah/dex_artjars/android/apex/art_
+boot_images/javalib/boot.oat --image=out/soong/cheetah/dex_artjars/android
+/apex/art_boot_images/javalib/arm64/boot.art --instruction-set=arm64 --and
+roid-root=out/empty --no-inline-from=core-oj.jar --force-determinism --abo
+rt-on-hard-verifier-error --instruction-set-variant=cortex-a55 --instructi
+on-set-features=default --generate-mini-debug-info || ( echo 'ERROR: Dex2o
+at failed to compile a boot image.It is likely that the boot classpath is 
+inconsistent.Rebuild with ART_BOOT_IMAGE_EXTRA_ARGS="--runtime-arg -verbos
+e:verifier" to see verification errors.' ; false ) # hash of input list: b
+b4c783e60c5fe8f723f06a1fc27caeedeb88883dae99b303257caf0b2276d92
+dex2oatd F 05-05 20:54:42   158   158 art_method.h:604] Check failed: IsIm
+agePointerSize(pointer_size) 
+Runtime aborting...
+All threads:
+DALVIK THREADS (1):
+"main" prio=5 tid=1 Runnable (still starting up)
+    | group="" sCount=0 ucsCount=0 flags=0 obj=(nil) self=0x64b1e64dbe30
+    | sysTid=158 nice=19 cgrp=default sched=0/0 handle=0x7dbfeaf10740
+    | state=R schedstat=( 23324439 37432 5 ) utm=1 stm=0 core=3 HZ=100
+    | stack=0x7ffd468d7000-0x7ffd468d9000 stackSize=8192KB
+    | held mutexes= "abort lock" "mutator lock"(shared held)
+    native: #00 pc 0000000000e9a168  /home/weiminn/Documents/aosp13/out/host
+/linux-x86/bin/dex2oatd64 (UnwindStackCurrent::UnwindFromContext(unsigned 
+long, void*)+88)
+    native: #01 pc 0000000000e94d9d  /home/weiminn/Documents/aosp13/out/host
+/linux-x86/bin/dex2oatd64 (art::DumpNativeStack(std::__1::basic_ostream<ch
+ar, std::__1::char_traits<char> >&, int, BacktraceMap*, char const*, art::
+ArtMethod*, void*, bool)+141)
+    native: #02 pc 0000000000ec8616  /home/weiminn/Documents/aosp13/out/host
+/linux-x86/bin/dex2oatd64 (art::Thread::DumpStack(std::__1::basic_ostream<
+char, std::__1::char_traits<char> >&, bool, BacktraceMap*, bool) const+422
+)
+    native: #03 pc 0000000000ef19ff  /home/weiminn/Documents/aosp13/out/host
+/linux-x86/bin/dex2oatd64 (art::DumpCheckpoint::Run(art::Thread*)+575)
+    native: #04 pc 0000000000eea690  /home/weiminn/Documents/aosp13/out/host
+/linux-x86/bin/dex2oatd64 (art::ThreadList::RunCheckpoint(art::Closure*, a
+rt::Closure*)+288)
+    native: #05 pc 0000000000eea275  /home/weiminn/Documents/aosp13/out/host
+/linux-x86/bin/dex2oatd64 (art::ThreadList::Dump(std::__1::basic_ostream<c
+har, std::__1::char_traits<char> >&, bool)+357)
+    native: #06 pc 0000000000dbae0a  /home/weiminn/Documents/aosp13/out/host
+/linux-x86/bin/dex2oatd64 (art::AbortState::Dump(std::__1::basic_ostream<c
+har, std::__1::char_traits<char> >&) const+186)
+    native: #07 pc 0000000000d9f46f  /home/weiminn/Documents/aosp13/out/host
+/linux-x86/bin/dex2oatd64 (art::Runtime::Abort(char const*)+399)
+    native: #08 pc 00000000016cfd1c  /home/weiminn/Documents/aosp13/out/host
+/linux-x86/bin/dex2oatd64 (android::base::SetAborter(std::__1::function<vo
+id (char const*)>&&)::$_3::__invoke(char const*)+60)
+    native:   std::__1::__compressed_pair_elem<std::__1::basic_string<char, 
+std::__1::char_traits<char>, std::__1::allocator<char> >::__rep, 0, false>
+::__compressed_pair_elem()
+    native:    external/libcxx/include/memory:2140
+    native:   std::__1::__compressed_pair<std::__1::basic_string<char, std::
+__1::char_traits<char>, std::__1::allocator<char> >::__rep, std::__1::allo
+cator<char> >::__compressed_pair<true, void>()
+    native:    external/libcxx/include/memory:2234
+    native:   std::__1::basic_string<char, std::__1::char_traits<char>, std:
+:__1::allocator<char> >::basic_string<decltype(nullptr)>(char const*)
+    native:    external/libcxx/include/string:820
+    native:   UnwindStackCurrent::UnwindFromContext(unsigned long, void*)
+    native:    system/unwinding/libbacktrace/UnwindStack.cpp:180
+    native:   art::DumpNativeStack(std::__1::basic_ostream<char, std::__1::c
+har_traits<char> >&, int, BacktraceMap*, char const*, art::ArtMethod*, voi
+d*, bool)
+    native:    art/runtime/native_stack_dump.cc:339
+    native: #09 pc 00000000016cf9a8  /home/weiminn/Documents/aosp13/out/host
+/linux-x86/bin/dex2oatd64 (android::base::LogMessage::~LogMessage()+328)
+    native:   art::Thread::DumpStack(std::__1::basic_ostream<char, std::__1:
+:char_traits<char> >&, bool, BacktraceMap*, bool) const
+    native:    art/runtime/thread.cc:2298
+    native: #10 pc 00000000006000f2  /home/weiminn/Documents/aosp13/out/host
+/linux-x86/bin/dex2oatd64 (art::ArtMethod::SetDataPtrSize(void const*, art
+::PointerSize)+226)
+    native:   art::DumpCheckpoint::Run(art::Thread*)
+    native:    art/runtime/thread_list.cc:213
+    native:   art::ThreadList::RunCheckpoint(art::Closure*, art::Closure*)
+    native:    art/runtime/thread_list.cc:374
+    native:   art::ThreadList::Dump(std::__1::basic_ostream<char, std::__1::
+char_traits<char> >&, bool)
+    native:    art/runtime/thread_list.cc:257
+    native:   art::AbortState::Dump(std::__1::basic_ostream<char, std::__1::
+char_traits<char> >&) const
+    native:    art/runtime/runtime.cc:761
+    native:   art::Dumpable<art::AbortState>::Dump(std::__1::basic_ostream<c
+har, std::__1::char_traits<char> >&) const
+    native:    art/libartbase/base/dumpable.h:38
+    native:   std::__1::basic_ostream<char, std::__1::char_traits<char> >& a
+rt::operator<< <art::AbortState>(std::__1::basic_ostream<char, std::__1::c
+har_traits<char> >&, art::Dumpable<art::AbortState> const&)
+    native:    art/libartbase/base/dumpable.h:49
+    native:   art::Runtime::Abort(char const*)
+    native:    art/runtime/runtime.cc:884
+    native: #11 pc 0000000000daf16d  /home/weiminn/Documents/aosp13/out/host
+/linux-x86/bin/dex2oatd64 (art::Runtime::CreateResolutionMethod()+285)
+    native: #12 pc 0000000000741453  /home/weiminn/Documents/aosp13/out/host
+/linux-x86/bin/dex2oatd64 (art::ClassLinker::InitWithoutImage(std::__1::ve
+ctor<std::__1::unique_ptr<art::DexFile const, std::__1::default_delete<art
+::DexFile const> >, std::__1::allocator<std::__1::unique_ptr<art::DexFile 
+const, std::__1::default_delete<art::DexFile const> > > >, std::__1::basic
+_string<char, std::__1::char_traits<char>, std::__1::allocator<char> >*)+6
+307)
+    native: #13 pc 0000000000da4709  /home/weiminn/Documents/aosp13/out/host
+/linux-x86/bin/dex2oatd64 (art::Runtime::Init(art::RuntimeArgumentMap&&)+1
+8073)
+    native: #14 pc 0000000000d9fef7  /home/weiminn/Documents/aosp13/out/host
+/linux-x86/bin/dex2oatd64 (art::Runtime::Create(art::RuntimeArgumentMap&&)
++135)
+    native: #15 pc 0000000000491e0f  /home/weiminn/Documents/aosp13/out/host
+/linux-x86/bin/dex2oatd64 (art::Dex2Oat::CreateRuntime(art::RuntimeArgumen
+tMap&&)+127)
+    native: #16 pc 0000000000484526  /home/weiminn/Documents/aosp13/out/host
+/linux-x86/bin/dex2oatd64 (art::Dex2Oat::Setup()+2118)
+    native: #17 pc 000000000047edcc  /home/weiminn/Documents/aosp13/out/host
+/linux-x86/bin/dex2oatd64 (main+1452)
+    native:   android::base::SetAborter(std::__1::function<void (char const*
+)>&&)::$_3::__invoke(char const*)
+    native:    external/libcxx/include/functional:1799
+    native:   android::base::LogMessage::~LogMessage()
+    native:    system/libbase/logging.cpp:504
+    native:   art::ArtMethod::SetDataPtrSize(void const*, art::PointerSize)
+    native:    art/runtime/art_method.h:604
+    native:   art::ArtMethod::SetEntryPointFromJniPtrSize(void const*, art::
+PointerSize)
+    native:    art/runtime/art_method.h:594
+    native:   art::Runtime::CreateResolutionMethod()
+    native:    art/runtime/runtime.cc:2789
+    native:   art::ClassLinker::InitWithoutImage(std::__1::vector<std::__1::
+unique_ptr<art::DexFile const, std::__1::default_delete<art::DexFile const
+> >, std::__1::allocator<std::__1::unique_ptr<art::DexFile const, std::__1
+::default_delete<art::DexFile const> > > >, std::__1::basic_string<char, s
+td::__1::char_traits<char>, std::__1::allocator<char> >*)
+    native:    art/runtime/class_linker.cc:787
+    native:   art::Runtime::Init(art::RuntimeArgumentMap&&)
+    native:    art/runtime/runtime.cc:2077
+    native:   art::Runtime::Create(art::RuntimeArgumentMap&&)
+    native:    art/runtime/runtime.cc:1046
+    native:   art::Dex2Oat::CreateRuntime(art::RuntimeArgumentMap&&)
+    native:    art/dex2oat/dex2oat.cc:2711
+    native:   art::Dex2Oat::Setup()
+    native:    art/dex2oat/dex2oat.cc:1522
+    native:   main
+    native:    art/dex2oat/dex2oat.cc:3168
+    native: #18 pc 000000000002814f  /usr/lib/x86_64-linux-gnu/libc.so.6 (??
+?) (BuildId: b20cbdb62d7717c13dc61a48b7b2e673a7edf233)
+    native: #19 pc 0000000000028208  /usr/lib/x86_64-linux-gnu/libc.so.6 (__
+libc_start_main+136) (BuildId: b20cbdb62d7717c13dc61a48b7b2e673a7edf233)
+    native:   __libc_start_main_impl
+    native:    ./csu/../csu/libc-start.c:360
+    native: #20 pc 00000000004241a8  /home/weiminn/Documents/aosp13/out/host
+/linux-x86/bin/dex2oatd64 (???)
+    (no managed stack frames)
+
+dex2oatd E 05-05 20:54:51   158   158 thread-inl.h:170] holding "abort loc
+k" at point where thread suspension is expected
+Aborting thread:
+"main" prio=5 tid=1 Runnable (still starting up)
+    | group="" sCount=0 ucsCount=0 flags=0 obj=(nil) self=0x64b1e64dbe30
+    | sysTid=158 nice=19 cgrp=default sched=0/0 handle=0x7dbfeaf10740
+    | state=R schedstat=( 46296127 29382693 40 ) utm=4 stm=0 core=8 HZ=100
+    | stack=0x7ffd468d7000-0x7ffd468d9000 stackSize=8192KB
+    | held mutexes= "abort lock" "mutator lock"(shared held)
+    native: #00 pc 0000000000e9a168  /home/weiminn/Documents/aosp13/out/host
+/linux-x86/bin/dex2oatd64 (UnwindStackCurrent::UnwindFromContext(unsigned 
+long, void*)+88)
+    native: #01 pc 0000000000e94d9d  /home/weiminn/Documents/aosp13/out/host
+/linux-x86/bin/dex2oatd64 (art::DumpNativeStack(std::__1::basic_ostream<ch
+ar, std::__1::char_traits<char> >&, int, BacktraceMap*, char const*, art::
+ArtMethod*, void*, bool)+141)
+    native: #02 pc 0000000000ec8616  /home/weiminn/Documents/aosp13/out/host
+/linux-x86/bin/dex2oatd64 (art::Thread::DumpStack(std::__1::basic_ostream<
+char, std::__1::char_traits<char> >&, bool, BacktraceMap*, bool) const+422
+)
+    native: #03 pc 0000000000dbb0dd  /home/weiminn/Documents/aosp13/out/host
+/linux-x86/bin/dex2oatd64 (art::AbortState::DumpThread(std::__1::basic_ost
+ream<char, std::__1::char_traits<char> >&, art::Thread*) const+93)
+    native: #04 pc 0000000000d9f46f  /home/weiminn/Documents/aosp13/out/host
+/linux-x86/bin/dex2oatd64 (art::Runtime::Abort(char const*)+399)
+    native:   std::__1::__compressed_pair_elem<std::__1::basic_string<char, 
+std::__1::char_traits<char>, std::__1::allocator<char> >::__rep, 0, false>
+::__compressed_pair_elem()
+    native:    external/libcxx/include/memory:2140
+    native:   std::__1::__compressed_pair<std::__1::basic_string<char, std::
+__1::char_traits<char>, std::__1::allocator<char> >::__rep, std::__1::allo
+cator<char> >::__compressed_pair<true, void>()
+    native:    external/libcxx/include/memory:2234
+    native:   std::__1::basic_string<char, std::__1::char_traits<char>, std:
+:__1::allocator<char> >::basic_string<decltype(nullptr)>(char const*)
+    native:    external/libcxx/include/string:820
+    native:   UnwindStackCurrent::UnwindFromContext(unsigned long, void*)
+    native:    system/unwinding/libbacktrace/UnwindStack.cpp:180
+    native:   art::DumpNativeStack(std::__1::basic_ostream<char, std::__1::c
+har_traits<char> >&, int, BacktraceMap*, char const*, art::ArtMethod*, voi
+d*, bool)
+    native:    art/runtime/native_stack_dump.cc:339
+    native: #05 pc 00000000016cfd1c  /home/weiminn/Documents/aosp13/out/host
+/linux-x86/bin/dex2oatd64 (android::base::SetAborter(std::__1::function<vo
+id (char const*)>&&)::$_3::__invoke(char const*)+60)
+    native:   art::Thread::DumpStack(std::__1::basic_ostream<char, std::__1:
+:char_traits<char> >&, bool, BacktraceMap*, bool) const
+    native:    art/runtime/thread.cc:2298
+    native:   art::AbortState::DumpThread(std::__1::basic_ostream<char, std:
+:__1::char_traits<char> >&, art::Thread*) const
+    native:    art/runtime/runtime.cc:782
+    native:   art::Dumpable<art::AbortState>::Dump(std::__1::basic_ostream<c
+har, std::__1::char_traits<char> >&) const
+    native:    art/libartbase/base/dumpable.h:38
+    native:   std::__1::basic_ostream<char, std::__1::char_traits<char> >& a
+rt::operator<< <art::AbortState>(std::__1::basic_ostream<char, std::__1::c
+har_traits<char> >&, art::Dumpable<art::AbortState> const&)
+    native:    art/libartbase/base/dumpable.h:49
+    native:   art::Runtime::Abort(char const*)
+    native:    art/runtime/runtime.cc:884
+    native: #06 pc 00000000016cf9a8  /home/weiminn/Documents/aosp13/out/host
+/linux-x86/bin/dex2oatd64 (android::base::LogMessage::~LogMessage()+328)
+    native: #07 pc 00000000006000f2  /home/weiminn/Documents/aosp13/out/host
+/linux-x86/bin/dex2oatd64 (art::ArtMethod::SetDataPtrSize(void const*, art
+::PointerSize)+226)
+    native: #08 pc 0000000000daf16d  /home/weiminn/Documents/aosp13/out/host
+/linux-x86/bin/dex2oatd64 (art::Runtime::CreateResolutionMethod()+285)
+    native: #09 pc 0000000000741453  /home/weiminn/Documents/aosp13/out/host
+/linux-x86/bin/dex2oatd64 (art::ClassLinker::InitWithoutImage(std::__1::ve
+ctor<std::__1::unique_ptr<art::DexFile const, std::__1::default_delete<art
+::DexFile const> >, std::__1::allocator<std::__1::unique_ptr<art::DexFile 
+const, std::__1::default_delete<art::DexFile const> > > >, std::__1::basic
+_string<char, std::__1::char_traits<char>, std::__1::allocator<char> >*)+6
+307)
+    native: #10 pc 0000000000da4709  /home/weiminn/Documents/aosp13/out/host
+/linux-x86/bin/dex2oatd64 (art::Runtime::Init(art::RuntimeArgumentMap&&)+1
+8073)
+    native:   android::base::SetAborter(std::__1::function<void (char const*
+)>&&)::$_3::__invoke(char const*)
+    native:    external/libcxx/include/functional:1799
+    native:   android::base::LogMessage::~LogMessage()
+    native:    system/libbase/logging.cpp:504
+    native:   art::ArtMethod::SetDataPtrSize(void const*, art::PointerSize)
+    native:    art/runtime/art_method.h:604
+    native:   art::ArtMethod::SetEntryPointFromJniPtrSize(void const*, art::
+PointerSize)
+    native:    art/runtime/art_method.h:594
+    native:   art::Runtime::CreateResolutionMethod()
+    native:    art/runtime/runtime.cc:2789
+    native:   art::ClassLinker::InitWithoutImage(std::__1::vector<std::__1::
+unique_ptr<art::DexFile const, std::__1::default_delete<art::DexFile const
+> >, std::__1::allocator<std::__1::unique_ptr<art::DexFile const, std::__1
+::default_delete<art::DexFile const> > > >, std::__1::basic_string<char, s
+td::__1::char_traits<char>, std::__1::allocator<char> >*)
+    native:    art/runtime/class_linker.cc:787
+    native:   art::Runtime::Init(art::RuntimeArgumentMap&&)
+    native:    art/runtime/runtime.cc:2077
+    native: #11 pc 0000000000d9fef7  /home/weiminn/Documents/aosp13/out/host
+/linux-x86/bin/dex2oatd64 (art::Runtime::Create(art::RuntimeArgumentMap&&)
++135)
+    native:   art::Runtime::Create(art::RuntimeArgumentMap&&)
+    native:    art/runtime/runtime.cc:1046
+    native: #12 pc 0000000000491e0f  /home/weiminn/Documents/aosp13/out/host
+/linux-x86/bin/dex2oatd64 (art::Dex2Oat::CreateRuntime(art::RuntimeArgumen
+tMap&&)+127)
+    native:   art::Dex2Oat::CreateRuntime(art::RuntimeArgumentMap&&)
+    native:    art/dex2oat/dex2oat.cc:2711
+    native: #13 pc 0000000000484526  /home/weiminn/Documents/aosp13/out/host
+/linux-x86/bin/dex2oatd64 (art::Dex2Oat::Setup()+2118)
+    native:   art::Dex2Oat::Setup()
+    native:    art/dex2oat/dex2oat.cc:1522
+    native: #14 pc 000000000047edcc  /home/weiminn/Documents/aosp13/out/host
+/linux-x86/bin/dex2oatd64 (main+1452)
+    native:   main
+    native:    art/dex2oat/dex2oat.cc:3168
+    native: #15 pc 000000000002814f  /usr/lib/x86_64-linux-gnu/libc.so.6 (??
+?) (BuildId: b20cbdb62d7717c13dc61a48b7b2e673a7edf233)
+    native: #16 pc 0000000000028208  /usr/lib/x86_64-linux-gnu/libc.so.6 (__
+libc_start_main+136) (BuildId: b20cbdb62d7717c13dc61a48b7b2e673a7edf233)
+    native:   __libc_start_main_impl
+    native:    ./csu/../csu/libc-start.c:360
+    native: #17 pc 00000000004241a8  /home/weiminn/Documents/aosp13/out/host
+/linux-x86/bin/dex2oatd64 (???)
+    (no managed stack frames)
+Aborted (core dumped)
+ERROR: Dex2oat failed to compile a boot image.It is likely that the boot c
+lasspath is inconsistent.Rebuild with ART_BOOT_IMAGE_EXTRA_ARGS="--runtime
+-arg -verbose:verifier" to see verification errors.
+[  8% 86/1028] //art/build/boot:art-bootclasspath-fragment dexpreopt art j
+FAILED: out/soong/cheetah/dex_artjars/android/apex/art_boot_images/javalib
+/arm/boot-apache-xml.art out/soong/cheetah/dex_artjars/android/apex/art_bo
+ot_images/javalib/arm/boot-apache-xml.oat out/soong/cheetah/dex_artjars/an
+droid/apex/art_boot_images/javalib/arm/boot-apache-xml.vdex out/soong/chee
+tah/dex_artjars/android/apex/art_boot_images/javalib/arm/boot-bouncycastle
+.art out/soong/cheetah/dex_artjars/android/apex/art_boot_images/javalib/ar
+m/boot-bouncycastle.oat out/soong/cheetah/dex_artjars/android/apex/art_boo
+t_images/javalib/arm/boot-bouncycastle.vdex out/soong/cheetah/dex_artjars/
+android/apex/art_boot_images/javalib/arm/boot-core-libart.art out/soong/ch
+eetah/dex_artjars/android/apex/art_boot_images/javalib/arm/boot-core-libar
+t.oat out/soong/cheetah/dex_artjars/android/apex/art_boot_images/javalib/a
+rm/boot-core-libart.vdex out/soong/cheetah/dex_artjars/android/apex/art_bo
+ot_images/javalib/arm/boot-okhttp.art out/soong/cheetah/dex_artjars/androi
+d/apex/art_boot_images/javalib/arm/boot-okhttp.oat out/soong/cheetah/dex_a
+rtjars/android/apex/art_boot_images/javalib/arm/boot-okhttp.vdex out/soong
+/cheetah/dex_artjars/android/apex/art_boot_images/javalib/arm/boot.art out
+/soong/cheetah/dex_artjars/android/apex/art_boot_images/javalib/arm/boot.i
+nvocation out/soong/cheetah/dex_artjars/android/apex/art_boot_images/javal
+ib/arm/boot.oat out/soong/cheetah/dex_artjars/android/apex/art_boot_images
+/javalib/arm/boot.vdex out/soong/cheetah/dex_artjars_unstripped/android/ap
+ex/art_boot_images/javalib/arm/boot-apache-xml.oat out/soong/cheetah/dex_a
+rtjars_unstripped/android/apex/art_boot_images/javalib/arm/boot-bouncycast
+le.oat out/soong/cheetah/dex_artjars_unstripped/android/apex/art_boot_imag
+es/javalib/arm/boot-core-libart.oat out/soong/cheetah/dex_artjars_unstripp
+ed/android/apex/art_boot_images/javalib/arm/boot-okhttp.oat out/soong/chee
+tah/dex_artjars_unstripped/android/apex/art_boot_images/javalib/arm/boot.o
+at
+mkdir -p out/soong/cheetah/dex_artjars_unstripped/android/apex/art_boot_im
+ages/javalib/arm && rm -f out/soong/cheetah/dex_artjars_unstripped/android
+/apex/art_boot_images/javalib/arm/*.art out/soong/cheetah/dex_artjars_unst
+ripped/android/apex/art_boot_images/javalib/arm/*.oat out/soong/cheetah/de
+x_artjars_unstripped/android/apex/art_boot_images/javalib/arm/*.invocation
+    && rm -f out/soong/cheetah/dex_artjars/android/apex/art_boot_images/javal
+ib/arm/*.art out/soong/cheetah/dex_artjars/android/apex/art_boot_images/ja
+valib/arm/*.oat out/soong/cheetah/dex_artjars/android/apex/art_boot_images
+/javalib/arm/*.invocation && ANDROID_LOG_TAGS="*:e" out/host/linux-x86/bin
+/dex2oatd --avoid-storing-invocation --write-invocation-to=out/soong/cheet
+ah/dex_artjars/android/apex/art_boot_images/javalib/arm/boot.invocation --
+runtime-arg -Xms64m --runtime-arg -Xmx64m --profile-file=out/soong/cheetah
+/dex_artjars/boot.prof --dirty-image-objects=frameworks/base/config/dirty-
+image-objects --base=0x70000000 --preloaded-classes=art/build/boot/preload
+ed-classes --dex-file=out/soong/cheetah/dex_artjars_input/core-oj.jar --de
+x-file=out/soong/cheetah/dex_artjars_input/core-libart.jar --dex-file=out/
+soong/cheetah/dex_artjars_input/okhttp.jar --dex-file=out/soong/cheetah/de
+x_artjars_input/bouncycastle.jar --dex-file=out/soong/cheetah/dex_artjars_
+input/apache-xml.jar --dex-location=/apex/com.android.art/javalib/core-oj.
+jar --dex-location=/apex/com.android.art/javalib/core-libart.jar --dex-loc
+ation=/apex/com.android.art/javalib/okhttp.jar --dex-location=/apex/com.an
+droid.art/javalib/bouncycastle.jar --dex-location=/apex/com.android.art/ja
+valib/apache-xml.jar --generate-debug-info --generate-build-id --image-for
+mat=lz4hc --oat-symbols=out/soong/cheetah/dex_artjars_unstripped/android/a
+pex/art_boot_images/javalib/arm/boot.oat --strip --oat-file=out/soong/chee
+tah/dex_artjars/android/apex/art_boot_images/javalib/arm/boot.oat --oat-lo
+cation=out/soong/cheetah/dex_artjars/android/apex/art_boot_images/javalib/
+boot.oat --image=out/soong/cheetah/dex_artjars/android/apex/art_boot_image
+s/javalib/arm/boot.art --instruction-set=arm --android-root=out/empty --no
+-inline-from=core-oj.jar --force-determinism --abort-on-hard-verifier-erro
+r --instruction-set-variant=generic --instruction-set-features=default --g
+enerate-mini-debug-info || ( echo 'ERROR: Dex2oat failed to compile a boot
+    image.It is likely that the boot classpath is inconsistent.Rebuild with A
+RT_BOOT_IMAGE_EXTRA_ARGS="--runtime-arg -verbose:verifier" to see verifica
+tion errors.' ; false ) # hash of input list: bb4c783e60c5fe8f723f06a1fc27
+caeedeb88883dae99b303257caf0b2276d92
+dex2oatd F 05-05 20:54:42   159   159 art_method.h:604] Check failed: IsIm
+agePointerSize(pointer_size) 
+Runtime aborting...
+All threads:
+DALVIK THREADS (1):
+"main" prio=5 tid=1 Runnable (still starting up)
+    | group="" sCount=0 ucsCount=0 flags=0 obj=(nil) self=0x63f93b0df6f0
+    | sysTid=159 nice=19 cgrp=default sched=0/0 handle=0x7d8aae500740
+    | state=R schedstat=( 22175087 3260 6 ) utm=2 stm=0 core=10 HZ=100
+    | stack=0x7ffdfc378000-0x7ffdfc37a000 stackSize=8184KB
+    | held mutexes= "abort lock" "mutator lock"(shared held)
+    native: #00 pc 0000000000e9a168  /home/weiminn/Documents/aosp13/out/host
+/linux-x86/bin/dex2oatd64 (UnwindStackCurrent::UnwindFromContext(unsigned 
+long, void*)+88)
+    native: #01 pc 0000000000e94d9d  /home/weiminn/Documents/aosp13/out/host
+/linux-x86/bin/dex2oatd64 (art::DumpNativeStack(std::__1::basic_ostream<ch
+ar, std::__1::char_traits<char> >&, int, BacktraceMap*, char const*, art::
+ArtMethod*, void*, bool)+141)
+    native: #02 pc 0000000000ec8616  /home/weiminn/Documents/aosp13/out/host
+/linux-x86/bin/dex2oatd64 (art::Thread::DumpStack(std::__1::basic_ostream<
+char, std::__1::char_traits<char> >&, bool, BacktraceMap*, bool) const+422
+)
+    native: #03 pc 0000000000ef19ff  /home/weiminn/Documents/aosp13/out/host
+/linux-x86/bin/dex2oatd64 (art::DumpCheckpoint::Run(art::Thread*)+575)
+    native: #04 pc 0000000000eea690  /home/weiminn/Documents/aosp13/out/host
+/linux-x86/bin/dex2oatd64 (art::ThreadList::RunCheckpoint(art::Closure*, a
+rt::Closure*)+288)
+    native: #05 pc 0000000000eea275  /home/weiminn/Documents/aosp13/out/host
+/linux-x86/bin/dex2oatd64 (art::ThreadList::Dump(std::__1::basic_ostream<c
+har, std::__1::char_traits<char> >&, bool)+357)
+    native: #06 pc 0000000000dbae0a  /home/weiminn/Documents/aosp13/out/host
+/linux-x86/bin/dex2oatd64 (art::AbortState::Dump(std::__1::basic_ostream<c
+har, std::__1::char_traits<char> >&) const+186)
+    native: #07 pc 0000000000d9f46f  /home/weiminn/Documents/aosp13/out/host
+/linux-x86/bin/dex2oatd64 (art::Runtime::Abort(char const*)+399)
+    native: #08 pc 00000000016cfd1c  /home/weiminn/Documents/aosp13/out/host
+/linux-x86/bin/dex2oatd64 (android::base::SetAborter(std::__1::function<vo
+id (char const*)>&&)::$_3::__invoke(char const*)+60)
+    native: #09 pc 00000000016cf9a8  /home/weiminn/Documents/aosp13/out/host
+/linux-x86/bin/dex2oatd64 (android::base::LogMessage::~LogMessage()+328)
+    native: #10 pc 00000000006000f2  /home/weiminn/Documents/aosp13/out/host
+/linux-x86/bin/dex2oatd64 (art::ArtMethod::SetDataPtrSize(void const*, art
+::PointerSize)+226)
+    native: #11 pc 0000000000daf16d  /home/weiminn/Documents/aosp13/out/host
+/linux-x86/bin/dex2oatd64 (art::Runtime::CreateResolutionMethod()+285)
+    native:   std::__1::__compressed_pair_elem<std::__1::basic_string<char, 
+std::__1::char_traits<char>, std::__1::allocator<char> >::__rep, 0, false>
+::__compressed_pair_elem()
+    native:    external/libcxx/include/memory:2140
+    native:   std::__1::__compressed_pair<std::__1::basic_string<char, std::
+__1::char_traits<char>, std::__1::allocator<char> >::__rep, std::__1::allo
+cator<char> >::__compressed_pair<true, void>()
+    native:    external/libcxx/include/memory:2234
+    native:   std::__1::basic_string<char, std::__1::char_traits<char>, std:
+:__1::allocator<char> >::basic_string<decltype(nullptr)>(char const*)
+    native:    external/libcxx/include/string:820
+    native:   UnwindStackCurrent::UnwindFromContext(unsigned long, void*)
+    native:    system/unwinding/libbacktrace/UnwindStack.cpp:180
+    native:   art::DumpNativeStack(std::__1::basic_ostream<char, std::__1::c
+har_traits<char> >&, int, BacktraceMap*, char const*, art::ArtMethod*, voi
+d*, bool)
+    native:    art/runtime/native_stack_dump.cc:339
+    native: #12 pc 0000000000741453  /home/weiminn/Documents/aosp13/out/host
+/linux-x86/bin/dex2oatd64 (art::ClassLinker::InitWithoutImage(std::__1::ve
+ctor<std::__1::unique_ptr<art::DexFile const, std::__1::default_delete<art
+::DexFile const> >, std::__1::allocator<std::__1::unique_ptr<art::DexFile 
+const, std::__1::default_delete<art::DexFile const> > > >, std::__1::basic
+_string<char, std::__1::char_traits<char>, std::__1::allocator<char> >*)+6
+307)
+    native:   art::Thread::DumpStack(std::__1::basic_ostream<char, std::__1:
+:char_traits<char> >&, bool, BacktraceMap*, bool) const
+    native:    art/runtime/thread.cc:2298
+    native: #13 pc 0000000000da4709  /home/weiminn/Documents/aosp13/out/host
+/linux-x86/bin/dex2oatd64 (art::Runtime::Init(art::RuntimeArgumentMap&&)+1
+8073)
+    native:   art::DumpCheckpoint::Run(art::Thread*)
+    native:    art/runtime/thread_list.cc:213
+    native:   art::ThreadList::RunCheckpoint(art::Closure*, art::Closure*)
+    native:    art/runtime/thread_list.cc:374
+    native:   art::ThreadList::Dump(std::__1::basic_ostream<char, std::__1::
+char_traits<char> >&, bool)
+    native:    art/runtime/thread_list.cc:257
+    native:   art::AbortState::Dump(std::__1::basic_ostream<char, std::__1::
+char_traits<char> >&) const
+    native:    art/runtime/runtime.cc:761
+    native:   art::Dumpable<art::AbortState>::Dump(std::__1::basic_ostream<c
+har, std::__1::char_traits<char> >&) const
+    native:    art/libartbase/base/dumpable.h:38
+    native:   std::__1::basic_ostream<char, std::__1::char_traits<char> >& a
+rt::operator<< <art::AbortState>(std::__1::basic_ostream<char, std::__1::c
+har_traits<char> >&, art::Dumpable<art::AbortState> const&)
+    native:    art/libartbase/base/dumpable.h:49
+    native:   art::Runtime::Abort(char const*)
+    native:    art/runtime/runtime.cc:884
+    native: #14 pc 0000000000d9fef7  /home/weiminn/Documents/aosp13/out/host
+/linux-x86/bin/dex2oatd64 (art::Runtime::Create(art::RuntimeArgumentMap&&)
++135)
+    native: #15 pc 0000000000491e0f  /home/weiminn/Documents/aosp13/out/host
+/linux-x86/bin/dex2oatd64 (art::Dex2Oat::CreateRuntime(art::RuntimeArgumen
+tMap&&)+127)
+    native: #16 pc 0000000000484526  /home/weiminn/Documents/aosp13/out/host
+/linux-x86/bin/dex2oatd64 (art::Dex2Oat::Setup()+2118)
+    native: #17 pc 000000000047edcc  /home/weiminn/Documents/aosp13/out/host
+/linux-x86/bin/dex2oatd64 (main+1452)
+    native: #18 pc 000000000002814f  /usr/lib/x86_64-linux-gnu/libc.so.6 (??
+?) (BuildId: b20cbdb62d7717c13dc61a48b7b2e673a7edf233)
+    native: #19 pc 0000000000028208  /usr/lib/x86_64-linux-gnu/libc.so.6 (__
+libc_start_main+136) (BuildId: b20cbdb62d7717c13dc61a48b7b2e673a7edf233)
+    native:   __libc_start_main_impl
+    native:    ./csu/../csu/libc-start.c:360
+    native: #20 pc 00000000004241a8  /home/weiminn/Documents/aosp13/out/host
+/linux-x86/bin/dex2oatd64 (???)
+    (no managed stack frames)
+
+dex2oatd E 05-05 20:54:51   159   159 thread-inl.h:170] holding "abort loc
+k" at point where thread suspension is expected
+Aborting thread:
+"main" prio=5 tid=1 Runnable (still starting up)
+    | group="" sCount=0 ucsCount=0 flags=0 obj=(nil) self=0x63f93b0df6f0
+    | sysTid=159 nice=19 cgrp=default sched=0/0 handle=0x7d8aae500740
+    | state=R schedstat=( 46410502 17203600 40 ) utm=4 stm=0 core=18 HZ=100
+    | stack=0x7ffdfc378000-0x7ffdfc37a000 stackSize=8184KB
+    | held mutexes= "abort lock" "mutator lock"(shared held)
+    native: #00 pc 0000000000e9a168  /home/weiminn/Documents/aosp13/out/host
+/linux-x86/bin/dex2oatd64 (UnwindStackCurrent::UnwindFromContext(unsigned 
+long, void*)+88)
+    native: #01 pc 0000000000e94d9d  /home/weiminn/Documents/aosp13/out/host
+/linux-x86/bin/dex2oatd64 (art::DumpNativeStack(std::__1::basic_ostream<ch
+ar, std::__1::char_traits<char> >&, int, BacktraceMap*, char const*, art::
+ArtMethod*, void*, bool)+141)
+    native: #02 pc 0000000000ec8616  /home/weiminn/Documents/aosp13/out/host
+/linux-x86/bin/dex2oatd64 (art::Thread::DumpStack(std::__1::basic_ostream<
+char, std::__1::char_traits<char> >&, bool, BacktraceMap*, bool) const+422
+)
+    native: #03 pc 0000000000dbb0dd  /home/weiminn/Documents/aosp13/out/host
+/linux-x86/bin/dex2oatd64 (art::AbortState::DumpThread(std::__1::basic_ost
+ream<char, std::__1::char_traits<char> >&, art::Thread*) const+93)
+    native: #04 pc 0000000000d9f46f  /home/weiminn/Documents/aosp13/out/host
+/linux-x86/bin/dex2oatd64 (art::Runtime::Abort(char const*)+399)
+    native:   std::__1::__compressed_pair_elem<std::__1::basic_string<char, 
+std::__1::char_traits<char>, std::__1::allocator<char> >::__rep, 0, false>
+::__compressed_pair_elem()
+    native:    external/libcxx/include/memory:2140
+    native:   std::__1::__compressed_pair<std::__1::basic_string<char, std::
+__1::char_traits<char>, std::__1::allocator<char> >::__rep, std::__1::allo
+cator<char> >::__compressed_pair<true, void>()
+    native:    external/libcxx/include/memory:2234
+    native:   std::__1::basic_string<char, std::__1::char_traits<char>, std:
+:__1::allocator<char> >::basic_string<decltype(nullptr)>(char const*)
+    native:    external/libcxx/include/string:820
+    native:   UnwindStackCurrent::UnwindFromContext(unsigned long, void*)
+    native:    system/unwinding/libbacktrace/UnwindStack.cpp:180
+    native:   art::DumpNativeStack(std::__1::basic_ostream<char, std::__1::c
+har_traits<char> >&, int, BacktraceMap*, char const*, art::ArtMethod*, voi
+d*, bool)
+    native:    art/runtime/native_stack_dump.cc:339
+    native: #05 pc 00000000016cfd1c  /home/weiminn/Documents/aosp13/out/host
+/linux-x86/bin/dex2oatd64 (android::base::SetAborter(std::__1::function<vo
+id (char const*)>&&)::$_3::__invoke(char const*)+60)
+    native:   art::Thread::DumpStack(std::__1::basic_ostream<char, std::__1:
+:char_traits<char> >&, bool, BacktraceMap*, bool) const
+    native:    art/runtime/thread.cc:2298
+    native:   art::AbortState::DumpThread(std::__1::basic_ostream<char, std:
+:__1::char_traits<char> >&, art::Thread*) const
+    native:    art/runtime/runtime.cc:782
+    native:   art::Dumpable<art::AbortState>::Dump(std::__1::basic_ostream<c
+har, std::__1::char_traits<char> >&) const
+    native:    art/libartbase/base/dumpable.h:38
+    native:   std::__1::basic_ostream<char, std::__1::char_traits<char> >& a
+rt::operator<< <art::AbortState>(std::__1::basic_ostream<char, std::__1::c
+har_traits<char> >&, art::Dumpable<art::AbortState> const&)
+    native:    art/libartbase/base/dumpable.h:49
+    native:   art::Runtime::Abort(char const*)
+    native:    art/runtime/runtime.cc:884
+    native: #06 pc 00000000016cf9a8  /home/weiminn/Documents/aosp13/out/host
+/linux-x86/bin/dex2oatd64 (android::base::LogMessage::~LogMessage()+328)
+    native: #07 pc 00000000006000f2  /home/weiminn/Documents/aosp13/out/host
+/linux-x86/bin/dex2oatd64 (art::ArtMethod::SetDataPtrSize(void const*, art
+::PointerSize)+226)
+    native: #08 pc 0000000000daf16d  /home/weiminn/Documents/aosp13/out/host
+/linux-x86/bin/dex2oatd64 (art::Runtime::CreateResolutionMethod()+285)
+    native: #09 pc 0000000000741453  /home/weiminn/Documents/aosp13/out/host
+/linux-x86/bin/dex2oatd64 (art::ClassLinker::InitWithoutImage(std::__1::ve
+ctor<std::__1::unique_ptr<art::DexFile const, std::__1::default_delete<art
+::DexFile const> >, std::__1::allocator<std::__1::unique_ptr<art::DexFile 
+const, std::__1::default_delete<art::DexFile const> > > >, std::__1::basic
+_string<char, std::__1::char_traits<char>, std::__1::allocator<char> >*)+6
+307)
+    native: #10 pc 0000000000da4709  /home/weiminn/Documents/aosp13/out/host
+/linux-x86/bin/dex2oatd64 (art::Runtime::Init(art::RuntimeArgumentMap&&)+1
+8073)
+    native:   android::base::SetAborter(std::__1::function<void (char const*
+)>&&)::$_3::__invoke(char const*)
+    native:    external/libcxx/include/functional:1799
+    native:   android::base::LogMessage::~LogMessage()
+    native:    system/libbase/logging.cpp:504
+    native:   art::ArtMethod::SetDataPtrSize(void const*, art::PointerSize)
+    native:    art/runtime/art_method.h:604
+    native:   art::ArtMethod::SetEntryPointFromJniPtrSize(void const*, art::
+PointerSize)
+    native:    art/runtime/art_method.h:594
+    native:   art::Runtime::CreateResolutionMethod()
+    native:    art/runtime/runtime.cc:2789
+    native:   art::ClassLinker::InitWithoutImage(std::__1::vector<std::__1::
+unique_ptr<art::DexFile const, std::__1::default_delete<art::DexFile const
+> >, std::__1::allocator<std::__1::unique_ptr<art::DexFile const, std::__1
+::default_delete<art::DexFile const> > > >, std::__1::basic_string<char, s
+td::__1::char_traits<char>, std::__1::allocator<char> >*)
+    native:    art/runtime/class_linker.cc:787
+    native:   art::Runtime::Init(art::RuntimeArgumentMap&&)
+    native:    art/runtime/runtime.cc:2077
+    native: #11 pc 0000000000d9fef7  /home/weiminn/Documents/aosp13/out/host
+/linux-x86/bin/dex2oatd64 (art::Runtime::Create(art::RuntimeArgumentMap&&)
++135)
+    native:   art::Runtime::Create(art::RuntimeArgumentMap&&)
+    native:    art/runtime/runtime.cc:1046
+    native: #12 pc 0000000000491e0f  /home/weiminn/Documents/aosp13/out/host
+/linux-x86/bin/dex2oatd64 (art::Dex2Oat::CreateRuntime(art::RuntimeArgumen
+tMap&&)+127)
+    native:   art::Dex2Oat::CreateRuntime(art::RuntimeArgumentMap&&)
+    native:    art/dex2oat/dex2oat.cc:2711
+    native: #13 pc 0000000000484526  /home/weiminn/Documents/aosp13/out/host
+/linux-x86/bin/dex2oatd64 (art::Dex2Oat::Setup()+2118)
+    native:   art::Dex2Oat::Setup()
+    native:    art/dex2oat/dex2oat.cc:1522
+    native: #14 pc 000000000047edcc  /home/weiminn/Documents/aosp13/out/host
+/linux-x86/bin/dex2oatd64 (main+1452)
+    native:   main
+    native:    art/dex2oat/dex2oat.cc:3168
+    native: #15 pc 000000000002814f  /usr/lib/x86_64-linux-gnu/libc.so.6 (??
+?) (BuildId: b20cbdb62d7717c13dc61a48b7b2e673a7edf233)
+    native: #16 pc 0000000000028208  /usr/lib/x86_64-linux-gnu/libc.so.6 (__
+libc_start_main+136) (BuildId: b20cbdb62d7717c13dc61a48b7b2e673a7edf233)
+    native:   __libc_start_main_impl
+    native:    ./csu/../csu/libc-start.c:360
+    native: #17 pc 00000000004241a8  /home/weiminn/Documents/aosp13/out/host
+/linux-x86/bin/dex2oatd64 (???)
+    (no managed stack frames)
+Aborted (core dumped)
+ERROR: Dex2oat failed to compile a boot image.It is likely that the boot c
+lasspath is inconsistent.Rebuild with ART_BOOT_IMAGE_EXTRA_ARGS="--runtime
+-arg -verbose:verifier" to see verification errors.
+20:54:57 ninja failed with: exit status 1
+
+#### failed to build some targets (18 seconds) ####
+\end{lstlisting}
+
+
+Deleted the contents of the AOSP 13 project and resynced, and now got new:
+\begin{lstlisting}
+[  0% 107/19930] //packages/modules/NeuralNetworks/runtime:libneuralnetwor
+FAILED: out/soong/.intermediates/packages/modules/NeuralNetworks/runtime/l
+ibneuralnetworks/android_arm64_armv8-2a_cortex-a55_shared_apex30/libneural
+networks.so.lsdump
+prebuilts/clang-tools/linux-x86/bin/header-abi-linker --root-dir . --root-
+dir $OUT_DIR:out -o out/soong/.intermediates/packages/modules/NeuralNetwor
+ks/runtime/libneuralnetworks/android_arm64_armv8-2a_cortex-a55_shared_apex
+30/libneuralnetworks.so.lsdump -so out/soong/.intermediates/packages/modul
+es/NeuralNetworks/runtime/libneuralnetworks/android_arm64_armv8-2a_cortex-
+a55_shared_apex30/libneuralnetworks.so -v packages/modules/NeuralNetworks/
+runtime/libneuralnetworks.map.txt -arch arm64 -Ipackages/modules/NeuralNet
+works/runtime/include -Iframeworks/native/cmds/lshal/libprocpartition/incl
+ude -Ibuild/soong/cc/libbuildversion/include -Iout/soong/.intermediates/pa
+ckages/modules/NeuralNetworks/runtime/statslog_neuralnetworks.h/gen @out/s
+oong/.intermediates/packages/modules/NeuralNetworks/runtime/libneuralnetwo
+rks/android_arm64_armv8-2a_cortex-a55_shared_apex30/libneuralnetworks.so.l
+sdump.rsp
+Failed to parse JSON: * Line 1, Column 1
+  Syntax error: value, object or array expected.
+
+ReadDump failed
+libc++abi: Pure virtual function called!
+Aborted (core dumped)
+21:57:03 ninja failed with: exit status 1
+
+\end{lstlisting}
+
+Also finding a lot of warning messages like:
+\begin{lstlisting}
+no declaration found for ELF symbol with id acoshl@@LIBC
+no declaration found for ELF symbol with id acosl@@LIBC
+no declaration found for ELF symbol with id asinhl@@LIBC
+no declaration found for ELF symbol with id asinl@@LIBC
+no declaration found for ELF symbol with id atan2l@@LIBC
+no declaration found for ELF symbol with id atanhl@@LIBC
+no declaration found for ELF symbol with id atanl@@LIBC
+no declaration found for ELF symbol with id cbrtl@@LIBC
+no declaration found for ELF symbol with id ceill@@LIBC
+no declaration found for ELF symbol with id coshl@@LIBC
+no declaration found for ELF symbol with id cosl@@LIBC
+no declaration found for ELF symbol with id csqrtl@@LIBC
+no declaration found for ELF symbol with id erfcl@@LIBC
+no declaration found for ELF symbol with id erfl@@LIBC
+no declaration found for ELF symbol with id expm1l@@LIBC
+no declaration found for ELF symbol with id floor@@LIBC
+no declaration found for ELF symbol with id floorl@@LIBC
+no declaration found for ELF symbol with id fmal@@LIBC
+no declaration found for ELF symbol with id frexpl@@LIBC
+no declaration found for ELF symbol with id hypotl@@LIBC
+no declaration found for ELF symbol with id ldexpf@@LIBC
+no declaration found for ELF symbol with id ldexpl@@LIBC
+no declaration found for ELF symbol with id lgammal@@LIBC
+no declaration found for ELF symbol with id lgammal_r@@LIBC
+no declaration found for ELF symbol with id log10l@@LIBC
+no declaration found for ELF symbol with id log1pl@@LIBC
+no declaration found for ELF symbol with id logbl@@LIBC
+no declaration found for ELF symbol with id nanl@@LIBC
+no declaration found for ELF symbol with id nextafterl@@LIBC
+no declaration found for ELF symbol with id nexttoward@@LIBC
+no declaration found for ELF symbol with id nexttowardl@@LIBC
+no declaration found for ELF symbol with id remainderl@@LIBC
+no declaration found for ELF symbol with id remquol@@LIBC
+no declaration found for ELF symbol with id rintl@@LIBC
+no declaration found for ELF symbol with id scalbnl@@LIBC
+no declaration found for ELF symbol with id sinhl@@LIBC
+no declaration found for ELF symbol with id sinl@@LIBC
+no declaration found for ELF symbol with id sqrt@@LIBC
+no declaration found for ELF symbol with id sqrtf@@LIBC
+no declaration found for ELF symbol with id sqrtl@@LIBC
+no declaration found for ELF symbol with id tanhl@@LIBC
+no declaration found for ELF symbol with id tanl@@LIBC
+no declaration found for ELF symbol with id truncl@@LIBC    
+\end{lstlisting}
+
+Now it compiles successfully, but stuck in infinite loop at boot.
+
+Check the driver number for Pixel 7 Pro\footnote{\url{https://source.android.com/docs/setup/reference/build-numbers}} and the number is TD1A.220804.031. Now download the driver binary for TD1A.220804.031\footnote{\url{https://developers.google.com/android/drivers}}. And now it works! Turns out I forgot to run the driver install script after I synced the repo.
+
+The logic is still not updating after I added in some logging code with [WEIMINN] tag inside the \path{frameworks/base/core/jni/AndroidRuntime.cpp}. The build system doesn't seem to be recognizing the changes in the source code. So I find the compiled framework objects in \texttt{out} using \path{find ./out -iname framework} and deleted the entire \path{out/soong/.intermediates/frameworks}, and run the \texttt{make} command again. Now it recompiles, but still not updating the logic inside the flashed ROM. Rebooting the machine also doesn't work.
+
+For the record, this is the command to find a string in the project:
+\begin{lstlisting}
+clear && find ./frameworks/ ./art/ ./bionic/ ./device/ ./build/ ./libnativehelper \( -iname '*.java' -o -iname '*.cpp' -o -iname '*.cc' -o -iname '*.hpp' -o -iname '*.h' -o -iname '*.S' -o -iname '*.mk' \) -a ! -iname '*test*' -a ! -iname '*out*' | xargs grep --color -sin 'docall('
+\end{lstlisting}
+
+Relunch for emulator with this script:
+\begin{lstlisting}
+echo "[WEIMINN] Building AOSP"
+cd /home/weiminn/Documents/aosp13_new
+source build/envsetup.sh
+lunch sdk_phone_x86_64-userdebug
+make
+
+emulator &
+
+boot_start=`date +%s`
+adb wait-for-device
+
+echo "[WEIMINN] Waiting for boot completion"
+A=$(adb shell getprop sys.boot_completed | tr -d '\r')
+while [ "$A" != "1" ]; do
+        echo "[WEIMINN] Waiting for boot completion"
+        sleep .5
+        A=$(adb shell getprop sys.boot_completed | tr -d '\r')
+done
+boot_end=`date +%s`
+echo Boot time was `expr $boot_end - $boot_start` seconds.
+
+adb root
+
+echo "[WEIMINN] Enabling logging"
+adb shell setprop debug.ld.all dlerror,dlopen
+
+rm -f logcat.txt 
+echo "[WEIMINN] Logging with Logcat to logcat.txt"
+adb logcat >> logcat.txt    
+\end{lstlisting}
+And now the code changes are detected by the build system and the new logic is reflected in the logcat!
+
+
+\subsection{Which components are involved in Framework for Debloation?}
+\subsection{Find Links on Permission Manager}
+\subsection{Find Links on Package Manager}
+\subsection{Explore Package Manager Service Source Codes}
+\subsection{Complete Package Manager Loading Flow}
+\subsection{Instrument Package Manager Process}
+\subsection{Understand Zicheng's Changes to Package Manager}
+
+\subsection{Intersection between ART/Bionic/Framework and Debloater Procedures}
+
+\subsection{Debloater Procedures not included in OAT/Classes Loading and Execution Flow}
+
+\subsection{Sequence Diagram Debloater Flow}
+
+\subsection{Instrument Debloater Flow}
+
+\subsection{Instrument ART Native Execution Flow}
+
+\subsection{Instrument ART Interpreted Execution Flow}
+
+\subsection{Implement Rudimentary Hardcoded Debloater in AOSP 13}
+
+\subsection{Implement Rudimentary Hardcoded Debloater in AOSP 14}
