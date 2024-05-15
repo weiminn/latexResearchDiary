@@ -771,27 +771,15 @@ adb logcat >> logcat.txt
 \end{lstlisting}
 And now the code changes are detected by the build system and the new logic is reflected in the logcat!
 
+\subsection{Implement Zicheng Code inside AOSP13 Emulator}
 
-\subsection{Which components are involved in Framework for Debloation?}
-\subsection{Find Links on Permission Manager}
-\subsection{Find Links on Package Manager}
-\subsection{Explore Package Manager Service Source Codes}
-\subsection{Complete Package Manager Loading Flow}
-\subsection{Instrument Package Manager Process}
-\subsection{Understand Zicheng's Changes to Package Manager}
+Insert the following code at the bottom of \path{build/make/target/board/emulator_x86_64/device.mk}: 
+\begin{lstlisting}
+DISABLE_ARTIFACT_PATH_REQUIREMENTS := true
+PRODUCT_PACKAGES += MINIMAManager
+\end{lstlisting}
+And paste in the \path{MINIMAManager.apk} inside \path{packages/apps/MINIMAManager} directory.
 
-\subsection{Intersection between ART/Bionic/Framework and Debloater Procedures}
+But the app installed via \path{adb install success_apps/60_com.atomic.apps.medical.drug.dictionary.apk} doesn't launch after preloading the MINIMAManager APK. If I remove the preload, then the app launches.
 
-\subsection{Debloater Procedures not included in OAT/Classes Loading and Execution Flow}
-
-\subsection{Sequence Diagram Debloater Flow}
-
-\subsection{Instrument Debloater Flow}
-
-\subsection{Instrument ART Native Execution Flow}
-
-\subsection{Instrument ART Interpreted Execution Flow}
-
-\subsection{Implement Rudimentary Hardcoded Debloater in AOSP 13}
-
-\subsection{Implement Rudimentary Hardcoded Debloater in AOSP 14}
+Pasted in the Customized Framework codes and now can succesfully \texttt{adb install} and launch the apps. The debloation also works!

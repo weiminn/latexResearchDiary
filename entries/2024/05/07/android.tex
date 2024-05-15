@@ -1,0 +1,570 @@
+% % % % mainfile: ../../../../master.tex
+\label{task:20240507_android}
+
+\subsection{Verify AOSP13 Debloating via ART Only}
+
+Get a list of APKs that can be successfully debloated and demoed.
+
+\begin{lstlisting}[language=bash]
+adb install success_apps/60_com.atomic.apps.medical.drug.dictionary.apk
+adb push success_schema/60_com.atomic.apps.medical.drug.dictionary_removed_methods.txt /sdcard
+
+adb install success_apps/169_com.storiestime.apk
+adb push success_schema/169_com.storiestime_removed_methods.txt /sdcard
+
+adb install success_apps/471_com.mobilemirror.app2018.mirror.apk
+adb push success_schema/471_com.mobilemirror.app2018.mirror_removed_methods.txt /sdcard
+
+adb install success_apps/400_com.myprograms.glasgow.apk
+
+adb install success_apps/382_com.diogines.pregnancy.apk
+
+\end{lstlisting}
+
+These APKs cannot be launched
+
+\begin{lstlisting}[language=bash]
+adb install success_apps/363_com.BloodpressureHistoryDiary.healthRecordsAnalyze.apk
+adb install success_apps/424_com.mdhelper.cardiojournal.apk
+
+\end{lstlisting}
+
+\subsection{Which components are involved in Framework for Debloation?}
+
+
+\begin{longtable}{p{.30\linewidth}p{.65\linewidth}} 
+\toprule
+Procedure & Description \\
+\midrule
+\endhead
+
+\multicolumn{2}{l}{\path{services/core/java/com/android/server/pm/permission/PermissionManagerService.java}}\\
+
+\path{onPackageInstalled}
+& Modify to add READ Permission to the installed package's requested permissions. 
+\\
+
+\midrule
+\caption{Framework Procedures} 
+\label{tab:frameworkprocedures}
+\end{longtable}
+
+\section{Isolate functionalities of ART Procedures}
+
+\begin{longtable}{p{.4\linewidth}p{.6\linewidth}} 
+\toprule
+Procedure & Zicheng's Work  \\
+\midrule
+\endhead
+
+\multicolumn{2}{l}{\path{libartbase/base/os_linux.h}} \\
+
+\path{CreateMINIMAFile}
+&Not invoked
+\\
+
+\path{CreateDirectories2}
+&Not invoked
+\\
+
+\midrule
+\multicolumn{2}{l}{\path{libartbase/base/os_linux.cc}} \\
+
+\path{CreateMINIMAFile}
+&Not invoked
+\\
+
+\path{CreateDirectories2}
+&Not invoked
+\\
+
+\midrule
+\multicolumn{2}{l}{\path{libdexfile/dex/art_dex_file_loader.cc}} \\
+
+\path{ArtDexFileLoader::Open}
+&Only trivial logging
+\\
+
+\midrule
+\multicolumn{2}{l}{\path{libdexfile/dex/dex_file_loader.cc}} \\
+
+\path{DexFileLoader::OpenCommon}
+&Only trivial logging
+\\
+
+\midrule
+\multicolumn{2}{l}{\path{libnativeloader/native_loader_namespace.cpp}} \\
+
+\path{NativeLoaderNamespace::Load}
+&Only trivial logging
+\\
+
+\midrule
+\multicolumn{2}{l}{\path{libnativeloader/native_loader.cpp}} \\
+
+\path{OpenNativeLibrary}
+&Only trivial logging
+\\
+
+\path{OpenNativeLibraryInNamespace}
+&Only trivial logging
+\\
+
+\midrule
+\path{oderefresh/oderefresh.cc} \\
+
+\path{AddDex2OatProfileAndCompilerFilter}
+&Change property \path{dalvik.vm.systemservercompilerfilter} for \texttt{speed} to \texttt{verify}. 
+\\
+
+\midrule
+\multicolumn{2}{l}{\path{oderefresh/oderefresh_main.cc}} \\
+
+\path{InitializeConfig} 
+&Change argument \path{--compiler-filter} for \texttt{speed} to \texttt{verify}.
+\\
+
+\midrule
+\multicolumn{2}{l}{\path{runtime/entrypoints/quick/quick_trampoline_entry_points.cc}} \\
+
+\path{artQuickToInterpreterBridge}
+&No change
+\\
+
+\midrule
+\multicolumn{2}{l}{\path{runtime/interpreter/interpreter_common.cc}} \\
+
+\path{DoCallCommon}
+&Only trivial Logging
+\\
+
+\midrule
+\multicolumn{2}{l}{\path{runtime/interpreter/interpreter_switch_impl-inl.h}} \\
+
+Additional header Macros&
+\path{#include "utils/Log.h"}
+
+\path{#include <jni.h>}
+
+\path{#include "runtime_globals.h"}
+
+\path{#include "jni/java_vm_ext.h"}
+
+\path{#include "jni/jni_env_ext.h"}
+\\
+
+\path{ExecuteSwitchImplCpp}
+&Get \texttt{SwitchImplContext}'s \path{shadow_frame}'s \path{GetMethod}'s \path{PrettyMethod} and check \path{MYmatch_hook_method}. If the method's signature matches, create intent to switich to MINIMA app.
+\\
+
+\midrule
+\multicolumn{2}{l}{\path{runtime/interpreter/interpreter_switch_impl.h}} \\
+
+\path{ExecuteSwitchImpl}
+&No change
+\\
+
+\midrule
+\multicolumn{2}{l}{\path{runtime/interpreter/interpreter.cc}} \\
+
+\path{Execute}
+&No change
+\\
+
+\path{EnterInterpreterFromEntryPoint}
+&No change
+\\
+
+\midrule
+\path{runtime/jit/jit.cc} \\
+
+\path{MethodEntered}
+&No change
+\\
+
+\midrule
+\multicolumn{2}{l}{\path{runtime/jni/java_vm_ext.cc}} \\
+
+Additional header Macros&
+\path{#include "utils/Log.h"}
+\\
+
+\path{FindSymbol}
+&Compare \path{symbol_name} to \path{Java_edu_smu_imitatejumping_Simple_1JNI_1Class_duration}
+\\
+
+\path{JavaVMExt::LoadNativeLibrary}
+&Only trivial logging
+\\
+
+\midrule
+\multicolumn{2}{l}{\path{runtime/jni/jni_internal.cc}} \\
+
+\path{FindClass}
+&No change
+\\
+
+\midrule
+\multicolumn{2}{l}{\path{runtime/mirror/class.cc}} \\
+
+\path{FindClassMethodWithSignature}
+&No change
+\\
+
+\midrule
+\multicolumn{2}{l}{\path{runtime/native/dalvik_system_DexFile.cc}} \\
+
+\path{DexFile_openDexFileNative}
+&No change
+\\
+
+\midrule
+\multicolumn{2}{l}{\path{runtime/native/dalvik_system_ZygoteHooks.cc}} \\
+
+\path{modifyFilePermissions1}
+&Procedure to modify a given file's permission; Not invoked
+\\
+
+\path{ZygoteHooks_nativePostForkChild}
+&Remove tracing logic. Get the process' package name for trivial logging.
+\\
+
+\midrule
+\multicolumn{2}{l}{\path{runtime/app_info.cc}} \\
+
+\path{GetPackageName} \textbf{(NO NEED)}
+& Get package name from AppInfo instance
+\\
+
+\midrule
+\multicolumn{2}{l}{\path{runtime/app_info.h}} \\
+
+\path{GetPackageName} \textbf{(NO NEED)}
+&Add definition to retrieve package name of the app; Not invoked
+\\
+
+\midrule
+\multicolumn{2}{l}{\path{runtime/art_method-inl.h}} \\
+
+\path{ArtMethod::CheckIncompatibleClassChange}
+&Trivial Logging
+\\
+
+\path{ArtMethod::UpdateCounter}
+&Get \texttt{PrettyMethod} and log it with \path{hotness_count_}\\
+
+\midrule
+\multicolumn{2}{l}{\path{runtime/art_method.cc}} \\
+
+
+Additional headers & \path{#include "utils/Log.h"}\\
+
+\path{ArtMethod::Invoke} \textbf{(NO NEED)}
+&Log its PrettyMethod if the method name matches \path{Runtime::MYmatch_target_method} after having quick code.
+\\
+
+\path{ArtMethod::PrettyMethod} \textbf{(NO NEED)}
+&Add additional information such as DEX method index, counter, and method index
+\\
+
+\midrule
+\multicolumn{2}{l}{\path{runtime/art_method.h}} \\
+
+\path{ArtMethod::UpdateCounter}
+&Modify declaration to include \path{REQUIRES_SHARED(Locks::mutator_lock_)} at the end
+\\
+
+\midrule
+\multicolumn{2}{l}{\path{runtime/class_linker.cc}} \\
+
+\path{ClassLinker::FindClass}
+&Only trivial logging
+\\
+
+\path{LinkCode}
+&\texttt{SetDontCompile} for the method if \path{Runtime::MYmatch_target_method} or \path{Runtime::MYmatch_hook_method}, plus trivial logging
+\\
+
+\path{ClassLinker::LoadClass}
+&Only trivial Logging
+\\
+
+\midrule
+\multicolumn{2}{l}{\path{runtime/instrumentation.cc}} \\
+
+\path{CanUseNterp}
+&If \path{Runtime::MYmatch_target_method} or \path{Runtime::MYmatch_hook_method} then return false to exit instead of proceeding.
+\\
+
+\path{Instrumentation::InitializeMethodsCode}
+&Check for \path{empty_Hook()} in the method signature and then logs. Add logging during the check if method is native. 
+\\
+
+\midrule
+\multicolumn{2}{l}{\path{runtime/oat_file_manager.cc}} \\
+
+\path{OatFileManager::OpenDexFilesFromOat_Impl}
+&Only trivial logging
+\\
+
+\midrule
+\multicolumn{2}{l}{\path{runtime/runtime_globals.h}} \\
+
+Added headers &
+\path{#include "utils/Log.h"}
+
+\path{#include <iostream>}
+
+\path{#include <sstream>}
+
+\path{#include <fstream>}
+
+\path{#include <stdio.h>}
+
+\path{#include <dirent.h>}
+
+\path{#include "base/os.h"}
+
+\path{#include <vector>}
+
+\path{#include <string>}
+\\
+
+\midrule
+\multicolumn{2}{l}{\path{runtime/runtime.h}} \\
+
+\texttt{NativeLibFunc}
+&Add declaration
+\\
+
+\path{MYmatch_hook_method}
+&Add declaration 
+\\
+
+\path{MYmatch_target_method}
+&Add declaration 
+\\
+
+\path{MYreadFile}
+&Add declaration 
+\\
+
+\path{MYmake_file}
+&Add declaration 
+\\
+
+\path{read_content}
+&Add declaration 
+\\
+
+\path{getLoadingSchema}
+&Add definition 
+\\
+
+\path{getLoadedSchema}
+&Add definition 
+\\
+
+\path{getShouldReadSchema}
+&Add definition 
+\\
+
+\path{setLoadingSchema}
+&Add definition 
+\\
+
+\path{setLoadedSchema}
+&Add definition 
+\\
+
+\path{setShouldReadSchema}
+&Add definition; not invoked
+\\
+
+\path{getDebugging}
+&Add definition 
+\\
+
+\path{getTarget_method_string_vector}
+&Add definition for accessor to \path{target_method_string_vector}
+\\
+
+\path{setTarget_method_string_vector}
+&Add definition 
+\\
+
+\path{getMINIMA_file_path}
+&Add definition for accessor to \path{MINIMA_file_path}
+\\
+
+\path{getMINIMA_folder_path}
+&Not invoked
+\\
+
+\path{getHookMethodName}
+&Add definition for accessor to \path{hook_method_name}
+\\
+
+\path{MINIMA_file_path}
+&Add private declaration 
+\\
+
+\path{hook_method_name}
+&Add private declaration 
+\\
+
+\path{target_method_string_vector}
+&Add private declaration 
+\\
+
+\path{target_native_func_string_vector}
+&Add private declaration 
+\\
+
+\path{debugging}
+&Add private declaration 
+\\
+
+\path{api_prefix_List}
+&Add private declaration 
+\\
+
+\path{loaded_schema_}
+&Add private declaration after \path{image_dex2oat_enabled_}
+\\
+
+\path{loading_schema_}
+&Add private declaration after \path{image_dex2oat_enabled_}
+\\
+
+\path{should_read_schema_}
+&Add private declaration after \path{image_dex2oat_enabled_}
+\\
+
+\midrule
+\multicolumn{2}{l}{\path{runtime/runtime.cc}} \\
+
+\path{StringAppendV}
+&Called by \path{StringPrintf} and \path{StringAppendF} which are not invoked
+\\
+
+\path{StringPrintf}
+&Not invoked
+\\
+
+\path{StringAppendF}
+&Not invoked
+\\
+
+\path{Runtime::MINIMA_file_path}
+&Hardcoded to \path{"/data/local/tmp/mySchema.txt"}
+\\
+
+\path{Runtime::hook_method_name}
+&Hardcoded to \path{"void edu.smu.minimaconfig.SettingsActivity.empty_Hook()"}
+\\
+
+\path{Runtime::debugging}
+&Hardcoded to \texttt{false}
+\\
+
+\path{Runtime::target_method_string_vector}
+&The vector that stores the schema
+\\
+
+\path{Runtime::target_native_func_string_vector}
+&Empty schema of native functions. Not invoked
+\\
+
+\path{api_prefix_List}
+&Not invoked
+\\
+
+\path{NativeLibFunc}
+&Format to store native functions in schema \path{target_native_func_string_vector}
+\\
+
+\path{Runtime}
+&Add initializers \path{loaded_schema_(false)}, \path{loading_schema_(false)} and \path{should_read_schema_(false)}. 
+\\
+
+\path{Create}
+&Checks if MINIMA file exists with \path{OS::FileExists(Runtime::getMINIMA_file_path().c_str())} and does nothing with it
+\\
+
+\path{Start}
+&Only trivial logging 
+\\
+
+\path{Init}
+&Remove \path{trace_config_->trace_mode = Trace::TraceMode::kMethodTracing;}
+\\
+
+\path{MYmatch_hook_method}
+&Check if method is \path{hook_method_name}
+\\
+
+\path{java2cpp}
+&Converts Java arraylist to C++ vector
+\\
+
+\path{is_within_JNImethod_list}
+&Not invoked
+\\
+
+\path{Runtime::read_content}
+&Loads the schema and stores it in \path{Runtime::target_native_func_string_vector}.
+\\
+
+\path{is_packageMethod}
+&Not invoked
+\\
+
+\path{Runtime::MYmatch_target_method}
+&Returns false if still loading schema (\texttt{getLoadingSchema}), runtime not started or is system server. 
+
+If preinstalled pacakge, should not read schema. Otherwise, call \path{read_content} to load the schema.
+
+Access the schema via \path{getTarget_method_string_vector} and iterate through to see if the method matches any of the signature in the schema.
+\\
+
+\path{Runtime::MYmake_file}
+&Not invoked
+\\
+
+\path{Runtime::MYreadFile}
+&Not invoked 
+\\
+
+\midrule
+\multicolumn{2}{l}{\path{runtime/trace.cc}} \\
+
+\path{modifyFilePermissions}
+&Modify permission of given file
+\\
+
+\path{Trace::Start}
+&Calls \path{modifyFilePermissions} to modify \path{trace_filename}
+\\
+
+\path{Trace::Trace}
+&Change initialization of \path{trace_mode_} from \path{trace_mode} to to \path{TraceMode::kMethodTracing}
+\\
+
+\path{Trace::MethodEntered}
+&No change
+\\
+
+\path{Trace::MethodExited}
+&No change
+\\
+
+\midrule
+\caption{ART Procedures involved in Debloation} 
+\label{tab:debloatartprocedures}
+\end{longtable}
+
+In \path{frameworks/base/services/core/java/com/android/server/pm/parsing/pkg/PackageImpl.java}, comment out this line in method \texttt{void makeImmutable}:
+\begin{lstlisting}[language=java]
+requestedPermissions = Collections.unmodifiableList(requestedPermissions);
+\end{lstlisting}
