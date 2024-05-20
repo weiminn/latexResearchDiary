@@ -1,0 +1,83 @@
+\label{task:20240517_android}
+
+\subsection{What makes up FjordPhantom exactly?}
+
+\subsubsection{Virtual Container}
+
+Allows installation of the same app multiple times to be used with different accounts\footnote{\url{https://promon.co/security-news/fjordphantom-android-malware/}}. 
+
+Those different apps run in the same sandbox to allow them to access each other's files and memory to debug each other. Allows breaking of sandbox without rooting.
+
+Loads additional code (logic of malware and invocations of hooking framework) into the process of hosted app.
+
+\subsubsection{Repackaging}
+
+Most popular code injection method is to repackage with additional code. But can be easily detected.
+
+\subsubsection{Hooking}
+
+Hook into APIs that is used to determine if Accessibility services are turned on, and return false information to bypass screenreader and rooting detection.
+
+Can also hook to UI functionalities such as dialog boxes to close them immediately if they contain certain strings.
+
+Usage of hooking in Malware analysis:
+
+\begin{longtable}{p{.3\linewidth}p{.7\linewidth}} 
+\toprule
+Paper & Hook Logic  \\
+\midrule
+\endhead
+Ronin, DASC2018\footnote{\url{https://www.researchgate.net/publication/328611051_Android_Hooking_Revisited}}
+&Hook Main activity to call Ronin
+
+Ronin overwrites PLT tables\footnote{\url{https://www.technovelty.org/linux/plt-and-got-the-key-to-code-sharing-and-dynamic-libraries.html}}  for hooking native functions in the memory
+\\
+
+Boxify, USENIX2015\footnote{\url{https://www.usenix.org/system/files/conference/usenixsecurity15/sec15-paper-backes.pdf}}
+& Secure sandboxing by dynmaically loading and executing within its own process.
+
+No firmware or application modification, or rooting needed.
+\\
+
+Malton, USENIX2017\footnote{\url{https://www.usenix.org/system/files/conference/usenixsecurity17/sec17-xue.pdf}}
+& Non-invasive Multi-layer (Java, C++ and ARM) Taint Analysis and Path Exploration. 
+
+Taint propagation at Instruction (ARM) layer using Valgrind \footnote{\url{https://valgrind.org/docs/valgrind2007.pdf}} because both app and framework code are compiled to native code in the ART runtime.
+\\
+
+ARTDroid, IMPS2016\footnote{\url{https://ceur-ws.org/Vol-1575/paper_10.pdf}}
+&
+\\
+
+RetroSkeleton, MobiSys'13\footnote{\url{https://www.cs.ucdavis.edu/~hchen/paper/mobisys2013rs.pdf}}
+& Hooking apps by static instrumentation
+\\
+
+AppGuard, TACAS2013\footnote{\url{https://link.springer.com/content/pdf/10.1007/978-3-642-36742-7_39.pdf}}
+& Hooking apps by static instrumentation
+\\
+
+StaDynA, CODASPY'15\footnote{\url{https://lilicoding.github.io/SA3Repo/papers/2015_zhauniarovich2015stadyna.pdf}}
+& Hooking framework APIs
+\\
+
+TaintDroid, USENIX2010\footnote{\url{https://static.usenix.org/event/osdi10/tech/full_papers/Enck.pdf}}
+&Hooking taint sources such as sensor manager, information databases and device identifers.
+
+Also hooking taint sinks (native socket library for network connections)
+\\
+
+DroidScope, USENIX2012\footnote{\url{https://www.usenix.org/system/files/conference/usenixsecurity12/sec12-final107.pdf}}
+& Runtime and kernel instrumentation
+\\
+
+Andrubis, Technical Report\footnote{\url{https://www.vvdveen.com/publications/TR0414001.pdf}}
+& Runtime instrumentation
+\\
+
+\midrule
+\caption{Permission Denied Syntax} 
+\label{tab:permissiondeniedsyntax}
+\end{longtable}
+
+\pagebreak
