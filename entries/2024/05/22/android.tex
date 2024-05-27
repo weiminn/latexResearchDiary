@@ -1,0 +1,125 @@
+\label{task:202405122_android}
+
+
+\subsection{Repackaging}
+
+Apps with malicious payloads added to apps on non-official app markets. Most popular code injection method is to repackage with additional code. But can be easily detected.
+
+\begin{longtable}{p{.3\linewidth}p{.65\linewidth}} 
+\toprule
+Name & Description \\
+\midrule
+\endhead
+
+Repackaging Attack on Android Banking Applications and Its Countermeasures, WPC'13\footnote{\url{https://link.springer.com/article/10.1007/s11277-013-1258-x}}
+& Example of repackaging attack by getting rid of antivirus instance-checking and modifying integrity-checking logic to send hash of original APK instead of the modified APK
+
+Countermeasures: Self-signing restriction, Code obfuscation, and Code attestation
+\\
+
+Detecting Repackaged Android Apps: Lit. Review and Benchmark, TSE2021\footnote{\url{https://ieeexplore.ieee.org/document/8653409}}
+& Detection approaches: \textbf{Similarity computation} (Code fuzzy hash, layout tree, resource files, layout group graph, method statements, control flow graph, identifiers, APIs, Intents, Permissions, Sensors, method signature, inputs/outputs of methods, control flow pattern, user interfaces, ICC-based view graph, data-dependency graph, abstract syntactic gree, API call sequenes, etc...), \textbf{Runtime monitoring} (execution trace, virtualization-based protection, watermarking, and package name), \textbf{Supervised learning} (user interactions, sensitive APIs, permissions, system call sequences, distance of sensitive subgraphs), \textbf{Unsupervised learning} (program dependency graph, permissions, intents, components, API calls, ICC, etc...), and \textbf{Sympton discovery} (string offset order)
+\\
+
+Active Warden Attack: On the (In)Effectiveness
+of Android App Repackage-Proofing, DSC2022\footnote{\url{https://ink.library.smu.edu.sg/cgi/viewcontent.cgi?article=7706&context=sis_research}}
+& By passing repackaging-proofings using Active Warden Attacks which is basically MITM (via customized cached local binder proxy) that intercepts and relay integrity verification messages between the victim app and the Android Framework APIs
+
+Existing repackaging-proofing works have flawed assumption of trusting ICCs
+\\
+
+Repack Me If You Can, ACSAC'21\footnote{\url{https://dl.acm.org/doi/pdf/10.1145/3485832.3488021}}
+& Existing anti-repacking and anti-virtualization solutions don't work. Virtualization eliminates the need to modify and repack the original APK. The container can execute any external app without modifying it, intercept all the API invocations to the Android OS and tamper the responses. 
+
+Protects the apps using \textbf{code splitting} (removing portion of code from the original app to split the original APK into multiple DEXes), and \textbf{IAT} (injection of controls which are evaluated during the interaction between the container and the plugin).
+\\
+
+\midrule
+\caption{Papers concerining Repackaging Attacks} 
+\label{tab:repackaingpapers}
+\end{longtable}
+
+\subsection{Virtualization and Containers}
+
+Allows installation of the same app multiple times to be used with different accounts\footnote{\url{https://promon.co/security-news/fjordphantom-android-malware/}}. 
+Those different apps run in the same sandbox to allow them to access each other's files and memory to debug each other. Allows breaking of sandbox without rooting.
+Loads additional code (logic of malware and invocations of hooking framework) into the process of hosted app.
+
+
+\begin{longtable}{p{.3\linewidth}p{.65\linewidth}} 
+\toprule
+Name & Description \\
+\midrule
+\endhead
+
+VAHunt: Warding Off New Repackaged Android Malware in App-Virtualization’s Clothing, CCS'20\footnote{\url{https://par.nsf.gov/servlets/purl/10220267}}
+&App-level virtualization where the host app creates virtual environment by dynamic proxy, and uses API hooking (so that the system thinks that all requests come from the host app) and binder proxy to bypass system service restrictions
+
+Stateful detection model using FSM and hooking intent APIs to detect app-level virtualization
+
+Data flow analysis to extract self-hiding loading strategies to differentiate between malicious and benign app-level virtualization-based apps
+\\
+
+Seamless In-App Ad Blocking on Stock Android, SPW'2017\footnote{\url{https://svenbugiel.de/publication/wissfeld-17-most/wissfeld-17-most.pdf}}
+&App-level virtualization for deploying security solutions (stripping advertising related-code without breaking app)
+
+No modification to both system or app (apart from removing)
+\\
+
+HideMyApp: Hiding the Presence of Sensitive Apps on Android, USENIX'2019\footnote{\url{https://www.usenix.org/system/files/sec19-pham.pdf}}
+&Built on top of app-level virtualization, the container app launches the APK file of the sensitive app within its context so that the sensitive app is not registered with the OS to protect the app from nosy apps. 
+
+No modification to firmware; few modification to the app
+\\
+
+Anti-Plugin, Blackhat'2017\footnote{\url{https://paper.bobylive.com/Meeting_Papers/BlackHat/Asia-2017/asia-17-Luo-Anti-Plugin-Don\%27t-Let-Your-App-Play-As-An-Android-Plugin-wp.pdf}}
+&Inspection of plugin technology (app-level virtualization) abuse by malware
+
+Malware can update itself without rooting the phoneor having to repackage; they only need to be downloaded and installed by the user the first time
+
+Malware can evade static analysis as the code is updated only after the installation
+\\
+
+% Anception, Arxiv: Application Virtualization for Android\footnote{\url{https://arxiv.org/pdf/1401.6726}}
+% &
+% \\
+
+App in the Middle, MACS'2019\footnote{\url{https://dl.acm.org/doi/pdf/10.1145/3322205.3311088}}
+&App-level virtualization threat analysis
+
+Can detect virtualization by detecting instrumentation and verifying file system structure
+\\
+
+Parallel Space Travelling, SACMAT'20\footnote{\url{https://www.cs.ucr.edu/~heng/pubs/sacmat2020.pdf}}
+&App-level virtualization consists of Virtual Framework (for emulation of core system services like PackageManager and ActivityManager) and Hook module (for intercepting the interaction between the guest apps and the system services). 
+
+Either GuestApp (privilege escalation, code injection, ransomware, phishing, cloning) or HostApp (hijacking, antivirus evasion) can be malicious.
+
+Can detect by inspecting private directory info, call stack, and memory maps
+\\
+
+VPBox, CCS'21\footnote{\url{https://par.nsf.gov/servlets/purl/10327186}}
+& Modify Android Framework for sandboxing via container-based virtualization which uses Linux container tools transplanted to Android or runs another Android OS as guest OS by mounting virtual file system and runtime. 
+
+Different from app-level virtualization where host app provides virtualization on top of the Android framework and create system service proxies to intercept messages. The host app has to hook the API invocations of the guest app so that the Android system thinks that all API requests are from the host apps, leaving host app's signatures in the guest app's call stack and memory.
+\\
+
+Condroid, MobileCloud2015\footnote{\url{http://arc.zju.edu.cn/_upload/article/files/d9/bd/a5f57e3a4143b907382976333a87/d086a9aa-13c0-4261-9109-b63686c62c97.pdf}}
+&OS-level virtualization using containers by modifying Android Framework (virtual Binder IPC mechanisms)
+
+Runs containers which are virtual machines running an isolated Android system with pre-installed apps. Android framework inside the Android systems inside the containers are modified.
+
+Linux kernel reconfigured to enable cgroups, namespace features, creating virtual devices and virtual device drivers.
+
+Android Framework of host Android system modified to cooperate with the containers.
+
+LXC tools transplanted from Linux to Android runtime environment for creating and managing containers.
+
+\\
+
+\midrule
+\caption{Papers concerning App-virtualization} 
+\label{tab:appvirtualization}
+\end{longtable}
+
+\pagebreak
