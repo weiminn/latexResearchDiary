@@ -1,0 +1,111 @@
+\label{task:20240610_android}
+
+\subsection{Decompile APKs}
+
+\subsubsection{JADX}
+First Decompiler to try is JADX\footnote{\url{https://github.com/skylot/jadx}}.
+
+Need to install JDK11:
+\begin{lstlisting}
+sudo apt install openjdk-11-jdk
+update-java-alternatives --list
+sudo update-alternatives --config java
+\end{lstlisting}
+
+Do not install JRE \texttt{sudo apt install openjdk-11-jre-headless}, as it is not JDK and lack some development library.
+
+APK Tool\footnote{\url{https://github.com/iBotPeaches/Apktool}}
+
+Dex2Jar\footnote{\url{https://github.com/pxb1988/dex2jar}}
+
+\subsection{Repackaging Attack}
+
+\subsubsection{Extract APK from Installed App}
+
+Download and install Screen Logger APK\footnote{\url{https://apkpure.com/screen-logger/com.wultra.app.screenlogger/download}}:
+\begin{lstlisting}
+adb install Screen\ Logger_1.1_APKPure.apk 
+\end{lstlisting}
+After installation, grant requested permissions to the Screen Logger app for it to run properly.
+
+Install DBS mobile banking application from Google Playstore, and extract its APK:
+\begin{lstlisting}
+adb shell pm list packages -f -3
+adb pull /data/app/~~VDIXkSOBT9AdrdsivBoitg==/com.dbs.sg.dbsmbanking-b3QDPSklmc7YrFj8nO2hHA==/base.apk
+\end{lstlisting}
+
+\subsubsection{Safeguards}
+
+Emulator Detection logic\footnote{\url{https://ray-chong.medium.com/android-emulator-detection-4d0f994aab5e}} in OCBC app:
+\begin{lstlisting}[language=java]
+public class Validation {
+    public static boolean isEmulator() {
+        String str = Build.FINGERPRINT;
+        if (!str.startsWith("generic") && !str.startsWith("unknown")) {
+            String str2 = Build.MODEL;
+            if (!str2.contains("google_sdk") && !str2.contains("Emulator") && !str2.contains("Android SDK built for x86") && !Build.MANUFACTURER.contains("Genymotion") && ((!Build.BRAND.startsWith("generic") || !Build.DEVICE.startsWith("generic")) && !"google_sdk".equals(Build.PRODUCT))) {
+                return false;
+            }
+        }
+        return true;
+    }
+\end{lstlisting}
+
+Root check when loading OneTouchActivity:
+\begin{lstlisting}[language=java]
+public boolean isRooted() {
+    if (!Validation.isRooted(this)) {
+        return false;
+    }
+    new AlertDialog.Builder(this).setTitle("").setMessage(getString(R.string.message_no_root_support)).setCancelable(false).setPositiveButton("OK", new DialogInterface.OnClickListener() { // from class: com.ocbc.mdt.onetouch.activity.OneTouchActivity.3
+        @Override // android.content.DialogInterface.OnClickListener
+        public void onClick(DialogInterface dialogInterface, int i11) {
+            OneTouchActivity.this.finish();
+            Process.killProcess(Process.myPid());
+        }
+    }).show();
+    return true;
+}
+\end{lstlisting}
+
+\texttt{String} constant that stores the warning message:
+\begin{lstlisting}[language=java]
+public static final String DEFAULT_ROOT_MSG_SG = "We cannot proceed with OCBC mobile banking as we suspect your device is 'jail broken', 'rooted' or running a non-compatible operating system. This leaves you vulnerable to fraud attacks. Please login to www.ocbc.com to continue banking.";
+\end{lstlisting}
+
+Root detection checks for multiple condtions to be true:
+\begin{lstlisting}[language=java]
+public boolean n() {
+    return j() || h() || b("su") || c() || e() || l() || g() || f() || d();
+}
+\end{lstlisting}
+
+One of the Root detection logic uses RootBeer\footnote{\url{https://github.com/scottyab/rootbeer}}:
+\begin{lstlisting}[language=java]
+public boolean f() {
+    if (!a()) {
+        n50.a.a("We could not load the native library to test for root");
+        return false;
+    }
+    int length = a.f55724d.length;
+    String[] strArr = new String[length];
+    for (int i11 = 0; i11 < length; i11++) {
+        strArr[i11] = a.f55724d[i11] + "su";
+    }
+    RootBeerNative rootBeerNative = new RootBeerNative();
+    try {
+        rootBeerNative.setLogDebugMessages(this.f55727b);
+        return rootBeerNative.checkForRoot(strArr) > 0;
+    } catch (UnsatisfiedLinkError unused) {
+        return false;
+    }
+}
+\end{lstlisting}
+
+% Accessbility Detection
+
+% \subsection{App Virtualization Attack}
+
+
+
+% \pagebreak
