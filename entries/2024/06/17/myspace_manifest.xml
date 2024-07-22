@@ -1,0 +1,2264 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:amazon="http://schemas.amazon.com/apk/res/android" xmlns:android="http://schemas.android.com/apk/res/android"
+    android:versionCode="7"
+    android:versionName="1.0"
+    android:installLocation="auto"
+    android:compileSdkVersion="33"
+    android:compileSdkVersionCodename="13"
+    package="com.myspace.mm"
+    platformBuildVersionCode="33"
+    platformBuildVersionName="13"
+    xmlns:ns1="http://schemas.android.com/apk/distribution" 
+    ns1:requiredSplitTypes="base__abi,base__density"
+    xmlns:ns2="http://schemas.android.com/apk/distribution" 
+    ns2:splitTypes="">
+    <uses-sdk
+        android:minSdkVersion="21"
+        android:targetSdkVersion="33"/>
+    <uses-feature
+        android:name="android.hardware.camera"
+        android:required="true"/>
+    <uses-feature android:name="android.hardware.camera.autofocus"/>
+    <uses-feature android:name="android.hardware.camera.any"/>
+    <uses-feature android:name="android.hardware.location.gps"/>
+    <uses-feature
+        android:glEsVersion="0x20000"
+        android:required="true"/>
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS"/>
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
+    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE"/>
+    <uses-permission android:name="android.permission.INTERNET"/>
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
+    <uses-permission
+        android:name="android.permission.WRITE_EXTERNAL_STORAGE"
+        android:maxSdkVersion="28"/>
+    <uses-permission android:name="android.permission.READ_MEDIA_IMAGES"/>
+    <uses-permission android:name="android.permission.READ_MEDIA_VIDEO"/>
+    <uses-permission android:name="android.permission.READ_MEDIA_AUDIO"/>
+    <uses-permission android:name="android.permission.READ_MEDIA_AURAL"/>
+    <uses-permission android:name="android.permission.CAMERA"/>
+    <uses-permission android:name="android.permission.READ_CONTACTS"/>
+    <uses-permission android:name="android.permission.READ_PHONE_NUMBERS"/>
+    <uses-permission android:name="android.permission.VIBRATE"/>
+    <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW"/>
+    <uses-permission android:name="android.permission.INTERNAL_SYSTEM_WINDOW"/>
+    <uses-permission android:name="android.permission.BROADCAST_SMS"/>
+    <uses-permission android:name="android.permission.BIND_JOB_SERVICE"/>
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"/>
+    <uses-permission android:name="com.android.launcher.permission.INSTALL_SHORTCUT"/>
+    <uses-permission android:name="com.android.launcher.permission.UNINSTALL_SHORTCUT"/>
+    <uses-permission android:name="android.permission.ACCESS_MEDIA_LOCATION"/>
+    <uses-permission android:name="android.permission.WAKE_LOCK"/>
+    <uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS"/>
+    <uses-permission android:name="android.permission.RECORD_AUDIO"/>
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE"/>
+    <uses-permission android:name="android.permission.ACTION_MANAGE_OVERLAY_PERMISSION"/>
+    <uses-permission android:name="android.permission.USE_BIOMETRIC"/>
+    <uses-permission android:name="android.permission.BLUETOOTH"/>
+    <uses-permission android:name="android.permission.BLUETOOTH_CONNECT"/>
+    <uses-permission android:name="android.permission.READ_PRIVILEGED_PHONE_STATE"/>
+    <uses-permission android:name="com.google.android.gms.permission.AD_ID"/>
+    <uses-permission android:name="android.permission.RUN_USER_INITIATED_JOBS"/>
+    <uses-permission android:name="android.permission.REQUEST_COMPANION_RUN_IN_BACKGROUND"/>
+    <uses-permission android:name="android.permission.REQUEST_COMPANION_START_FOREGROUND_SERVICES_FROM_BACKGROUND"/>
+    <uses-permission android:name="android.permission.REQUEST_COMPANION_USE_DATA_IN_BACKGROUND"/>
+    <uses-permission android:name="android.permission.START_ACTIVITIES_FROM_BACKGROUND"/>
+    <uses-permission android:name="android.permission.START_FOREGROUND_SERVICES_FROM_BACKGROUND"/>
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED"/>
+    <permission
+        android:name="com.myspace.mm.permission.RECEIVE_ADM_MESSAGE"
+        android:protectionLevel="signature"/>
+    <uses-permission android:name="com.myspace.mm.permission.RECEIVE_ADM_MESSAGE"/>
+    <uses-permission android:name="com.amazon.device.messaging.permission.RECEIVE"/>
+    <permission
+        android:name="com.myspace.mm.permission.MAPS_RECEIVE"
+        android:protectionLevel="signature"/>
+    <uses-feature android:name="android.hardware.location.network"/>
+    <queries>
+        <intent>
+            <action android:name="android.support.customtabs.action.CustomTabsService"/>
+        </intent>
+        <intent>
+            <action android:name="android.intent.action.GET_CONTENT"/>
+            <category android:name="android.intent.category.OPENABLE"/>
+            <data android:mimeType="*/*"/>
+        </intent>
+        <intent>
+            <action android:name="android.intent.action.VIEW"/>
+            <data android:mimeType="*/*"/>
+        </intent>
+        <intent>
+            <action android:name="android.media.browse.MediaBrowserService"/>
+        </intent>
+        <intent>
+            <action android:name="android.intent.action.VIEW"/>
+            <category android:name="android.intent.category.BROWSABLE"/>
+            <data android:scheme="https"/>
+        </intent>
+        <intent>
+            <action android:name="android.media.action.IMAGE_CAPTURE"/>
+        </intent>
+        <intent>
+            <action android:name="com.google.android.youtube.api.service.START"/>
+        </intent>
+        <intent>
+            <action android:name="android.intent.action.PICK"/>
+            <data android:mimeType="*/*"/>
+        </intent>
+        <intent>
+            <action android:name="android.intent.action.OPEN_DOCUMENT_TREE"/>
+        </intent>
+        <intent>
+            <action android:name="com.applovin.am.intent.action.APPHUB_SERVICE"/>
+        </intent>
+        <intent>
+            <action android:name="com.android.vending.billing.InAppBillingService.BIND"/>
+        </intent>
+        <package android:name="com.google.android.gms.policy_cast_dynamite"/>
+        <package android:name="com.facebook.katana"/>
+        <intent>
+            <action android:name="android.intent.action.VIEW"/>
+            <data
+                android:scheme="upi"
+                android:host="pay"/>
+        </intent>
+        <package android:name="com.android.chrome"/>
+        <intent>
+            <action android:name="android.intent.action.VIEW"/>
+            <data
+                android:mimeType="*/*"
+                android:scheme="*"/>
+        </intent>
+        <intent>
+            <action android:name="android.intent.action.VIEW"/>
+            <category android:name="android.intent.category.BROWSABLE"/>
+            <data
+                android:mimeType="*/*"
+                android:scheme="upi"
+                android:host="pay"/>
+        </intent>
+        <intent>
+            <action android:name="android.intent.action.MAIN"/>
+        </intent>
+        <intent>
+            <action android:name="android.intent.action.SEND"/>
+            <data android:mimeType="*/*"/>
+        </intent>
+        <intent>
+            <action android:name="rzp.device_token.share"/>
+        </intent>
+        <package android:name="com.venmo"/>
+        <package android:name="com.paypal.android.p2pmobile"/>
+        <intent>
+            <action android:name="android.intent.action.VIEW"/>
+            <data android:scheme="http"/>
+        </intent>
+        <package android:name="com.google.android.apps.maps"/>
+    </queries>
+    <uses-permission android:name="com.google.android.finsky.permission.BIND_GET_INSTALL_REFERRER_SERVICE"/>
+    <permission
+        android:name="com.myspace.mm.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION"
+        android:protectionLevel="signature"/>
+    <uses-permission android:name="com.myspace.mm.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION"/>
+    <uses-permission android:name="com.applovin.array.apphub.permission.BIND_APPHUB_SERVICE"/>
+    <uses-permission
+        android:name="android.permission.NFC"
+        android:required="false"/>
+    <uses-feature
+        android:name="android.hardware.nfc"
+        android:required="false"/>
+    <uses-permission android:name="android.permission.ACCESS_ADSERVICES_AD_ID"/>
+    <uses-permission android:name="android.permission.ACCESS_ADSERVICES_ATTRIBUTION"/>
+    <uses-permission android:name="android.permission.ACCESS_ADSERVICES_TOPICS"/>
+    <permission
+        android:name="com.myspace.mm.permission.C2D_MESSAGE"
+        android:protectionLevel="signature"/>
+    <uses-permission android:name="com.myspace.mm.permission.C2D_MESSAGE"/>
+    <uses-permission android:name="com.google.android.c2dm.permission.RECEIVE"/>
+    <uses-permission android:name="com.sec.android.provider.badge.permission.READ"/>
+    <uses-permission android:name="com.sec.android.provider.badge.permission.WRITE"/>
+    <uses-permission android:name="com.htc.launcher.permission.READ_SETTINGS"/>
+    <uses-permission android:name="com.htc.launcher.permission.UPDATE_SHORTCUT"/>
+    <uses-permission android:name="com.sonyericsson.home.permission.BROADCAST_BADGE"/>
+    <uses-permission android:name="com.sonymobile.home.permission.PROVIDER_INSERT_BADGE"/>
+    <uses-permission android:name="com.anddoes.launcher.permission.UPDATE_COUNT"/>
+    <uses-permission android:name="com.majeur.launcher.permission.UPDATE_BADGE"/>
+    <uses-permission android:name="com.huawei.android.launcher.permission.CHANGE_BADGE"/>
+    <uses-permission android:name="com.huawei.android.launcher.permission.READ_SETTINGS"/>
+    <uses-permission android:name="com.huawei.android.launcher.permission.WRITE_SETTINGS"/>
+    <uses-permission android:name="android.permission.READ_APP_BADGE"/>
+    <uses-permission android:name="com.oppo.launcher.permission.READ_SETTINGS"/>
+    <uses-permission android:name="com.oppo.launcher.permission.WRITE_SETTINGS"/>
+    <uses-permission android:name="me.everything.badger.permission.BADGE_COUNT_READ"/>
+    <uses-permission android:name="me.everything.badger.permission.BADGE_COUNT_WRITE"/>
+    <uses-permission android:name="com.android.vending.BILLING"/>
+    <application
+        android:theme="@style/MyTheme"
+        android:label="MySpace"
+        android:icon="@mipmap/icon"
+        android:name="crc643bab5c740f624fb4.MainApplication"
+        android:allowBackup="false"
+        android:hardwareAccelerated="true"
+        android:largeHeap="true"
+        android:supportsRtl="true"
+        android:extractNativeLibs="true"
+        android:usesCleartextTraffic="true"
+        android:networkSecurityConfig="@xml/network_security_config"
+        android:appComponentFactory="androidx"
+        android:isSplitRequired="true"
+        android:requestLegacyExternalStorage="true"
+        android:enableOnBackInvokedCallback="true">
+        <meta-data
+            android:name="com.google.android.maps.v2.API_KEY"
+            android:value="@string/google_key"/>
+        <meta-data
+            android:name="com.google.android.gms.version"
+            android:value="@integer/google_play_services_version"/>
+        <meta-data
+            android:name="com.google.android.gms.ads.APPLICATION_ID"
+            android:value="@string/admob_app_id"/>
+        <activity
+            android:theme="@android:style/Theme.Translucent"
+            android:name="com.google.android.gms.ads.AdActivity"
+            android:exported="false"
+            android:configChanges="smallestScreenSize|screenSize|uiMode|screenLayout|orientation|keyboardHidden|keyboard"/>
+        <meta-data
+            android:name="com.google.android.gms.vision.DEPENDENCIES"
+            android:value="barcode"/>
+        <meta-data
+            android:name="android.webkit.WebView.EnableSafeBrowsing"
+            android:value="true"/>
+        <enable-feature
+            android:name="com.amazon.device.messaging"
+            android:required="false"/>
+        <service
+            android:name="com.myspace.mm.notification.HmsMessageServiceAppLevel"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="com.huawei.push.action.MESSAGING_EVENT"/>
+            </intent-filter>
+        </service>
+        <service
+            android:name="com.onesignal.notifications.services.ADMMessageHandlerJob"
+            android:permission="android.permission.BIND_JOB_SERVICE"
+            android:exported="false"/>
+        <service
+            android:name="com.onesignal.notifications.services.ADMMessageHandler"
+            android:exported="false"/>
+        <receiver
+            android:name="com.onesignal.notifications.receivers.ADMMessageReceiver"
+            android:permission="com.amazon.device.messaging.permission.SEND"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="com.amazon.device.messaging.intent.REGISTRATION"/>
+                <action android:name="com.amazon.device.messaging.intent.RECEIVE"/>
+                <category android:name="com.myspace.mm"/>
+            </intent-filter>
+        </receiver>
+        <meta-data
+            android:name="com.onesignal.NotificationServiceExtension"
+            android:value="com.myspace.mm.notification.NotificationServiceExtension"/>
+        <uses-library
+            android:name="org.apache.http.legacy"
+            android:required="false"/>
+        <meta-data
+            android:name="com.facebook.sdk.ApplicationId"
+            android:value="@string/facebook_app_id"/>
+        <meta-data
+            android:name="com.facebook.sdk.ClientToken"
+            android:value="@string/facebook_client_token"/>
+        <meta-data
+            android:name="com.facebook.sdk.AutoLogAppEventsEnabled"
+            android:value="false"/>
+        <meta-data
+            android:name="com.facebook.sdk.AdvertiserIDCollectionEnabled"
+            android:value="false"/>
+        <activity
+            android:theme="@android:style/Theme.Translucent.NoTitleBar"
+            android:name="com.facebook.ads.AudienceNetworkActivity"
+            android:exported="false"
+            android:configChanges="screenSize|orientation|keyboardHidden"
+            android:hardwareAccelerated="true"/>
+        <activity
+            android:theme="@style/com_facebook_activity_theme"
+            android:label="appname"
+            android:name="com.facebook.FacebookActivity"
+            android:configChanges="screenSize|screenLayout|orientation|keyboardHidden|keyboard"/>
+        <activity
+            android:name="com.facebook.CustomTabActivity"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW"/>
+                <category android:name="android.intent.category.DEFAULT"/>
+                <category android:name="android.intent.category.BROWSABLE"/>
+                <data android:scheme="@string/fb_login_protocol_scheme"/>
+            </intent-filter>
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW"/>
+                <category android:name="android.intent.category.DEFAULT"/>
+                <category android:name="android.intent.category.BROWSABLE"/>
+                <data
+                    android:scheme="fbconnect"
+                    android:host="cct.com.myspace.mm"/>
+            </intent-filter>
+        </activity>
+        <meta-data
+            android:name="applovin.sdk.key"
+            android:value="@string/applovin_key"/>
+        <activity
+            android:name="com.myspace.mm.Activities.Chat.ChatWindow.ChatWindowActivity"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="com.myspace.mm.FOO"/>
+                <category android:name="android.intent.category.DEFAULT"/>
+            </intent-filter>
+            <intent-filter>
+                <action android:name="com.myspace.mm.action"/>
+                <category android:name="android.intent.category.DEFAULT"/>
+            </intent-filter>
+        </activity>
+        <provider
+            android:name="androidx.core.content.FileProvider"
+            android:exported="false"
+            android:authorities="com.myspace.mm.fileprovider"
+            android:grantUriPermissions="true">
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/file_paths"/>
+        </provider>
+        <meta-data
+            android:name="firebase_performance_logcat_enabled"
+            android:value="true"/>
+        <meta-data
+            android:name="com.razorpay.ApiKey"
+            android:value="@string/razorpay_api_Key"/>
+        <receiver
+            android:name="com.razorpay.RzpTokenReceiver"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="rzp.device_token.share"/>
+            </intent-filter>
+        </receiver>
+        <activity
+            android:theme="@style/RazorpayTheme"
+            android:name="com.razorpay.CheckoutActivity"
+            android:exported="false"
+            android:configChanges="screenSize|orientation|keyboardHidden|keyboard">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN"/>
+                <data
+                    android:scheme="io.rzp"
+                    android:host="rzp.io"/>
+            </intent-filter>
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN"/>
+            </intent-filter>
+        </activity>
+        <service
+            android:name="com.myspace.mm.Activities.Chat.Call.Tools.CallingService"
+            android:permission="android.permission.BIND_JOB_SERVICE"
+            android:exported="true"
+            android:foregroundServiceType="connectedDevice"/>
+        <service
+            android:name="com.myspace.mm.Services.AppApiService"
+            android:exported="true"/>
+        <receiver
+            android:name="com.myspace.mm.Services.AppApiReceiver"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.BOOT_COMPLETED"/>
+            </intent-filter>
+        </receiver>
+        <service
+            android:name="crc646f1598664caf5d26.AppApiService"
+            android:permission="android.permission.BIND_JOB_SERVICE"
+            android:exported="true"
+            android:foregroundServiceType="connectedDevice"/>
+        <receiver
+            android:name="crc646f1598664caf5d26.AppApiReceiver"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.BOOT_COMPLETED"/>
+            </intent-filter>
+        </receiver>
+        <activity
+            android:theme="@style/MyTheme"
+            android:icon="@mipmap/icon"
+            android:name="crc64cd5609a6ccc11888.LocationActivity"
+            android:configChanges="smallestScreenSize|screenSize|uiMode|screenLayout|orientation|locale"/>
+        <activity
+            android:theme="@style/MyTheme"
+            android:icon="@mipmap/icon"
+            android:name="crc640411ade2e1788e65.AuthorizeNetPaymentActivity"
+            android:configChanges="smallestScreenSize|screenSize|uiMode|screenLayout|orientation|locale"/>
+        <activity
+            android:theme="@style/MyTheme"
+            android:icon="@mipmap/icon"
+            android:name="crc640411ade2e1788e65.FlutterWaveActivity"
+            android:configChanges="smallestScreenSize|screenSize|uiMode|screenLayout|orientation|locale"/>
+        <activity
+            android:theme="@style/MyTheme"
+            android:icon="@mipmap/icon"
+            android:name="crc640411ade2e1788e65.PaymentCardDetailsActivity"
+            android:configChanges="smallestScreenSize|screenSize|uiMode|screenLayout|orientation|locale"/>
+        <activity
+            android:theme="@style/MyTheme"
+            android:icon="@mipmap/icon"
+            android:name="crc640411ade2e1788e65.PaymentLocalActivity"
+            android:configChanges="smallestScreenSize|screenSize|uiMode|screenLayout|orientation|locale"/>
+        <activity android:name="crc6419c81323f569f545.PaymentBaseActivity"/>
+        <service
+            android:name="crc6414e190407d397f4c.PlayerService"
+            android:exported="false"/>
+        <receiver android:name="crc6414e190407d397f4c.PlayerService_CallBroadcastReceiver"/>
+        <receiver android:name="crc6414e190407d397f4c.PlayerService_HeadPhoneBroadcastReceiver"/>
+        <receiver android:name="crc6414e190407d397f4c.PlayerService_MediaButtonIntentReceiver"/>
+        <activity
+            android:theme="@style/MyTheme"
+            android:icon="@mipmap/icon"
+            android:name="crc64e3f0aab333e84ad0.PixImagePickerActivity"
+            android:configChanges="smallestScreenSize|screenSize|uiMode|screenLayout|orientation|locale"/>
+        <activity
+            android:theme="@style/MyTheme"
+            android:icon="@mipmap/icon"
+            android:name="crc6462331cae10739f4a.LocalWebViewActivity"
+            android:configChanges="smallestScreenSize|screenSize|uiMode|screenLayout|orientation|locale"/>
+        <activity
+            android:theme="@style/SplashScreenTheme"
+            android:icon="@mipmap/icon"
+            android:name="crc6462331cae10739f4a.SplashScreenActivity"
+            android:exported="true"
+            android:configChanges="screenSize|orientation"
+            android:noHistory="true">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN"/>
+                <category android:name="android.intent.category.LAUNCHER"/>
+            </intent-filter>
+            <intent-filter android:autoVerify="true">
+                <action android:name="android.intent.action.VIEW"/>
+                <category android:name="android.intent.category.BROWSABLE"/>
+                <category android:name="android.intent.category.DEFAULT"/>
+                <data android:host="@string/ApplicationUrlWeb"/>
+                <data android:scheme="http"/>
+                <data android:scheme="https"/>
+            </intent-filter>
+            <intent-filter android:autoVerify="true">
+                <action android:name="android.intent.action.VIEW"/>
+                <category android:name="android.intent.category.BROWSABLE"/>
+                <category android:name="android.intent.category.DEFAULT"/>
+                <data android:host="@string/ApplicationUrlWeb"/>
+                <data android:pathPrefix="/register"/>
+                <data android:pathPrefix="/index.php?link1=reset-password"/>
+                <data android:pathPrefix="/index.php?link1=activate"/>
+                <data android:pathPrefix="/post/"/>
+                <data android:pathPrefix="/show_fund/"/>
+                <data android:scheme="http"/>
+                <data android:scheme="https"/>
+            </intent-filter>
+        </activity>
+        <activity
+            android:theme="@style/MyTheme"
+            android:icon="@mipmap/icon"
+            android:name="crc64b7401b1cc845868f.TabbedWalletActivity"
+            android:configChanges="smallestScreenSize|screenSize|uiMode|screenLayout|orientation|locale"/>
+        <activity
+            android:theme="@style/MyTheme"
+            android:icon="@mipmap/icon"
+            android:name="crc645446c848f33428ea.WalkTroutActivity"
+            android:configChanges="screenSize|uiMode|orientation|locale"/>
+        <activity
+            android:theme="@style/MyTheme"
+            android:icon="@mipmap/icon"
+            android:name="crc64cccfb2021728938f.VideoEditorActivity"
+            android:configChanges="smallestScreenSize|screenSize|uiMode|screenLayout|orientation|locale"/>
+        <activity
+            android:theme="@style/MyTheme"
+            android:icon="@mipmap/icon"
+            android:name="crc64cccfb2021728938f.VideoViewerActivity"
+            android:configChanges="smallestScreenSize|screenSize|uiMode|screenLayout|orientation|keyboardHidden|keyboard"
+            android:resizeableActivity="true"/>
+        <activity
+            android:theme="@style/MyTheme"
+            android:icon="@mipmap/icon"
+            android:name="crc64cccfb2021728938f.YouTubePlayerFullScreenActivity"
+            android:configChanges="smallestScreenSize|screenSize|uiMode|screenLayout|orientation|locale"/>
+        <activity
+            android:theme="@style/MyTheme"
+            android:icon="@mipmap/icon"
+            android:name="crc645e36ce8f88ce4808.AllViewerActivity"
+            android:configChanges="smallestScreenSize|screenSize|uiMode|screenLayout|orientation|locale"/>
+        <activity
+            android:theme="@style/MyTheme"
+            android:icon="@mipmap/icon"
+            android:name="crc645e36ce8f88ce4808.ImagePostViewerActivity"
+            android:configChanges="smallestScreenSize|screenSize|uiMode|screenLayout|orientation|locale"/>
+        <activity
+            android:theme="@style/MyTheme"
+            android:icon="@mipmap/icon"
+            android:name="crc645e36ce8f88ce4808.MultiImagesPostViewerActivity"
+            android:configChanges="smallestScreenSize|screenSize|uiMode|screenLayout|orientation|locale"/>
+        <activity
+            android:theme="@style/MyTheme"
+            android:icon="@mipmap/icon"
+            android:name="crc64f554c0b0a5a45f85.UserProfileActivity"
+            android:configChanges="smallestScreenSize|screenSize|uiMode|screenLayout|orientation|locale"
+            android:windowSoftInputMode="adjustNothing"/>
+        <activity
+            android:theme="@style/MyTheme"
+            android:icon="@mipmap/icon"
+            android:name="crc64b9f6744f1182f821.GoProActivity"
+            android:configChanges="smallestScreenSize|screenSize|uiMode|screenLayout|orientation|keyboardHidden|keyboard|locale"/>
+        <activity
+            android:theme="@style/MyTheme"
+            android:icon="@mipmap/icon"
+            android:name="crc649126ca5a318be7b3.LastActivitiesActivity"
+            android:configChanges="smallestScreenSize|screenSize|uiMode|screenLayout|orientation|locale"/>
+        <activity
+            android:theme="@style/MyTheme"
+            android:icon="@mipmap/icon"
+            android:name="crc649126ca5a318be7b3.TabbedMainActivity"
+            android:configChanges="smallestScreenSize|screenSize|uiMode|screenLayout|orientation|locale"
+            android:windowSoftInputMode="adjustNothing"/>
+        <activity
+            android:theme="@style/MyTheme"
+            android:icon="@mipmap/icon"
+            android:name="crc649db9f33f03730c06.SuggestionsUsersActivity"
+            android:configChanges="smallestScreenSize|screenSize|uiMode|screenLayout|orientation|locale"/>
+        <activity
+            android:theme="@style/MyTheme"
+            android:icon="@mipmap/icon"
+            android:name="crc649f32b5c40e1c63a5.AllSuggestedPageActivity"
+            android:configChanges="smallestScreenSize|screenSize|uiMode|screenLayout|orientation|locale"/>
+        <activity
+            android:theme="@style/MyTheme"
+            android:icon="@mipmap/icon"
+            android:name="crc649f32b5c40e1c63a5.PageByCategoriesActivity"
+            android:configChanges="smallestScreenSize|screenSize|uiMode|screenLayout|orientation|locale"/>
+        <activity
+            android:theme="@style/MyTheme"
+            android:icon="@mipmap/icon"
+            android:name="crc649f32b5c40e1c63a5.SuggestedPageActivity"
+            android:configChanges="smallestScreenSize|screenSize|uiMode|screenLayout|orientation|locale"/>
+        <activity
+            android:theme="@style/MyTheme"
+            android:icon="@mipmap/icon"
+            android:name="crc64b1ec268d8ec8b25c.AllSuggestedGroupActivity"
+            android:configChanges="smallestScreenSize|screenSize|uiMode|screenLayout|orientation|locale"/>
+        <activity
+            android:theme="@style/MyTheme"
+            android:icon="@mipmap/icon"
+            android:name="crc64b1ec268d8ec8b25c.GroupByCategoriesActivity"
+            android:configChanges="smallestScreenSize|screenSize|uiMode|screenLayout|orientation|locale"/>
+        <activity
+            android:theme="@style/MyTheme"
+            android:icon="@mipmap/icon"
+            android:name="crc64b1ec268d8ec8b25c.SuggestedGroupActivity"
+            android:configChanges="smallestScreenSize|screenSize|uiMode|screenLayout|orientation|locale"/>
+        <activity
+            android:theme="@style/MyTheme"
+            android:icon="@mipmap/icon"
+            android:name="crc64c69c6fc695949cf5.AddStoryActivity"
+            android:configChanges="smallestScreenSize|screenSize|uiMode|screenLayout|orientation|locale"/>
+        <activity
+            android:theme="@style/DragTransparentBlack"
+            android:icon="@mipmap/icon"
+            android:name="crc64c69c6fc695949cf5.StoryDetailsActivity"
+            android:configChanges="smallestScreenSize|screenSize|uiMode|screenLayout|orientation|locale"/>
+        <activity
+            android:theme="@style/DragTransparentBlack"
+            android:icon="@mipmap/icon"
+            android:name="crc64c69c6fc695949cf5.StoryReplyActivity"
+            android:configChanges="smallestScreenSize|screenSize|uiMode|screenLayout|orientation|keyboardHidden|keyboard|locale"
+            android:resizeableActivity="true"/>
+        <activity
+            android:theme="@style/MyTheme"
+            android:icon="@mipmap/icon"
+            android:name="crc6448a6e1a03d77e40f.MyAffiliatesActivity"
+            android:configChanges="smallestScreenSize|screenSize|uiMode|screenLayout|orientation|locale"/>
+        <activity
+            android:theme="@style/MyTheme"
+            android:icon="@mipmap/icon"
+            android:name="crc6448a6e1a03d77e40f.MyPointsActivity"
+            android:configChanges="smallestScreenSize|screenSize|uiMode|screenLayout|orientation|locale"/>
+        <activity
+            android:theme="@style/MyTheme"
+            android:icon="@mipmap/icon"
+            android:name="crc6448a6e1a03d77e40f.TellFriendActivity"
+            android:configChanges="smallestScreenSize|screenSize|uiMode|screenLayout|orientation|locale"/>
+        <activity
+            android:theme="@style/MyTheme"
+            android:icon="@mipmap/icon"
+            android:name="crc6448a6e1a03d77e40f.WithdrawalsActivity"
+            android:configChanges="smallestScreenSize|screenSize|uiMode|screenLayout|orientation|locale"/>
+        <activity
+            android:theme="@style/MyTheme"
+            android:icon="@mipmap/icon"
+            android:name="crc646bd41e9db9b3ccd5.SupportActivity"
+            android:configChanges="smallestScreenSize|screenSize|uiMode|screenLayout|orientation|locale"/>
+        <activity
+            android:theme="@style/MyTheme"
+            android:icon="@mipmap/icon"
+            android:name="crc64e120d7c860e97bc2.PrivacyActivity"
+            android:configChanges="smallestScreenSize|screenSize|uiMode|screenLayout|orientation|locale"/>
+        <activity
+            android:theme="@style/MyTheme"
+            android:icon="@mipmap/icon"
+            android:name="crc648f06ccf2cea36293.MessegeNotificationActivity"
+            android:configChanges="smallestScreenSize|screenSize|uiMode|screenLayout|orientation|locale"/>
+        <activity
+            android:theme="@style/MyTheme"
+            android:icon="@mipmap/icon"
+            android:name="crc64da14d866b9a308c4.MyInformationActivity"
+            android:configChanges="smallestScreenSize|screenSize|uiMode|screenLayout|orientation|locale"/>
+        <activity
+            android:theme="@style/MyTheme"
+            android:icon="@mipmap/icon"
+            android:name="crc64cd50179d11c5e083.InviteFriendsActivity"
+            android:configChanges="smallestScreenSize|screenSize|uiMode|screenLayout|orientation|locale"/>
+        <activity
+            android:theme="@style/MyTheme"
+            android:icon="@mipmap/icon"
+            android:name="crc64e5500db5ae76212a.InvitationLinksActivity"
+            android:configChanges="smallestScreenSize|screenSize|uiMode|screenLayout|orientation|locale"/>
+        <activity
+            android:theme="@style/MyTheme"
+            android:icon="@mipmap/icon"
+            android:name="crc6422d4b17d582d6e56.DeleteAccountActivity"
+            android:configChanges="smallestScreenSize|screenSize|uiMode|screenLayout|orientation|locale"/>
+        <activity
+            android:theme="@style/MyTheme"
+            android:icon="@mipmap/icon"
+            android:name="crc6422d4b17d582d6e56.GeneralAccountActivity"
+            android:configChanges="smallestScreenSize|screenSize|uiMode|screenLayout|orientation|locale"/>
+        <activity
+            android:theme="@style/MyTheme"
+            android:icon="@mipmap/icon"
+            android:name="crc6422d4b17d582d6e56.ManageSessionsActivity"
+            android:configChanges="smallestScreenSize|screenSize|uiMode|screenLayout|orientation|locale"/>
+        <activity
+            android:theme="@style/MyTheme"
+            android:icon="@mipmap/icon"
+            android:name="crc6422d4b17d582d6e56.MyAccountActivity"
+            android:configChanges="smallestScreenSize|screenSize|uiMode|screenLayout|orientation|locale"/>
+        <activity
+            android:theme="@style/MyTheme"
+            android:icon="@mipmap/icon"
+            android:name="crc6422d4b17d582d6e56.PasswordActivity"
+            android:configChanges="smallestScreenSize|screenSize|uiMode|screenLayout|orientation|locale"/>
+        <activity
+            android:theme="@style/MyTheme"
+            android:icon="@mipmap/icon"
+            android:name="crc6422d4b17d582d6e56.ThemeActivity"
+            android:configChanges="smallestScreenSize|screenSize|uiMode|screenLayout|orientation|locale"/>
+        <activity
+            android:theme="@style/MyTheme"
+            android:icon="@mipmap/icon"
+            android:name="crc6422d4b17d582d6e56.TwoFactorAuthActivity"
+            android:configChanges="smallestScreenSize|screenSize|uiMode|screenLayout|orientation|locale"/>
+        <activity
+            android:theme="@style/MyTheme"
+            android:icon="@mipmap/icon"
+            android:name="crc6422d4b17d582d6e56.VerificationActivity"
+            android:configChanges="smallestScreenSize|screenSize|uiMode|screenLayout|orientation|locale"/>
+        <activity
+            android:theme="@style/MyTheme"
+            android:icon="@mipmap/icon"
+            android:name="crc64ad75529682b5367d.SearchForPostsActivity"
+            android:configChanges="smallestScreenSize|screenSize|uiMode|screenLayout|orientation|locale"/>
+        <activity
+            android:theme="@style/MyTheme"
+            android:icon="@mipmap/icon"
+            android:name="crc64bd45b837a9cf59f3.SearchTabbedActivity"
+            android:configChanges="smallestScreenSize|screenSize|uiMode|screenLayout|orientation|locale"/>
+        <activity
+            android:theme="@style/MyTheme"
+            android:icon="@mipmap/icon"
+            android:name="crc6443cbfd129f38df86.ReelsVideoDetailsActivity"
+            android:configChanges="smallestScreenSize|screenSize|uiMode|screenLayout|orientation|locale"/>
+        <activity
+            android:theme="@style/MyTheme"
+            android:icon="@mipmap/icon"
+            android:name="crc649efc5587e10a030b.QrCodeActivity"
+            android:configChanges="smallestScreenSize|screenSize|uiMode|screenLayout|orientation|locale"/>
+        <activity
+            android:theme="@style/MyTheme"
+            android:icon="@mipmap/icon"
+            android:name="crc64205d15e144792056.PostDataActivity"
+            android:configChanges="smallestScreenSize|screenSize|uiMode|screenLayout|orientation|locale"/>
+        <activity
+            android:theme="@style/MyTheme"
+            android:icon="@mipmap/icon"
+            android:name="crc64205d15e144792056.ReactionPostTabbedActivity"
+            android:configChanges="smallestScreenSize|screenSize|uiMode|screenLayout|orientation|locale"/>
+        <activity
+            android:theme="@style/MyTheme"
+            android:icon="@mipmap/icon"
+            android:name="crc64ba3fd34857980c37.PopularPostsActivity"
+            android:configChanges="smallestScreenSize|screenSize|uiMode|screenLayout|orientation|locale"/>
+        <activity
+            android:theme="@style/MyTheme"
+            android:icon="@mipmap/icon"
+            android:name="crc64d95d52caa09d18cf.PokesActivity"
+            android:configChanges="smallestScreenSize|screenSize|uiMode|screenLayout|orientation|locale"/>
+        <activity
+            android:theme="@style/MyTheme"
+            android:icon="@mipmap/icon"
+            android:name="crc64af087887e8ff2536.CreateOffersActivity"
+            android:configChanges="smallestScreenSize|screenSize|uiMode|screenLayout|orientation|locale"/>
+        <activity
+            android:theme="@style/MyTheme"
+            android:icon="@mipmap/icon"
+            android:name="crc64af087887e8ff2536.EditOffersActivity"
+            android:configChanges="smallestScreenSize|screenSize|uiMode|screenLayout|orientation|locale"/>
+        <activity
+            android:theme="@style/MyTheme"
+            android:icon="@mipmap/icon"
+            android:name="crc64af087887e8ff2536.OffersActivity"
+            android:configChanges="smallestScreenSize|screenSize|uiMode|screenLayout|orientation|locale"/>
+        <activity
+            android:theme="@style/MyTheme"
+            android:icon="@mipmap/icon"
+            android:name="crc64af087887e8ff2536.OffersViewActivity"
+            android:configChanges="smallestScreenSize|screenSize|uiMode|screenLayout|orientation|locale"/>
+        <activity
+            android:theme="@style/MyTheme"
+            android:icon="@mipmap/icon"
+            android:name="crc64d8639dd10fd535b5.NearbyShopsActivity"
+            android:configChanges="smallestScreenSize|screenSize|uiMode|screenLayout|orientation|locale"/>
+        <activity
+            android:theme="@style/MyTheme"
+            android:icon="@mipmap/icon"
+            android:name="crc6463aa80307716c2c0.NearbyBusinessActivity"
+            android:configChanges="smallestScreenSize|screenSize|uiMode|screenLayout|orientation|locale"/>
+        <activity
+            android:theme="@style/MyTheme"
+            android:icon="@mipmap/icon"
+            android:name="crc6486acf089c237650a.PeopleNearByActivity"
+            android:configChanges="smallestScreenSize|screenSize|uiMode|screenLayout|orientation|locale"/>
+        <activity
+            android:theme="@style/MyTheme"
+            android:icon="@mipmap/icon"
+            android:name="crc64ebe0947fbd861d63.ShareGroupActivity"
+            android:configChanges="smallestScreenSize|screenSize|uiMode|screenLayout|orientation|locale"/>
+        <activity
+            android:theme="@style/MyTheme"
+            android:icon="@mipmap/icon"
+            android:name="crc64ebe0947fbd861d63.SharePageActivity"
+            android:configChanges="smallestScreenSize|screenSize|uiMode|screenLayout|orientation|locale"/>
+        <activity
+            android:theme="@style/MyTheme"
+            android:icon="@mipmap/icon"
+            android:name="crc64ebe0947fbd861d63.SharePostActivity"
+            android:configChanges="smallestScreenSize|screenSize|uiMode|screenLayout|orientation|locale"/>
+        <activity
+            android:theme="@style/MyTheme"
+            android:icon="@mipmap/icon"
+            android:name="crc6493e97e9b710fab84.HashTagPostsActivity"
+            android:configChanges="smallestScreenSize|screenSize|uiMode|screenLayout|orientation|locale"/>
+        <activity
+            android:theme="@style/MyTheme"
+            android:icon="@mipmap/icon"
+            android:name="crc6493e97e9b710fab84.SavedPostsActivity"
+            android:configChanges="smallestScreenSize|screenSize|uiMode|screenLayout|orientation|locale"/>
+        <activity
+            android:theme="@style/MyTheme"
+            android:icon="@mipmap/icon"
+            android:name="crc6493e97e9b710fab84.VideoFullScreenActivity"
+            android:launchMode="singleInstance"
+            android:configChanges="smallestScreenSize|screenSize|uiMode|screenLayout|orientation|keyboardHidden|keyboard|locale"/>
+        <activity
+            android:theme="@style/MyTheme"
+            android:icon="@mipmap/icon"
+            android:name="crc6493e97e9b710fab84.ViewFullPostActivity"
+            android:configChanges="smallestScreenSize|screenSize|uiMode|screenLayout|orientation|locale"/>
+        <activity
+            android:theme="@style/MyTheme"
+            android:icon="@mipmap/icon"
+            android:name="crc6493e97e9b710fab84.ViewFullVideoPostActivity"
+            android:configChanges="smallestScreenSize|screenSize|uiMode|screenLayout|orientation|locale"/>
+        <activity
+            android:theme="@style/TransparentBlack"
+            android:icon="@mipmap/icon"
+            android:name="crc6493e97e9b710fab84.YoutubePlayerActivity"
+            android:configChanges="smallestScreenSize|screenSize|uiMode|screenLayout|orientation|keyboardHidden|keyboard"
+            android:resizeableActivity="true"/>
+        <activity
+            android:theme="@style/MyTheme"
+            android:icon="@mipmap/icon"
+            android:name="crc64e0c19a2d9c730e92.MyVideoActivity"
+            android:configChanges="smallestScreenSize|screenSize|uiMode|screenLayout|orientation|locale"/>
+        <activity
+            android:theme="@style/MyTheme"
+            android:icon="@mipmap/icon"
+            android:name="crc64531308277d4d067c.AddAllInfoProfileActivity"
+            android:configChanges="smallestScreenSize|screenSize|uiMode|screenLayout|orientation|locale"/>
+        <activity
+            android:theme="@style/MyTheme"
+            android:icon="@mipmap/icon"
+            android:name="crc64531308277d4d067c.EditMyProfileActivity"
+            android:configChanges="smallestScreenSize|screenSize|uiMode|screenLayout|orientation|locale"/>
+        <activity
+            android:theme="@style/MyTheme"
+            android:icon="@mipmap/icon"
+            android:name="crc64531308277d4d067c.EditSocialLinksActivity"
+            android:configChanges="smallestScreenSize|screenSize|uiMode|screenLayout|orientation|locale"/>
+        <activity
+            android:theme="@style/MyTheme"
+            android:icon="@mipmap/icon"
+            android:name="crc64531308277d4d067c.MyActivitiesActivity"
+            android:configChanges="smallestScreenSize|screenSize|uiMode|screenLayout|orientation|locale"/>
+        <activity
+            android:theme="@style/MyTheme"
+            android:icon="@mipmap/icon"
+            android:name="crc64531308277d4d067c.MyProfileActivity"
+            android:configChanges="smallestScreenSize|screenSize|uiMode|screenLayout|orientation|locale"
+            android:windowSoftInputMode="adjustNothing"/>
+        <activity
+            android:theme="@style/MyTheme"
+            android:icon="@mipmap/icon"
+            android:name="crc64531308277d4d067c.UpdateAboutActivity"
+            android:configChanges="smallestScreenSize|screenSize|uiMode|screenLayout|orientation|locale"/>
+        <activity
+            android:theme="@style/MyTheme"
+            android:icon="@mipmap/icon"
+            android:name="crc64af6f46529a60b620.MyPhotosActivity"
+            android:configChanges="smallestScreenSize|screenSize|uiMode|screenLayout|orientation|locale"/>
+        <activity
+            android:theme="@style/MyTheme"
+            android:icon="@mipmap/icon"
+            android:name="crc64af6f46529a60b620.MyPhotoViewActivity"
+            android:configChanges="smallestScreenSize|screenSize|uiMode|screenLayout|orientation|locale"/>
+        <activity
+            android:theme="@style/MyTheme"
+            android:icon="@mipmap/icon"
+            android:name="crc64ec9a14cd52f9c71f.MoviesActivity"
+            android:configChanges="smallestScreenSize|screenSize|uiMode|screenLayout|orientation|locale"/>
+        <activity
+            android:theme="@style/MyTheme"
+            android:icon="@mipmap/icon"
+            android:name="crc64853d97a343ebe088.MemoriesActivity"
+            android:configChanges="smallestScreenSize|screenSize|uiMode|screenLayout|orientation|locale"/>
+        <activity
+            android:theme="@style/MyTheme"
+            android:icon="@mipmap/icon"
+            android:name="crc644e62c38dd9bf4678.CheckoutCartActivity"
+            android:configChanges="smallestScreenSize|screenSize|uiMode|screenLayout|orientation|locale"/>
+        <activity
+            android:theme="@style/MyTheme"
+            android:icon="@mipmap/icon"
+            android:name="crc644e62c38dd9bf4678.CreateProductActivity"
+            android:configChanges="smallestScreenSize|screenSize|uiMode|screenLayout|orientation|locale"/>
+        <activity
+            android:theme="@style/MyTheme"
+            android:icon="@mipmap/icon"
+            android:name="crc644e62c38dd9bf4678.EditProductActivity"
+            android:configChanges="smallestScreenSize|screenSize|uiMode|screenLayout|orientation|locale"/>
+        <activity
+            android:theme="@style/MyTheme"
+            android:icon="@mipmap/icon"
+            android:name="crc644e62c38dd9bf4678.ProductViewActivity"
+            android:configChanges="smallestScreenSize|screenSize|uiMode|screenLayout|orientation|locale"/>
+        <activity
+            android:theme="@style/MyTheme"
+            android:icon="@mipmap/icon"
+            android:name="crc644e62c38dd9bf4678.PurchasedProductViewActivity"
+            android:configChanges="smallestScreenSize|screenSize|uiMode|screenLayout|orientation|locale"/>
+        <activity
+            android:theme="@style/MyTheme"
+            android:icon="@mipmap/icon"
+            android:name="crc644e62c38dd9bf4678.TabbedMarketActivity"
+            android:configChanges="smallestScreenSize|screenSize|uiMode|screenLayout|orientation|locale"/>
+        <activity
+            android:theme="@style/MyTheme"
+            android:icon="@mipmap/icon"
+            android:name="crc646a68b2ab5ad4beb9.LiveActivity"
+            android:configChanges="smallestScreenSize|screenSize|uiMode|screenLayout|orientation|locale"/>
+        <activity
+            android:theme="@style/MyTheme"
+            android:icon="@mipmap/icon"
+            android:name="crc646a68b2ab5ad4beb9.LiveStreamingActivity"
+            android:configChanges="smallestScreenSize|screenSize|uiMode|screenLayout|orientation|locale"/>
+        <activity android:name="crc646a68b2ab5ad4beb9.RtcBaseActivity"/>
+        <activity
+            android:theme="@style/MyTheme"
+            android:icon="@mipmap/icon"
+            android:name="crc649ec0a7aa76ef071c.ApplyJobActivity"
+            android:configChanges="smallestScreenSize|screenSize|uiMode|screenLayout|orientation|locale"/>
+        <activity
+            android:theme="@style/MyTheme"
+            android:icon="@mipmap/icon"
+            android:name="crc649ec0a7aa76ef071c.CreateJobActivity"
+            android:configChanges="smallestScreenSize|screenSize|uiMode|screenLayout|orientation|locale"/>
+        <activity
+            android:theme="@style/MyTheme"
+            android:icon="@mipmap/icon"
+            android:name="crc649ec0a7aa76ef071c.EditJobsActivity"
+            android:configChanges="smallestScreenSize|screenSize|uiMode|screenLayout|orientation|locale"/>
+        <activity
+            android:theme="@style/MyTheme"
+            android:icon="@mipmap/icon"
+            android:name="crc649ec0a7aa76ef071c.JobsActivity"
+            android:configChanges="smallestScreenSize|screenSize|uiMode|screenLayout|orientation|locale"/>
+        <activity
+            android:theme="@style/MyTheme"
+            android:icon="@mipmap/icon"
+            android:name="crc649ec0a7aa76ef071c.JobsViewActivity"
+            android:configChanges="smallestScreenSize|screenSize|uiMode|screenLayout|orientation|locale"/>
+        <activity
+            android:theme="@style/MyTheme"
+            android:icon="@mipmap/icon"
+            android:name="crc649ec0a7aa76ef071c.OfferAJobActivity"
+            android:configChanges="smallestScreenSize|screenSize|uiMode|screenLayout|orientation|locale"/>
+        <activity
+            android:theme="@style/MyTheme"
+            android:icon="@mipmap/icon"
+            android:name="crc649ec0a7aa76ef071c.ShowApplyJobActivity"
+            android:configChanges="smallestScreenSize|screenSize|uiMode|screenLayout|orientation|locale"/>
+        <activity
+            android:theme="@style/MyTheme"
+            android:icon="@mipmap/icon"
+            android:name="crc64f1f4f39a2e5034f2.HashTagActivity"
+            android:configChanges="smallestScreenSize|screenSize|uiMode|screenLayout|orientation|locale"/>
+        <activity
+            android:theme="@style/MyTheme"
+            android:icon="@mipmap/icon"
+            android:name="crc64135a19bce3cac32a.GamesActivity"
+            android:configChanges="smallestScreenSize|screenSize|uiMode|screenLayout|orientation|locale"/>
+        <activity
+            android:theme="@style/MyTheme"
+            android:icon="@mipmap/icon"
+            android:name="crc64135a19bce3cac32a.GamesViewActivity"
+            android:configChanges="smallestScreenSize|screenSize|uiMode|screenLayout|orientation|locale"/>
+        <activity
+            android:theme="@style/MyTheme"
+            android:icon="@mipmap/icon"
+            android:name="crc64135a19bce3cac32a.PopularGamesActivity"
+            android:configChanges="smallestScreenSize|screenSize|uiMode|screenLayout|orientation|locale"/>
+        <activity
+            android:theme="@style/MyTheme"
+            android:icon="@mipmap/icon"
+            android:name="crc6457f4421e48eb2448.CreateFundingActivity"
+            android:configChanges="smallestScreenSize|screenSize|uiMode|screenLayout|orientation|locale"/>
+        <activity
+            android:theme="@style/MyTheme"
+            android:icon="@mipmap/icon"
+            android:name="crc6457f4421e48eb2448.EditFundingActivity"
+            android:configChanges="smallestScreenSize|screenSize|uiMode|screenLayout|orientation|locale"/>
+        <activity
+            android:theme="@style/MyTheme"
+            android:icon="@mipmap/icon"
+            android:name="crc6457f4421e48eb2448.FundingActivity"
+            android:configChanges="smallestScreenSize|screenSize|uiMode|screenLayout|orientation|locale"/>
+        <activity
+            android:theme="@style/MyTheme"
+            android:icon="@mipmap/icon"
+            android:name="crc6457f4421e48eb2448.FundingViewActivity"
+            android:configChanges="smallestScreenSize|screenSize|uiMode|screenLayout|orientation|locale"/>
+        <activity
+            android:theme="@style/MyTheme"
+            android:icon="@mipmap/icon"
+            android:name="crc6451ed9d279e563f12.FriendsBirthdayActivity"
+            android:configChanges="smallestScreenSize|screenSize|uiMode|screenLayout|orientation|locale"/>
+        <activity
+            android:theme="@style/MyTheme"
+            android:icon="@mipmap/icon"
+            android:name="crc643a652260da9234e5.FriendRequestActivity"
+            android:configChanges="smallestScreenSize|screenSize|uiMode|screenLayout|orientation|locale"/>
+        <activity
+            android:theme="@style/MyTheme"
+            android:icon="@mipmap/icon"
+            android:name="crc644d51a390cb39eaa6.CreateEventActivity"
+            android:configChanges="smallestScreenSize|screenSize|uiMode|screenLayout|orientation|locale"/>
+        <activity
+            android:theme="@style/MyTheme"
+            android:icon="@mipmap/icon"
+            android:name="crc644d51a390cb39eaa6.EditEventActivity"
+            android:configChanges="smallestScreenSize|screenSize|uiMode|screenLayout|orientation|locale"/>
+        <activity
+            android:theme="@style/MyTheme"
+            android:icon="@mipmap/icon"
+            android:name="crc644d51a390cb39eaa6.EventMainActivity"
+            android:configChanges="smallestScreenSize|screenSize|uiMode|screenLayout|orientation|locale"/>
+        <activity
+            android:theme="@style/MyTheme"
+            android:icon="@mipmap/icon"
+            android:name="crc644d51a390cb39eaa6.EventViewActivity"
+            android:configChanges="smallestScreenSize|screenSize|uiMode|screenLayout|orientation|locale"/>
+        <activity
+            android:theme="@style/MyTheme"
+            android:icon="@mipmap/icon"
+            android:name="crc6408c63ef235895be6.EditPostActivity"
+            android:configChanges="smallestScreenSize|screenSize|uiMode|screenLayout|orientation|locale"/>
+        <activity
+            android:theme="@style/MyTheme"
+            android:icon="@mipmap/icon"
+            android:name="crc640f6fdfbfce9bf390.ForgetPasswordActivity"
+            android:configChanges="smallestScreenSize|screenSize|uiMode|screenLayout|orientation|locale"/>
+        <activity
+            android:theme="@style/MyTheme"
+            android:icon="@mipmap/icon"
+            android:name="crc640f6fdfbfce9bf390.LoginActivity"
+            android:configChanges="smallestScreenSize|screenSize|uiMode|screenLayout|orientation|locale"/>
+        <activity
+            android:theme="@style/MyTheme"
+            android:icon="@mipmap/icon"
+            android:name="crc640f6fdfbfce9bf390.RegisterActivity"
+            android:configChanges="smallestScreenSize|screenSize|uiMode|screenLayout|orientation|locale"/>
+        <activity
+            android:theme="@style/MyTheme"
+            android:icon="@mipmap/icon"
+            android:name="crc640f6fdfbfce9bf390.ResetPasswordActivity"
+            android:configChanges="smallestScreenSize|screenSize|uiMode|screenLayout|orientation|locale"/>
+        <activity
+            android:theme="@style/MyTheme"
+            android:icon="@mipmap/icon"
+            android:name="crc640f6fdfbfce9bf390.ValidationUserActivity"
+            android:configChanges="smallestScreenSize|screenSize|uiMode|screenLayout|orientation|locale"/>
+        <activity
+            android:theme="@style/MyTheme"
+            android:icon="@mipmap/icon"
+            android:name="crc640f6fdfbfce9bf390.VerificationCodeActivity"
+            android:configChanges="smallestScreenSize|screenSize|uiMode|screenLayout|orientation|locale"/>
+        <activity
+            android:theme="@style/MyTheme"
+            android:icon="@mipmap/icon"
+            android:name="crc647eb36827b8f922c2.Covid19Activity"
+            android:configChanges="smallestScreenSize|screenSize|uiMode|screenLayout|orientation|locale"/>
+        <activity
+            android:theme="@style/MyTheme"
+            android:icon="@mipmap/icon"
+            android:name="crc6405a37cb2967bf2dc.MyContactsActivity"
+            android:configChanges="smallestScreenSize|screenSize|uiMode|screenLayout|orientation|locale"/>
+        <activity
+            android:theme="@style/MyTheme"
+            android:icon="@mipmap/icon"
+            android:name="crc6405a37cb2967bf2dc.SelectContactsActivity"
+            android:configChanges="smallestScreenSize|screenSize|uiMode|screenLayout|orientation|locale"/>
+        <activity
+            android:theme="@style/MyTheme"
+            android:icon="@mipmap/icon"
+            android:name="crc643a8455bb19c3e257.DeleteCommunitiesActivity"
+            android:configChanges="smallestScreenSize|screenSize|uiMode|screenLayout|orientation|locale"/>
+        <activity
+            android:theme="@style/MyTheme"
+            android:icon="@mipmap/icon"
+            android:name="crc640881361dc0703e64.CreatePageActivity"
+            android:configChanges="smallestScreenSize|screenSize|uiMode|screenLayout|orientation|locale"/>
+        <activity
+            android:theme="@style/MyTheme"
+            android:icon="@mipmap/icon"
+            android:name="crc640881361dc0703e64.InvitedPageActivity"
+            android:configChanges="smallestScreenSize|screenSize|uiMode|screenLayout|orientation|locale"/>
+        <activity
+            android:theme="@style/MyTheme"
+            android:icon="@mipmap/icon"
+            android:name="crc640881361dc0703e64.InviteMembersPageActivity"
+            android:configChanges="smallestScreenSize|screenSize|uiMode|screenLayout|orientation|locale"/>
+        <activity
+            android:theme="@style/MyTheme"
+            android:icon="@mipmap/icon"
+            android:name="crc640881361dc0703e64.PageProfileActivity"
+            android:configChanges="smallestScreenSize|screenSize|uiMode|screenLayout|orientation|locale"
+            android:windowSoftInputMode="adjustNothing"/>
+        <activity
+            android:theme="@style/MyTheme"
+            android:icon="@mipmap/icon"
+            android:name="crc640881361dc0703e64.PagesActivity"
+            android:configChanges="smallestScreenSize|screenSize|uiMode|screenLayout|orientation|locale"/>
+        <activity
+            android:theme="@style/MyTheme"
+            android:icon="@mipmap/icon"
+            android:name="crc640881361dc0703e64.ReviewsPageActivity"
+            android:configChanges="smallestScreenSize|screenSize|uiMode|screenLayout|orientation|locale"/>
+        <activity
+            android:theme="@style/MyTheme"
+            android:icon="@mipmap/icon"
+            android:name="crc64daf69b8d0a781c02.PageActionButtonsActivity"
+            android:configChanges="smallestScreenSize|screenSize|uiMode|screenLayout|orientation|locale"/>
+        <activity
+            android:theme="@style/MyTheme"
+            android:icon="@mipmap/icon"
+            android:name="crc64daf69b8d0a781c02.PageGeneralActivity"
+            android:configChanges="smallestScreenSize|screenSize|uiMode|screenLayout|orientation|locale"/>
+        <activity
+            android:theme="@style/MyTheme"
+            android:icon="@mipmap/icon"
+            android:name="crc64daf69b8d0a781c02.PageInfoActivity"
+            android:configChanges="smallestScreenSize|screenSize|uiMode|screenLayout|orientation|locale"/>
+        <activity
+            android:theme="@style/MyTheme"
+            android:icon="@mipmap/icon"
+            android:name="crc64daf69b8d0a781c02.PagesAdminActivity"
+            android:configChanges="smallestScreenSize|screenSize|uiMode|screenLayout|orientation|locale"/>
+        <activity
+            android:theme="@style/MyTheme"
+            android:icon="@mipmap/icon"
+            android:name="crc64daf69b8d0a781c02.PageSocialLinksActivity"
+            android:configChanges="smallestScreenSize|screenSize|uiMode|screenLayout|orientation|locale"/>
+        <activity
+            android:theme="@style/MyTheme"
+            android:icon="@mipmap/icon"
+            android:name="crc64daf69b8d0a781c02.SettingsPageActivity"
+            android:configChanges="smallestScreenSize|screenSize|uiMode|screenLayout|orientation|locale"/>
+        <activity
+            android:theme="@style/MyTheme"
+            android:icon="@mipmap/icon"
+            android:name="crc64c2f67ecf4b6c370e.CreateGroupActivity"
+            android:configChanges="smallestScreenSize|screenSize|uiMode|screenLayout|orientation|locale"/>
+        <activity
+            android:theme="@style/MyTheme"
+            android:icon="@mipmap/icon"
+            android:name="crc64c2f67ecf4b6c370e.GroupMembersActivity"
+            android:configChanges="smallestScreenSize|screenSize|uiMode|screenLayout|orientation|locale"/>
+        <activity
+            android:theme="@style/MyTheme"
+            android:icon="@mipmap/icon"
+            android:name="crc64c2f67ecf4b6c370e.GroupProfileActivity"
+            android:configChanges="smallestScreenSize|screenSize|uiMode|screenLayout|orientation|locale"
+            android:windowSoftInputMode="adjustNothing"/>
+        <activity
+            android:theme="@style/MyTheme"
+            android:icon="@mipmap/icon"
+            android:name="crc64c2f67ecf4b6c370e.GroupsActivity"
+            android:configChanges="smallestScreenSize|screenSize|uiMode|screenLayout|orientation|locale"/>
+        <activity
+            android:theme="@style/MyTheme"
+            android:icon="@mipmap/icon"
+            android:name="crc64c2f67ecf4b6c370e.InviteMembersGroupActivity"
+            android:configChanges="smallestScreenSize|screenSize|uiMode|screenLayout|orientation|locale"/>
+        <activity
+            android:theme="@style/MyTheme"
+            android:icon="@mipmap/icon"
+            android:name="crc64c2f67ecf4b6c370e.JoinRequestActivity"
+            android:configChanges="smallestScreenSize|screenSize|uiMode|screenLayout|orientation|locale"/>
+        <activity
+            android:theme="@style/MyTheme"
+            android:icon="@mipmap/icon"
+            android:name="crc64b91b833efe2120ad.GroupGeneralActivity"
+            android:configChanges="smallestScreenSize|screenSize|uiMode|screenLayout|orientation|locale"/>
+        <activity
+            android:theme="@style/MyTheme"
+            android:icon="@mipmap/icon"
+            android:name="crc64b91b833efe2120ad.GroupPrivacyActivity"
+            android:configChanges="smallestScreenSize|screenSize|uiMode|screenLayout|orientation|locale"/>
+        <activity
+            android:theme="@style/MyTheme"
+            android:icon="@mipmap/icon"
+            android:name="crc64b91b833efe2120ad.SettingsGroupActivity"
+            android:configChanges="smallestScreenSize|screenSize|uiMode|screenLayout|orientation|locale"/>
+        <activity
+            android:theme="@style/MyTheme"
+            android:icon="@mipmap/icon"
+            android:name="crc64d5bbbb9587026094.CommonThingsActivity"
+            android:configChanges="smallestScreenSize|screenSize|uiMode|screenLayout|orientation|locale"/>
+        <activity
+            android:theme="@style/MyTheme"
+            android:icon="@mipmap/icon"
+            android:name="crc646bb324bc4b123e90.CommentActivity"
+            android:configChanges="smallestScreenSize|screenSize|uiMode|screenLayout|orientation|locale"/>
+        <activity
+            android:theme="@style/MyTheme"
+            android:icon="@mipmap/icon"
+            android:name="crc646bb324bc4b123e90.ReactionCommentTabbedActivity"
+            android:configChanges="smallestScreenSize|screenSize|uiMode|screenLayout|orientation|locale"/>
+        <activity
+            android:theme="@style/MyTheme"
+            android:icon="@mipmap/icon"
+            android:name="crc646bb324bc4b123e90.ReplyCommentActivity"
+            android:configChanges="smallestScreenSize|screenSize|uiMode|screenLayout|orientation|locale"/>
+        <activity
+            android:theme="@style/MyTheme"
+            android:icon="@mipmap/icon"
+            android:name="crc646bb324bc4b123e90.ReplyCommentBottomSheet"
+            android:configChanges="smallestScreenSize|screenSize|uiMode|screenLayout|orientation|locale"/>
+        <activity
+            android:theme="@style/MyTheme"
+            android:label="Message"
+            android:icon="@mipmap/icon"
+            android:name="crc64579a0ca9843a75b3.ReceivingSharingActivity"
+            android:exported="true"
+            android:configChanges="smallestScreenSize|screenSize|uiMode|screenLayout|orientation|locale">
+            <intent-filter>
+                <action android:name="android.intent.action.SEND"/>
+                <action android:name="android.intent.action.SEND_MULTIPLE"/>
+                <category android:name="android.intent.category.DEFAULT"/>
+                <data android:mimeType="application/*"/>
+                <data android:mimeType="image/*"/>
+                <data android:mimeType="video/*"/>
+                <data android:mimeType="audio/*"/>
+                <data android:mimeType="text/*"/>
+            </intent-filter>
+        </activity>
+        <activity
+            android:theme="@style/MyTheme"
+            android:icon="@mipmap/icon"
+            android:name="crc64579a0ca9843a75b3.WallpaperActivity"
+            android:configChanges="smallestScreenSize|screenSize|uiMode|screenLayout|orientation|locale"/>
+        <activity
+            android:theme="@style/DragTransparentBlack"
+            android:icon="@mipmap/icon"
+            android:name="crc64c0f8d71c3b1120ed.ImageViewerActivity"
+            android:configChanges="smallestScreenSize|screenSize|uiMode|screenLayout|orientation|locale"/>
+        <activity
+            android:theme="@style/MyTheme"
+            android:icon="@mipmap/icon"
+            android:name="crc644126e314405d5429.SharedFilesActivity"
+            android:configChanges="smallestScreenSize|screenSize|uiMode|screenLayout|orientation|locale"/>
+        <activity
+            android:theme="@style/MyTheme"
+            android:icon="@mipmap/icon"
+            android:name="crc64122cb61c102d44d7.RequestActivity"
+            android:configChanges="smallestScreenSize|screenSize|uiMode|screenLayout|orientation|locale"/>
+        <activity
+            android:theme="@style/MyTheme"
+            android:icon="@mipmap/icon"
+            android:name="crc649ac6f0c158e0b1b4.PageChatWindowActivity"
+            android:configChanges="smallestScreenSize|screenSize|uiMode|screenLayout|orientation|keyboardHidden|keyboard|locale"
+            android:resizeableActivity="true"/>
+        <activity
+            android:theme="@style/MyTheme"
+            android:icon="@mipmap/icon"
+            android:name="crc6493d14262de47f1f2.AddNewChatActivity"
+            android:configChanges="smallestScreenSize|screenSize|uiMode|screenLayout|orientation|locale"/>
+        <activity
+            android:theme="@style/MyTheme"
+            android:icon="@mipmap/icon"
+            android:name="crc6493d14262de47f1f2.ChatTabbedMainActivity"
+            android:configChanges="smallestScreenSize|screenSize|uiMode|screenLayout|orientation|locale"
+            android:windowSoftInputMode="adjustNothing"/>
+        <activity
+            android:theme="@style/MyTheme"
+            android:icon="@mipmap/icon"
+            android:name="crc648ea9895ffbc9b6c0.CreateGroupChatActivity"
+            android:configChanges="smallestScreenSize|screenSize|uiMode|screenLayout|orientation|locale"/>
+        <activity
+            android:theme="@style/MyTheme"
+            android:icon="@mipmap/icon"
+            android:name="crc648ea9895ffbc9b6c0.EditGroupChatActivity"
+            android:configChanges="smallestScreenSize|screenSize|uiMode|screenLayout|orientation|locale"/>
+        <activity
+            android:theme="@style/MyTheme"
+            android:icon="@mipmap/icon"
+            android:name="crc648ea9895ffbc9b6c0.GroupChatWindowActivity"
+            android:configChanges="smallestScreenSize|screenSize|uiMode|screenLayout|orientation|keyboardHidden|keyboard|locale"
+            android:resizeableActivity="true"/>
+        <activity
+            android:theme="@style/MyTheme"
+            android:icon="@mipmap/icon"
+            android:name="crc648ea9895ffbc9b6c0.MentionActivity"
+            android:configChanges="smallestScreenSize|screenSize|uiMode|screenLayout|orientation|locale"/>
+        <service
+            android:name="crc64affa9057777efbaf.ChatHeadService"
+            android:exported="false"/>
+        <activity
+            android:theme="@style/MyTheme"
+            android:icon="@mipmap/icon"
+            android:name="crc640923f7cee4b90fbc.ChatWindowActivity"
+            android:configChanges="smallestScreenSize|screenSize|uiMode|screenLayout|orientation|locale"/>
+        <activity
+            android:theme="@style/MyTheme"
+            android:icon="@mipmap/icon"
+            android:name="crc640923f7cee4b90fbc.ForwardMessagesActivity"
+            android:configChanges="smallestScreenSize|screenSize|uiMode|screenLayout|orientation|locale"/>
+        <activity
+            android:theme="@style/MyTheme"
+            android:icon="@mipmap/icon"
+            android:name="crc640923f7cee4b90fbc.MessageInfoActivity"
+            android:configChanges="smallestScreenSize|screenSize|uiMode|screenLayout|orientation|locale"/>
+        <activity
+            android:theme="@style/MyTheme"
+            android:icon="@mipmap/icon"
+            android:name="crc640923f7cee4b90fbc.PinnedMessageActivity"
+            android:configChanges="smallestScreenSize|screenSize|uiMode|screenLayout|orientation|locale"/>
+        <activity
+            android:theme="@style/MyTheme"
+            android:icon="@mipmap/icon"
+            android:name="crc640923f7cee4b90fbc.StartedMessagesActivity"
+            android:configChanges="smallestScreenSize|screenSize|uiMode|screenLayout|orientation|locale"/>
+        <activity
+            android:theme="@style/MyTheme"
+            android:icon="@mipmap/icon"
+            android:name="crc64a36e739ff2726766.AddNewCallActivity"
+            android:configChanges="smallestScreenSize|screenSize|uiMode|screenLayout|orientation|locale"/>
+        <activity
+            android:theme="@style/MyTheme"
+            android:icon="@mipmap/icon"
+            android:name="crc64a36e739ff2726766.VideoAudioComingCallActivity"
+            android:exported="true"
+            android:launchMode="singleTask"
+            android:configChanges="smallestScreenSize|screenSize|uiMode|screenLayout|orientation|locale"
+            android:autoRemoveFromRecents="true"/>
+        <activity
+            android:theme="@style/MyTheme"
+            android:icon="@mipmap/icon"
+            android:name="crc648c3da6d10cdca739.TwilioAudioCallActivity"
+            android:configChanges="smallestScreenSize|screenSize|uiMode|screenLayout|orientation|locale"
+            android:autoRemoveFromRecents="true"/>
+        <activity
+            android:theme="@style/MyTheme"
+            android:icon="@mipmap/icon"
+            android:name="crc648c3da6d10cdca739.TwilioVideoCallActivity"
+            android:configChanges="smallestScreenSize|screenSize|uiMode|screenLayout|orientation|locale"
+            android:autoRemoveFromRecents="true"
+            android:supportsPictureInPicture="true"/>
+        <service
+            android:name="crc64b48fd67f674a9443.CallingService"
+            android:exported="true"/>
+        <activity
+            android:theme="@style/MyTheme"
+            android:icon="@mipmap/icon"
+            android:name="crc64fe00f35973cd1075.AgoraAudioCallActivity"
+            android:screenOrientation="portrait"
+            android:configChanges="smallestScreenSize|screenSize|uiMode|screenLayout|orientation|locale"
+            android:autoRemoveFromRecents="true"/>
+        <activity
+            android:theme="@style/MyTheme"
+            android:icon="@mipmap/icon"
+            android:name="crc64fe00f35973cd1075.AgoraVideoCallActivity"
+            android:configChanges="smallestScreenSize|screenSize|uiMode|screenLayout|orientation|locale"
+            android:autoRemoveFromRecents="true"
+            android:supportsPictureInPicture="true"/>
+        <activity
+            android:theme="@style/MyTheme"
+            android:icon="@mipmap/icon"
+            android:name="crc64381171282d77b272.BoostedActivity"
+            android:configChanges="smallestScreenSize|screenSize|uiMode|screenLayout|orientation|locale"/>
+        <activity
+            android:theme="@style/MyTheme"
+            android:icon="@mipmap/icon"
+            android:name="crc6454b7d4eb24fc3d0c.BlockedUsersActivity"
+            android:configChanges="smallestScreenSize|screenSize|uiMode|screenLayout|orientation|locale"/>
+        <activity android:name="crc64dcf039a48c5f8fc0.BaseActivity"/>
+        <activity
+            android:theme="@style/MyTheme"
+            android:icon="@mipmap/icon"
+            android:name="crc6447b7d00dc8d7ead2.ArticlesActivity"
+            android:configChanges="smallestScreenSize|screenSize|uiMode|screenLayout|orientation|locale"/>
+        <activity
+            android:theme="@style/MyTheme"
+            android:icon="@mipmap/icon"
+            android:name="crc6447b7d00dc8d7ead2.ArticlesViewActivity"
+            android:configChanges="smallestScreenSize|screenSize|uiMode|screenLayout|orientation|locale"/>
+        <activity
+            android:theme="@style/MyTheme"
+            android:icon="@mipmap/icon"
+            android:name="crc6447b7d00dc8d7ead2.CreateBlogActivity"
+            android:configChanges="smallestScreenSize|screenSize|uiMode|screenLayout|orientation|locale"/>
+        <activity
+            android:theme="@style/MyTheme"
+            android:icon="@mipmap/icon"
+            android:name="crc6447b7d00dc8d7ead2.FilterCategoriesActivity"
+            android:configChanges="smallestScreenSize|screenSize|uiMode|screenLayout|orientation|locale"/>
+        <activity
+            android:theme="@style/MyTheme"
+            android:icon="@mipmap/icon"
+            android:name="crc647f8ac66c39d81454.AddImageToAlbumActivity"
+            android:configChanges="smallestScreenSize|screenSize|uiMode|screenLayout|orientation|locale"/>
+        <activity
+            android:theme="@style/MyTheme"
+            android:icon="@mipmap/icon"
+            android:name="crc647f8ac66c39d81454.CreateAlbumActivity"
+            android:configChanges="smallestScreenSize|screenSize|uiMode|screenLayout|orientation|locale"/>
+        <activity
+            android:theme="@style/MyTheme"
+            android:icon="@mipmap/icon"
+            android:name="crc647f8ac66c39d81454.ImageByAlbumActivity"
+            android:configChanges="smallestScreenSize|screenSize|uiMode|screenLayout|orientation|locale"/>
+        <activity
+            android:theme="@style/MyTheme"
+            android:icon="@mipmap/icon"
+            android:name="crc647f8ac66c39d81454.MyAlbumActivity"
+            android:configChanges="smallestScreenSize|screenSize|uiMode|screenLayout|orientation|locale"/>
+        <activity
+            android:theme="@style/MyTheme"
+            android:icon="@mipmap/icon"
+            android:name="crc6449dc28d6218a8a60.CreateAdvertiseActivity"
+            android:configChanges="smallestScreenSize|screenSize|uiMode|screenLayout|orientation|locale"/>
+        <activity
+            android:theme="@style/MyTheme"
+            android:icon="@mipmap/icon"
+            android:name="crc6449dc28d6218a8a60.MyAdvertiseActivity"
+            android:configChanges="smallestScreenSize|screenSize|uiMode|screenLayout|orientation|locale"/>
+        <activity
+            android:theme="@style/MyTheme"
+            android:icon="@mipmap/icon"
+            android:name="crc646ffd56b67f268c86.AddressActivity"
+            android:configChanges="smallestScreenSize|screenSize|uiMode|screenLayout|orientation|locale"/>
+        <activity
+            android:theme="@style/MyTheme"
+            android:icon="@mipmap/icon"
+            android:name="crc646ffd56b67f268c86.CreateAddressActivity"
+            android:configChanges="smallestScreenSize|screenSize|uiMode|screenLayout|orientation|locale"/>
+        <activity
+            android:theme="@style/MyTheme"
+            android:icon="@mipmap/icon"
+            android:name="crc646ffd56b67f268c86.EditAddressActivity"
+            android:configChanges="smallestScreenSize|screenSize|uiMode|screenLayout|orientation|locale"/>
+        <activity
+            android:theme="@style/MyTheme"
+            android:icon="@mipmap/icon"
+            android:name="crc64c51607effc384a79.AddPostActivity"
+            android:configChanges="smallestScreenSize|screenSize|uiMode|screenLayout|orientation|locale"/>
+        <activity
+            android:theme="@style/MyTheme"
+            android:icon="@mipmap/icon"
+            android:name="crc64c51607effc384a79.FeelingsActivity"
+            android:configChanges="smallestScreenSize|screenSize|uiMode|screenLayout|orientation|locale"/>
+        <activity
+            android:theme="@style/MyTheme"
+            android:icon="@mipmap/icon"
+            android:name="crc64c51607effc384a79.GifActivity"
+            android:configChanges="smallestScreenSize|screenSize|uiMode|screenLayout|orientation|locale"/>
+        <activity
+            android:theme="@style/MyTheme"
+            android:icon="@mipmap/icon"
+            android:name="crc64c51607effc384a79.MentionActivity"
+            android:configChanges="smallestScreenSize|screenSize|uiMode|screenLayout|orientation|locale"/>
+        <activity
+            android:theme="@style/MyTheme"
+            android:label="Post"
+            android:icon="@mipmap/icon"
+            android:name="crc64c51607effc384a79.PostSharingActivity"
+            android:exported="true"
+            android:configChanges="smallestScreenSize|screenSize|uiMode|screenLayout|orientation|locale">
+            <intent-filter>
+                <action android:name="android.intent.action.SEND"/>
+                <action android:name="android.intent.action.SEND_MULTIPLE"/>
+                <category android:name="android.intent.category.DEFAULT"/>
+                <data android:mimeType="application/*"/>
+                <data android:mimeType="image/*"/>
+                <data android:mimeType="video/*"/>
+                <data android:mimeType="audio/*"/>
+                <data android:mimeType="text/plain"/>
+            </intent-filter>
+        </activity>
+        <service
+            android:name="crc64ff88a238e659b0f6.PostService"
+            android:exported="false"/>
+        <service android:name="crc64396a3fe5f8138e3f.KeepAliveService"/>
+        <receiver
+            android:label="Essentials Battery Broadcast Receiver"
+            android:name="crc64a0e0a82d0db9a07d.BatteryBroadcastReceiver"
+            android:enabled="true"
+            android:exported="false"/>
+        <receiver
+            android:label="Essentials Energy Saver Broadcast Receiver"
+            android:name="crc64a0e0a82d0db9a07d.EnergySaverBroadcastReceiver"
+            android:enabled="true"
+            android:exported="false"/>
+        <receiver
+            android:label="Essentials Connectivity Broadcast Receiver"
+            android:name="crc64a0e0a82d0db9a07d.ConnectivityBroadcastReceiver"
+            android:enabled="true"
+            android:exported="false"/>
+        <activity
+            android:name="crc64a0e0a82d0db9a07d.IntermediateActivity"
+            android:configChanges="screenSize|orientation"/>
+        <provider
+            android:name="xamarin.essentials.fileProvider"
+            android:exported="false"
+            android:authorities="com.myspace.mm.fileProvider"
+            android:grantUriPermissions="true">
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/xamarin_essentials_fileprovider_file_paths"/>
+        </provider>
+        <activity
+            android:name="crc64a0e0a82d0db9a07d.WebAuthenticatorIntermediateActivity"
+            android:configChanges="screenSize|orientation"/>
+        <activity android:name="crc646380db0424104db8.PgwHome"/>
+        <provider
+            android:name="mono.MonoRuntimeProvider"
+            android:exported="false"
+            android:authorities="com.myspace.mm.mono.MonoRuntimeProvider.__mono_init__"
+            android:initOrder="1999999999"/>
+        <activity
+            android:theme="@style/PlacesAutocompleteOverlay"
+            android:label="@string/places_autocomplete_label"
+            android:name="com.google.android.libraries.places.widget.AutocompleteActivity"
+            android:exported="false"
+            android:windowSoftInputMode="adjustResize"/>
+        <provider
+            android:name="androidx.startup.InitializationProvider"
+            android:exported="false"
+            android:authorities="com.myspace.mm.androidx-startup">
+            <meta-data
+                android:name="androidx.profileinstaller.ProfileInstallerInitializer"
+                android:value="androidx.startup"/>
+            <meta-data
+                android:name="androidx.lifecycle.ProcessLifecycleInitializer"
+                android:value="androidx.startup"/>
+            <meta-data
+                android:name="androidx.emoji2.text.EmojiCompatInitializer"
+                android:value="androidx.startup"/>
+            <meta-data
+                android:name="androidx.work.WorkManagerInitializer"
+                android:value="androidx.startup"/>
+        </provider>
+        <receiver
+            android:name="androidx.profileinstaller.ProfileInstallReceiver"
+            android:permission="android.permission.DUMP"
+            android:enabled="true"
+            android:exported="true"
+            android:directBootAware="false">
+            <intent-filter>
+                <action android:name="androidx.profileinstaller.action.INSTALL_PROFILE"/>
+            </intent-filter>
+            <intent-filter>
+                <action android:name="androidx.profileinstaller.action.SKIP_FILE"/>
+            </intent-filter>
+            <intent-filter>
+                <action android:name="androidx.profileinstaller.action.SAVE_PROFILE"/>
+            </intent-filter>
+            <intent-filter>
+                <action android:name="androidx.profileinstaller.action.BENCHMARK_OPERATION"/>
+            </intent-filter>
+        </receiver>
+        <service
+            android:name="androidx.room.MultiInstanceInvalidationService"
+            android:exported="false"
+            android:directBootAware="true"/>
+        <service
+            android:name="androidx.work.impl.background.systemalarm.SystemAlarmService"
+            android:enabled="@bool/enable_system_alarm_service_default"
+            android:exported="false"
+            android:directBootAware="false"/>
+        <service
+            android:name="androidx.work.impl.background.systemjob.SystemJobService"
+            android:permission="android.permission.BIND_JOB_SERVICE"
+            android:enabled="@bool/enable_system_job_service_default"
+            android:exported="true"
+            android:directBootAware="false"/>
+        <service
+            android:name="androidx.work.impl.foreground.SystemForegroundService"
+            android:enabled="@bool/enable_system_foreground_service_default"
+            android:exported="false"
+            android:directBootAware="false"/>
+        <receiver
+            android:name="androidx.work.impl.utils.ForceStopRunnable.BroadcastReceiver"
+            android:enabled="true"
+            android:exported="false"
+            android:directBootAware="false"/>
+        <receiver
+            android:name="androidx.work.impl.background.systemalarm.ConstraintProxy.BatteryChargingProxy"
+            android:enabled="false"
+            android:exported="false"
+            android:directBootAware="false">
+            <intent-filter>
+                <action android:name="android.intent.action.ACTION_POWER_CONNECTED"/>
+                <action android:name="android.intent.action.ACTION_POWER_DISCONNECTED"/>
+            </intent-filter>
+        </receiver>
+        <receiver
+            android:name="androidx.work.impl.background.systemalarm.ConstraintProxy.BatteryNotLowProxy"
+            android:enabled="false"
+            android:exported="false"
+            android:directBootAware="false">
+            <intent-filter>
+                <action android:name="android.intent.action.BATTERY_OKAY"/>
+                <action android:name="android.intent.action.BATTERY_LOW"/>
+            </intent-filter>
+        </receiver>
+        <receiver
+            android:name="androidx.work.impl.background.systemalarm.ConstraintProxy.StorageNotLowProxy"
+            android:enabled="false"
+            android:exported="false"
+            android:directBootAware="false">
+            <intent-filter>
+                <action android:name="android.intent.action.DEVICE_STORAGE_LOW"/>
+                <action android:name="android.intent.action.DEVICE_STORAGE_OK"/>
+            </intent-filter>
+        </receiver>
+        <receiver
+            android:name="androidx.work.impl.background.systemalarm.ConstraintProxy.NetworkStateProxy"
+            android:enabled="false"
+            android:exported="false"
+            android:directBootAware="false">
+            <intent-filter>
+                <action android:name="android.net.conn.CONNECTIVITY_CHANGE"/>
+            </intent-filter>
+        </receiver>
+        <receiver
+            android:name="androidx.work.impl.background.systemalarm.RescheduleReceiver"
+            android:enabled="false"
+            android:exported="false"
+            android:directBootAware="false">
+            <intent-filter>
+                <action android:name="android.intent.action.BOOT_COMPLETED"/>
+                <action android:name="android.intent.action.TIME_SET"/>
+                <action android:name="android.intent.action.TIMEZONE_CHANGED"/>
+            </intent-filter>
+        </receiver>
+        <receiver
+            android:name="androidx.work.impl.background.systemalarm.ConstraintProxyUpdateReceiver"
+            android:enabled="@bool/enable_system_alarm_service_default"
+            android:exported="false"
+            android:directBootAware="false">
+            <intent-filter>
+                <action android:name="androidx.work.impl.background.systemalarm.UpdateProxies"/>
+            </intent-filter>
+        </receiver>
+        <receiver
+            android:name="androidx.work.impl.diagnostics.DiagnosticsReceiver"
+            android:permission="android.permission.DUMP"
+            android:enabled="true"
+            android:exported="true"
+            android:directBootAware="false">
+            <intent-filter>
+                <action android:name="androidx.work.diagnostics.REQUEST_DIAGNOSTICS"/>
+            </intent-filter>
+        </receiver>
+        <uses-library
+            android:name="androidx.window.extensions"
+            android:required="false"/>
+        <uses-library
+            android:name="androidx.window.sidecar"
+            android:required="false"/>
+        <service
+            android:name="androidx.camera.core.impl.MetadataHolderService"
+            android:enabled="false"
+            android:exported="false">
+            <meta-data
+                android:name="androidx.camera.core.impl.MetadataHolderService.DEFAULT_CONFIG_PROVIDER"
+                android:value="androidx.camera.camera2.Camera2Config$DefaultProvider"/>
+        </service>
+        <provider
+            android:name="com.applovin.sdk.AppLovinInitProvider"
+            android:exported="false"
+            android:authorities="com.myspace.mm.applovininitprovider"
+            android:initOrder="101"/>
+        <activity
+            android:name="com.applovin.adview.AppLovinFullscreenActivity"
+            android:exported="false"
+            android:launchMode="singleTop"
+            android:screenOrientation="behind"
+            android:configChanges="fontScale|smallestScreenSize|screenSize|uiMode|screenLayout|orientation|keyboardHidden|keyboard|locale"
+            android:hardwareAccelerated="true"/>
+        <activity
+            android:theme="@android:style/Theme.NoTitleBar.Fullscreen"
+            android:name="com.applovin.adview.AppLovinFullscreenThemedActivity"
+            android:exported="false"
+            android:launchMode="singleTop"
+            android:screenOrientation="behind"
+            android:configChanges="fontScale|smallestScreenSize|screenSize|uiMode|screenLayout|orientation|keyboardHidden|keyboard|locale"
+            android:hardwareAccelerated="true"/>
+        <activity
+            android:name="com.applovin.sdk.AppLovinWebViewActivity"
+            android:configChanges="fontScale|smallestScreenSize|screenSize|uiMode|screenLayout|orientation|keyboardHidden|keyboard|locale"/>
+        <activity
+            android:theme="@android:style/Theme.NoTitleBar.Fullscreen"
+            android:name="com.applovin.mediation.hybridAds.MaxHybridMRecAdActivity"
+            android:configChanges="fontScale|smallestScreenSize|screenSize|uiMode|screenLayout|orientation|keyboardHidden|keyboard|locale"/>
+        <activity
+            android:theme="@android:style/Theme.NoTitleBar.Fullscreen"
+            android:name="com.applovin.mediation.hybridAds.MaxHybridNativeAdActivity"
+            android:configChanges="fontScale|smallestScreenSize|screenSize|uiMode|screenLayout|orientation|keyboardHidden|keyboard|locale"/>
+        <activity
+            android:theme="@style/com.applovin.mediation.MaxDebuggerActivity.Theme"
+            android:name="com.applovin.mediation.MaxDebuggerActivity"
+            android:configChanges="fontScale|smallestScreenSize|screenSize|uiMode|screenLayout|orientation|keyboardHidden|keyboard|locale"/>
+        <activity
+            android:theme="@style/com.applovin.mediation.MaxDebuggerActivity.Theme"
+            android:name="com.applovin.mediation.MaxDebuggerDetailActivity"
+            android:configChanges="fontScale|smallestScreenSize|screenSize|uiMode|screenLayout|orientation|keyboardHidden|keyboard|locale"/>
+        <activity
+            android:theme="@style/com.applovin.mediation.MaxDebuggerActivity.Theme"
+            android:name="com.applovin.mediation.MaxDebuggerMultiAdActivity"
+            android:configChanges="fontScale|smallestScreenSize|screenSize|uiMode|screenLayout|orientation|keyboardHidden|keyboard|locale"/>
+        <activity
+            android:theme="@style/com.applovin.mediation.MaxDebuggerActivity.Theme"
+            android:name="com.applovin.mediation.MaxDebuggerAdUnitsListActivity"
+            android:configChanges="fontScale|smallestScreenSize|screenSize|uiMode|screenLayout|orientation|keyboardHidden|keyboard|locale"/>
+        <activity
+            android:theme="@style/com.applovin.mediation.MaxDebuggerActivity.Theme"
+            android:name="com.applovin.mediation.MaxDebuggerAdUnitWaterfallsListActivity"
+            android:configChanges="fontScale|smallestScreenSize|screenSize|uiMode|screenLayout|orientation|keyboardHidden|keyboard|locale"/>
+        <activity
+            android:theme="@style/com.applovin.mediation.MaxDebuggerActivity.Theme"
+            android:name="com.applovin.mediation.MaxDebuggerAdUnitDetailActivity"
+            android:configChanges="fontScale|smallestScreenSize|screenSize|uiMode|screenLayout|orientation|keyboardHidden|keyboard|locale"/>
+        <activity
+            android:theme="@style/com.applovin.mediation.MaxDebuggerActivity.Theme"
+            android:name="com.applovin.mediation.MaxDebuggerCmpNetworksListActivity"
+            android:configChanges="fontScale|smallestScreenSize|screenSize|uiMode|screenLayout|orientation|keyboardHidden|keyboard|locale"/>
+        <activity
+            android:theme="@style/com.applovin.mediation.MaxDebuggerActivity.Theme"
+            android:name="com.applovin.mediation.MaxDebuggerTcfConsentStatusesListActivity"
+            android:configChanges="fontScale|smallestScreenSize|screenSize|uiMode|screenLayout|orientation|keyboardHidden|keyboard|locale"/>
+        <activity
+            android:theme="@style/com.applovin.mediation.MaxDebuggerActivity.Theme"
+            android:name="com.applovin.mediation.MaxDebuggerTcfInfoListActivity"
+            android:configChanges="fontScale|smallestScreenSize|screenSize|uiMode|screenLayout|orientation|keyboardHidden|keyboard|locale"/>
+        <activity
+            android:theme="@style/com.applovin.mediation.MaxDebuggerActivity.Theme"
+            android:name="com.applovin.mediation.MaxDebuggerTcfStringActivity"
+            android:configChanges="fontScale|smallestScreenSize|screenSize|uiMode|screenLayout|orientation|keyboardHidden|keyboard|locale"/>
+        <activity
+            android:theme="@style/com.applovin.mediation.MaxDebuggerActivity.Theme"
+            android:name="com.applovin.mediation.MaxDebuggerTestLiveNetworkActivity"
+            android:configChanges="fontScale|smallestScreenSize|screenSize|uiMode|screenLayout|orientation|keyboardHidden|keyboard|locale"/>
+        <activity
+            android:theme="@style/com.applovin.mediation.MaxDebuggerActivity.Theme"
+            android:name="com.applovin.mediation.MaxDebuggerTestModeNetworkActivity"
+            android:configChanges="fontScale|smallestScreenSize|screenSize|uiMode|screenLayout|orientation|keyboardHidden|keyboard|locale"/>
+        <activity
+            android:theme="@style/com.applovin.mediation.MaxDebuggerActivity.Theme"
+            android:name="com.applovin.mediation.MaxDebuggerWaterfallKeywordsActivity"
+            android:configChanges="fontScale|smallestScreenSize|screenSize|uiMode|screenLayout|orientation|keyboardHidden|keyboard|locale"/>
+        <activity
+            android:theme="@style/com.applovin.creative.CreativeDebuggerActivity.Theme"
+            android:name="com.applovin.creative.MaxCreativeDebuggerActivity"
+            android:configChanges="fontScale|smallestScreenSize|screenSize|uiMode|screenLayout|orientation|keyboardHidden|keyboard|locale"/>
+        <activity
+            android:theme="@style/com.applovin.creative.CreativeDebuggerActivity.Theme"
+            android:name="com.applovin.creative.MaxCreativeDebuggerDisplayedAdActivity"
+            android:configChanges="fontScale|smallestScreenSize|screenSize|uiMode|screenLayout|orientation|keyboardHidden|keyboard|locale"/>
+        <service
+            android:name="com.applovin.impl.adview.activity.FullscreenAdService"
+            android:exported="false"
+            android:stopWithTask="false"/>
+        <meta-data
+            android:name="cashfree_pg_core_reporting_enabled"
+            android:value="@bool/cashfree_pg_core_reporting_enabled"/>
+        <meta-data
+            android:name="cashfree_custom_analytics_subscriber_enabled"
+            android:value="@bool/cashfree_custom_analytics_subscriber_enabled"/>
+        <provider
+            android:name="com.cashfree.pg.api.CashfreeCoreContentProvider"
+            android:exported="false"
+            android:authorities="com.myspace.mm.cashfreecorecontentprovider"/>
+        <meta-data
+            android:name="cashfree_pg_core_auto_initialization_enabled"
+            android:value="@bool/cashfree_pg_core_auto_initialize_enabled"/>
+        <activity
+            android:theme="@style/CFCoreUPIStyle"
+            android:name="com.cashfree.pg.core.api.ui.CFCoreUPIPaymentActivity"
+            android:exported="false"
+            android:launchMode="singleTop"/>
+        <activity
+            android:theme="@style/CFCoreUPIStyle"
+            android:name="com.cashfree.pg.core.api.ui.CFCoreModalActivity"
+            android:exported="false"
+            android:launchMode="singleTop"/>
+        <activity
+            android:theme="@style/CFCoreTheme"
+            android:name="com.cashfree.pg.core.api.ui.CashfreeCoreNativeVerificationActivity"
+            android:exported="false"
+            android:launchMode="singleTop"
+            android:screenOrientation="portrait"/>
+        <meta-data
+            android:name="cashfree_pg_logging_level"
+            android:value="@integer/cashfree_pg_logging_level"/>
+        <receiver
+            android:name="com.cashfree.pg.core.api.ui.receiver.CFSMSBroadcastReceiver"
+            android:permission="com.google.android.gms.auth.api.phone.permission.SEND"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="com.google.android.gms.auth.api.phone.SMS_RETRIEVED"/>
+            </intent-filter>
+        </receiver>
+        <activity
+            android:theme="@style/CFUITheme"
+            android:name="com.cashfree.pg.ui.hidden.checkout.CashfreeNativeCheckoutActivity"
+            android:exported="false"
+            android:launchMode="singleTop"
+            android:screenOrientation="portrait"
+            android:windowSoftInputMode="adjustPan">
+            <intent-filter>
+                <action android:name="android.nfc.action.TECH_DISCOVERED"/>
+                <category android:name="android.intent.category.DEFAULT"/>
+            </intent-filter>
+            <intent-filter>
+                <action android:name="android.nfc.action.TAG_DISCOVERED"/>
+                <category android:name="android.intent.category.DEFAULT"/>
+            </intent-filter>
+            <intent-filter>
+                <action android:name="android.nfc.action.NDEF_DISCOVERED"/>
+            </intent-filter>
+        </activity>
+        <activity
+            android:theme="@style/CFSeamlessStyle"
+            android:name="com.cashfree.pg.ui.hidden.seamless.CFDropSeamlessActivity"
+            android:exported="false"
+            android:launchMode="singleTop"/>
+        <activity
+            android:label="@string/app_name"
+            android:name="com.flutterwave.raveandroid.RavePayActivity"
+            android:screenOrientation="portrait"
+            android:windowSoftInputMode="adjustPan"/>
+        <activity
+            android:name="com.flutterwave.raveandroid.card.savedcards.SavedCardsActivity"
+            android:screenOrientation="portrait"/>
+        <activity
+            android:name="com.flutterwave.raveutils.verification.VerificationActivity"
+            android:screenOrientation="portrait"/>
+        <provider
+            android:name="com.google.android.gms.ads.MobileAdsInitProvider"
+            android:exported="false"
+            android:authorities="com.myspace.mm.mobileadsinitprovider"
+            android:initOrder="100"/>
+        <service
+            android:name="com.google.android.gms.ads.AdService"
+            android:enabled="true"
+            android:exported="false"/>
+        <activity
+            android:name="com.google.android.gms.ads.OutOfContextTestingActivity"
+            android:exported="false"
+            android:configChanges="smallestScreenSize|screenSize|uiMode|screenLayout|orientation|keyboardHidden|keyboard"/>
+        <property
+            android:name="android.adservices.AD_SERVICES_CONFIG"
+            android:resource="@xml/gma_ad_services_config"/>
+        <service
+            android:name="com.onesignal.core.services.SyncService"
+            android:exported="false"
+            android:stopWithTask="true"/>
+        <service
+            android:name="com.onesignal.core.services.SyncJobService"
+            android:permission="android.permission.BIND_JOB_SERVICE"
+            android:exported="false"/>
+        <activity
+            android:theme="@android:style/Theme.Translucent.NoTitleBar"
+            android:name="com.onesignal.core.activities.PermissionsActivity"
+            android:exported="false"/>
+        <receiver
+            android:name="com.onesignal.notifications.receivers.FCMBroadcastReceiver"
+            android:permission="com.google.android.c2dm.permission.SEND"
+            android:exported="true">
+            <intent-filter android:priority="999">
+                <action android:name="com.google.android.c2dm.intent.RECEIVE"/>
+                <category android:name="com.myspace.mm"/>
+            </intent-filter>
+        </receiver>
+        <service
+            android:name="com.onesignal.notifications.services.HmsMessageServiceOneSignal"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="com.huawei.push.action.MESSAGING_EVENT"/>
+            </intent-filter>
+        </service>
+        <activity
+            android:theme="@android:style/Theme.Translucent.NoTitleBar"
+            android:name="com.onesignal.notifications.activities.NotificationOpenedActivityHMS"
+            android:exported="true"
+            android:noHistory="true">
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW"/>
+            </intent-filter>
+        </activity>
+        <receiver
+            android:name="com.onesignal.notifications.receivers.NotificationDismissReceiver"
+            android:exported="true"/>
+        <receiver
+            android:name="com.onesignal.notifications.receivers.BootUpReceiver"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.BOOT_COMPLETED"/>
+                <action android:name="android.intent.action.QUICKBOOT_POWERON"/>
+            </intent-filter>
+        </receiver>
+        <receiver
+            android:name="com.onesignal.notifications.receivers.UpgradeReceiver"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.MY_PACKAGE_REPLACED"/>
+            </intent-filter>
+        </receiver>
+        <activity
+            android:theme="@android:style/Theme.Translucent.NoTitleBar"
+            android:name="com.onesignal.notifications.activities.NotificationOpenedActivity"
+            android:exported="true"
+            android:taskAffinity=""
+            android:excludeFromRecents="true"
+            android:noHistory="true"/>
+        <activity
+            android:theme="@android:style/Theme.Translucent.NoTitleBar"
+            android:name="com.onesignal.notifications.activities.NotificationOpenedActivityAndroid22AndOlder"
+            android:exported="true"
+            android:excludeFromRecents="true"
+            android:noHistory="true"/>
+        <meta-data
+            android:name="com.razorpay.plugin.googlepay_all"
+            android:value="com.razorpay.RzpGpayMerged"/>
+        <meta-data
+            android:name="aia-compat-api-min-version"
+            android:value="1"/>
+        <meta-data
+            android:name="com.google.android.play.billingclient.version"
+            android:value="6.0.1"/>
+        <activity
+            android:theme="@android:style/Theme.Translucent.NoTitleBar"
+            android:name="com.android.billingclient.api.ProxyBillingActivity"
+            android:exported="false"
+            android:configChanges="screenSize|screenLayout|orientation|keyboardHidden|keyboard"/>
+        <activity
+            android:name="com.braintreepayments.api.BraintreeDeepLinkActivity"
+            android:exported="true"
+            android:launchMode="singleTask">
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW"/>
+                <data android:scheme="com.myspace.mm.braintree.deeplinkhandler"/>
+                <category android:name="android.intent.category.DEFAULT"/>
+                <category android:name="android.intent.category.BROWSABLE"/>
+            </intent-filter>
+        </activity>
+        <activity
+            android:theme="@style/bt_drop_in_activity_theme"
+            android:name="com.braintreepayments.api.DropInActivity"
+            android:exported="true"
+            android:launchMode="singleTask">
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW"/>
+                <data android:scheme="com.myspace.mm.braintree"/>
+                <category android:name="android.intent.category.DEFAULT"/>
+                <category android:name="android.intent.category.BROWSABLE"/>
+            </intent-filter>
+        </activity>
+        <meta-data
+            android:name="com.google.android.gms.wallet.api.enabled"
+            android:value="true"/>
+        <activity
+            android:theme="@style/bt_transparent_activity"
+            android:name="com.braintreepayments.api.GooglePayActivity"/>
+        <activity
+            android:theme="@style/Theme.AppCompat"
+            android:name="com.braintreepayments.api.ThreeDSecureActivity"/>
+        <activity android:name="com.facebook.CustomTabMainActivity"/>
+        <provider
+            android:name="com.facebook.internal.FacebookInitProvider"
+            android:exported="false"
+            android:authorities="com.myspace.mm.FacebookInitProvider"/>
+        <receiver
+            android:name="com.facebook.CurrentAccessTokenExpirationBroadcastReceiver"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="com.facebook.sdk.ACTION_CURRENT_ACCESS_TOKEN_CHANGED"/>
+            </intent-filter>
+        </receiver>
+        <receiver
+            android:name="com.facebook.AuthenticationTokenManager.CurrentAuthenticationTokenChangedBroadcastReceiver"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="com.facebook.sdk.ACTION_CURRENT_AUTHENTICATION_TOKEN_CHANGED"/>
+            </intent-filter>
+        </receiver>
+        <activity
+            android:theme="@style/Stripe3DS2Theme"
+            android:name="com.stripe.android.stripe3ds2.views.ChallengeActivity"
+            android:exported="false"/>
+        <activity
+            android:name="com.stripe.android.financialconnections.FinancialConnectionsSheetRedirectActivity"
+            android:exported="true"
+            android:launchMode="singleTask">
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW"/>
+                <category android:name="android.intent.category.DEFAULT"/>
+                <category android:name="android.intent.category.BROWSABLE"/>
+                <data
+                    android:scheme="stripe-auth"
+                    android:host="link-accounts"
+                    android:pathPrefix="/com.myspace.mm/authentication_return"/>
+                <data
+                    android:scheme="stripe-auth"
+                    android:host="link-native-accounts"
+                    android:pathPrefix="/com.myspace.mm/authentication_return"/>
+                <data
+                    android:scheme="stripe-auth"
+                    android:host="link-accounts"
+                    android:path="/com.myspace.mm/success"/>
+                <data
+                    android:scheme="stripe-auth"
+                    android:host="link-accounts"
+                    android:path="/com.myspace.mm/cancel"/>
+                <data
+                    android:scheme="stripe-auth"
+                    android:host="native-redirect"
+                    android:pathPrefix="/com.myspace.mm"/>
+                <data
+                    android:scheme="stripe"
+                    android:host="auth-redirect"
+                    android:pathPrefix="/com.myspace.mm"/>
+            </intent-filter>
+        </activity>
+        <activity
+            android:theme="@style/StripeDefaultTheme"
+            android:name="com.stripe.android.financialconnections.FinancialConnectionsSheetActivity"
+            android:exported="false"/>
+        <activity
+            android:theme="@style/StripeDefaultTheme"
+            android:name="com.stripe.android.financialconnections.ui.FinancialConnectionsSheetNativeActivity"
+            android:exported="false"
+            android:windowSoftInputMode="adjustResize"/>
+        <provider
+            android:name="com.stripe.android.financialconnections.appinitializer.FinancialConnectionsInitializer"
+            android:exported="false"
+            android:multiprocess="true"
+            android:authorities="com.myspace.mm.financialconnections-init"/>
+        <activity
+            android:theme="@style/StripeTransparentTheme"
+            android:name="com.stripe.android.link.LinkForegroundActivity"
+            android:launchMode="singleTop"
+            android:configChanges="smallestScreenSize|screenSize|screenLayout|orientation|keyboardHidden|keyboard"
+            android:autoRemoveFromRecents="true"/>
+        <activity
+            android:theme="@style/StripeTransparentTheme"
+            android:name="com.stripe.android.link.LinkRedirectHandlerActivity"
+            android:exported="true"
+            android:launchMode="singleInstance"
+            android:autoRemoveFromRecents="true">
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW"/>
+                <category android:name="android.intent.category.DEFAULT"/>
+                <category android:name="android.intent.category.BROWSABLE"/>
+                <data
+                    android:scheme="link-popup"
+                    android:host="complete"
+                    android:path="/com.myspace.mm"/>
+            </intent-filter>
+        </activity>
+        <activity
+            android:theme="@style/StripeDefaultTheme"
+            android:name="com.stripe.android.view.AddPaymentMethodActivity"
+            android:exported="false"/>
+        <activity
+            android:theme="@style/StripeDefaultTheme"
+            android:name="com.stripe.android.view.PaymentMethodsActivity"
+            android:exported="false"/>
+        <activity
+            android:theme="@style/StripeDefaultTheme"
+            android:name="com.stripe.android.view.PaymentFlowActivity"
+            android:exported="false"/>
+        <activity
+            android:theme="@style/StripeDefaultTheme"
+            android:name="com.stripe.android.view.PaymentAuthWebViewActivity"
+            android:exported="false"
+            android:windowSoftInputMode="adjustResize"/>
+        <activity
+            android:theme="@style/StripeTransparentTheme"
+            android:name="com.stripe.android.view.PaymentRelayActivity"
+            android:exported="false"/>
+        <activity
+            android:theme="@style/StripeTransparentTheme"
+            android:name="com.stripe.android.payments.StripeBrowserLauncherActivity"
+            android:exported="false"
+            android:launchMode="singleTask"/>
+        <activity
+            android:theme="@style/StripeTransparentTheme"
+            android:name="com.stripe.android.payments.StripeBrowserProxyReturnActivity"
+            android:exported="true"
+            android:launchMode="singleTask">
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW"/>
+                <category android:name="android.intent.category.DEFAULT"/>
+                <category android:name="android.intent.category.BROWSABLE"/>
+                <data
+                    android:scheme="stripesdk"
+                    android:host="payment_return_url"
+                    android:path="/com.myspace.mm"/>
+            </intent-filter>
+        </activity>
+        <activity
+            android:theme="@style/StripeDefaultTheme"
+            android:name="com.stripe.android.payments.core.authentication.threeds2.Stripe3ds2TransactionActivity"
+            android:exported="false"/>
+        <activity
+            android:theme="@style/StripeGooglePayDefaultTheme"
+            android:name="com.stripe.android.googlepaylauncher.GooglePayLauncherActivity"
+            android:exported="false"/>
+        <activity
+            android:theme="@style/StripeGooglePayDefaultTheme"
+            android:name="com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncherActivity"
+            android:exported="false"/>
+        <activity
+            android:theme="@style/StripePayLauncherDefaultTheme"
+            android:name="com.stripe.android.payments.paymentlauncher.PaymentLauncherConfirmationActivity"
+            android:exported="false"/>
+        <activity
+            android:theme="@style/StripeTransparentTheme"
+            android:name="com.stripe.android.payments.bankaccount.ui.CollectBankAccountActivity"
+            android:exported="false"/>
+        <activity
+            android:theme="@style/StripePaymentSheetDefaultTheme"
+            android:name="com.stripe.android.paymentsheet.PaymentSheetActivity"
+            android:exported="false"
+            android:windowSoftInputMode="adjustResize"/>
+        <activity
+            android:theme="@style/StripePaymentSheetDefaultTheme"
+            android:name="com.stripe.android.paymentsheet.PaymentOptionsActivity"
+            android:exported="false"
+            android:windowSoftInputMode="adjustResize"/>
+        <activity
+            android:theme="@style/StripePaymentSheetDefaultTheme"
+            android:name="com.stripe.android.customersheet.CustomerSheetActivity"
+            android:exported="false"
+            android:windowSoftInputMode="adjustResize"/>
+        <activity
+            android:theme="@style/StripePaymentSheetDefaultTheme"
+            android:name="com.stripe.android.paymentsheet.addresselement.AddressElementActivity"
+            android:exported="false"/>
+        <activity
+            android:theme="@style/StripePaymentSheetDefaultTheme"
+            android:name="com.stripe.android.paymentsheet.paymentdatacollection.bacs.BacsMandateConfirmationActivity"
+            android:exported="false"/>
+        <activity
+            android:theme="@style/StripePaymentSheetDefaultTheme"
+            android:name="com.stripe.android.paymentsheet.paymentdatacollection.polling.PollingActivity"
+            android:exported="false"/>
+        <activity
+            android:theme="@style/StripePaymentSheetDefaultTheme"
+            android:name="com.stripe.android.paymentsheet.ui.SepaMandateActivity"
+            android:exported="false"/>
+        <activity
+            android:theme="@style/StripePaymentSheetDefaultTheme"
+            android:name="com.stripe.android.ui.core.cardscan.CardScanActivity"
+            android:exported="false"/>
+        <provider
+            android:name="com.google.firebase.provider.FirebaseInitProvider"
+            android:exported="false"
+            android:authorities="com.myspace.mm.firebaseinitprovider"
+            android:initOrder="100"
+            android:directBootAware="true"/>
+        <service
+            android:name="com.google.firebase.components.ComponentDiscoveryService"
+            android:exported="false"
+            android:directBootAware="true">
+            <meta-data
+                android:name="com.google.firebase.components:com.google.firebase.FirebaseCommonKtxRegistrar"
+                android:value="com.google.firebase.components.ComponentRegistrar"/>
+            <meta-data
+                android:name="com.google.firebase.components:com.google.firebase.ktx.FirebaseCommonLegacyRegistrar"
+                android:value="com.google.firebase.components.ComponentRegistrar"/>
+            <meta-data
+                android:name="com.google.firebase.components:com.google.firebase.datatransport.TransportRegistrar"
+                android:value="com.google.firebase.components.ComponentRegistrar"/>
+            <meta-data
+                android:name="com.google.firebase.components:com.google.firebase.installations.FirebaseInstallationsKtxRegistrar"
+                android:value="com.google.firebase.components.ComponentRegistrar"/>
+            <meta-data
+                android:name="com.google.firebase.components:com.google.firebase.installations.FirebaseInstallationsRegistrar"
+                android:value="com.google.firebase.components.ComponentRegistrar"/>
+            <meta-data
+                android:name="com.google.firebase.components:com.google.firebase.messaging.FirebaseMessagingKtxRegistrar"
+                android:value="com.google.firebase.components.ComponentRegistrar"/>
+            <meta-data
+                android:name="com.google.firebase.components:com.google.firebase.messaging.FirebaseMessagingRegistrar"
+                android:value="com.google.firebase.components.ComponentRegistrar"/>
+            <meta-data
+                android:name="com.google.firebase.components:com.google.firebase.analytics.connector.internal.AnalyticsConnectorRegistrar"
+                android:value="com.google.firebase.components.ComponentRegistrar"/>
+        </service>
+        <receiver
+            android:name="com.google.firebase.iid.FirebaseInstanceIdReceiver"
+            android:permission="com.google.android.c2dm.permission.SEND"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="com.google.android.c2dm.intent.RECEIVE"/>
+            </intent-filter>
+            <meta-data
+                android:name="com.google.android.gms.cloudmessaging.FINISHED_AFTER_HANDLED"
+                android:value="true"/>
+        </receiver>
+        <service
+            android:name="com.google.firebase.messaging.FirebaseMessagingService"
+            android:exported="false"
+            android:directBootAware="true">
+            <intent-filter android:priority="-500">
+                <action android:name="com.google.firebase.MESSAGING_EVENT"/>
+            </intent-filter>
+        </service>
+        <service
+            android:name="com.google.android.datatransport.runtime.backends.TransportBackendDiscovery"
+            android:exported="false">
+            <meta-data
+                android:name="backend:com.google.android.datatransport.cct.CctBackendFactory"
+                android:value="cct"/>
+        </service>
+        <service
+            android:name="com.google.android.datatransport.runtime.scheduling.jobscheduling.JobInfoSchedulerService"
+            android:permission="android.permission.BIND_JOB_SERVICE"
+            android:exported="false"/>
+        <receiver
+            android:name="com.google.android.datatransport.runtime.scheduling.jobscheduling.AlarmManagerSchedulerBroadcastReceiver"
+            android:exported="false"/>
+        <activity
+            android:theme="@android:style/Theme.Translucent.NoTitleBar"
+            android:name="com.google.android.gms.auth.api.signin.internal.SignInHubActivity"
+            android:exported="false"
+            android:excludeFromRecents="true"/>
+        <service
+            android:name="com.google.android.gms.auth.api.signin.RevocationBoundService"
+            android:permission="com.google.android.gms.auth.api.signin.permission.REVOCATION_NOTIFICATION"
+            android:exported="true"
+            android:visibleToInstantApps="true"/>
+        <activity
+            android:theme="@android:style/Theme.Translucent.NoTitleBar"
+            android:name="com.google.android.gms.common.api.GoogleApiActivity"
+            android:exported="false"/>
+        <receiver
+            android:name="com.google.android.gms.cast.framework.media.MediaIntentReceiver"
+            android:exported="false"/>
+        <service
+            android:name="com.google.android.gms.cast.framework.ReconnectionService"
+            android:exported="false"/>
+        <receiver
+            android:name="com.google.android.gms.measurement.AppMeasurementReceiver"
+            android:enabled="true"
+            android:exported="false"/>
+        <service
+            android:name="com.google.android.gms.measurement.AppMeasurementService"
+            android:enabled="true"
+            android:exported="false"/>
+        <service
+            android:name="com.google.android.gms.measurement.AppMeasurementJobService"
+            android:permission="android.permission.BIND_JOB_SERVICE"
+            android:enabled="true"
+            android:exported="false"/>
+        <service
+            android:name="com.google.android.gms.nearby.exposurenotification.WakeUpService"
+            android:permission="com.google.android.gms.nearby.exposurenotification.EXPOSURE_CALLBACK"
+            android:exported="true"/>
+        <provider
+            android:name="com.facebook.ads.AudienceNetworkContentProvider"
+            android:exported="false"
+            android:authorities="com.myspace.mm.AudienceNetworkContentProvider"/>
+        <activity
+            android:name="com.google.android.play.core.missingsplits.PlayCoreMissingSplitsActivity"
+            android:enabled="false"
+            android:exported="false"
+            android:process=":playcore_missing_splits_activity"
+            android:stateNotNeeded="true"
+            android:launchMode="singleInstance"/>
+        <activity
+            android:theme="@style/Theme.PlayCore.Transparent"
+            android:name="com.google.android.play.core.common.PlayCoreDialogWrapperActivity"
+            android:exported="false"
+            android:stateNotNeeded="true"/>
+        <service
+            android:name="com.google.android.play.core.assetpacks.AssetPackExtractionService"
+            android:enabled="false"
+            android:exported="true">
+            <meta-data
+                android:name="com.google.android.play.core.assetpacks.versionCode"
+                android:value="11002"/>
+        </service>
+        <service
+            android:name="com.google.android.play.core.assetpacks.ExtractionForegroundService"
+            android:enabled="false"
+            android:exported="false"/>
+        <meta-data
+            android:name="com.android.vending.splits.required"
+            android:value="true"/>
+        <meta-data
+            android:name="com.android.stamp.source"
+            android:value="https://play.google.com/store"/>
+        <meta-data
+            android:name="com.android.stamp.type"
+            android:value="STAMP_TYPE_DISTRIBUTION_APK"/>
+        <meta-data
+            android:name="com.android.vending.splits"
+            android:resource="@xml/splits0"/>
+        <meta-data
+            android:name="com.android.vending.derived.apk.id"
+            android:value="3"/>
+    </application>
+</manifest>

@@ -1,0 +1,37 @@
+\label{task:20240617_android}
+
+% Accessbility Detection
+
+\subsection{Virtualization-based Attack}
+
+\subsubsection{How to hook an API?}
+
+Dynamic Proxy API in Java for creating dynamic proxy of a class of instance using Proxy Design Pattern. Use reflection to hook them.
+
+Using Parallel Space? Request wrappers collect virtualized app's requests and send it to the framework. UID, PID all encapsulated, thus circumventing sandboxing. Malware can be installed in the virtualization framework together with the target app and can access the app data without violating Android security policy.
+
+All the virtualized apps inherit the same permissions as the virtualization platform. Thus, the framework need to implement the Android security model as well.
+
+Penetration Test:
+\begin{itemize}
+    \item \textbf{Permission Access:} Access dangerous permissions such as \path{ACCESS_FINE_GRAINED_LOCATION}, \path{SEND_SMS}, \path{CONTENT_PROVIDER_ACCESS} that are inherited from the virtualization platform. 
+    \item \textbf{Internal Storage:} Access directory \path{/data/data/Parallel_Space/victim_app}
+    % \item \textbf{Protected External Storage:} 
+    \item \textbf{Private App Component:}  Content providers that uses databases to store 
+    \item \textbf{System Services:} 
+    \item \textbf{Shell Command:} 
+    \item \textbf{Socket:} 
+    \item \textbf{Privilege Escalation:} 
+    \item \textbf{Code injection:} 
+    \item \textbf{Randsomeware:} 
+    \item \textbf{Phishing:} 
+    \item \textbf{Clone:} 
+    \item \textbf{Antivirus evasion:} 
+    \item \textbf{Hijacking:} 
+\end{itemize}
+
+Host app (Parallel space) has launcher, hook module (communicates with Host app through IPC calls to intercept interactions between guest apps and system services) and virtualization framework (emulates core system services by implementing virtual system serices that relays communication to actual system services).
+
+\subsubsection{What API to hook?}
+
+% \pagebreak
